@@ -9,38 +9,58 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1>Welcome to Node App</h1>
-        <div class="tab">
-            <button class="tab-button active" id="login-tab">Logon</button>
-            <button class="tab-button" id="create-account-tab">Create Account</button>
+
+    <!-- Logo -->
+    <div class="logo">
+        <img src="images/PlatedLogo.png" alt="Company Logo">
+    </div>
+
+    <!-- Main Split Screen -->
+    <div class="main-wrapper">
+
+        <!-- Left Side (Login Area) -->
+        <div class="left-side">
+            <div class="container">
+                <h1>Welcome to Plated!</h1>
+
+                <div class="tab">
+                    <button class="tab-button active" id="login-tab">Logon</button>
+                    <button class="tab-button" id="create-account-tab">Create Account</button>
+                </div>
+
+                <div id="form-container">
+                    <!-- Logon Form -->
+                    <form id="logon-form" class="active-form">
+                        <label for="login-email">Email:</label>
+                        <input type="email" id="login-email" placeholder="Enter your email" required>
+
+                        <label for="login-password">Password:</label>
+                        <input type="password" id="login-password" placeholder="Enter your password" required>
+
+                        <button type="submit" class="button">Logon</button>
+                    </form>
+
+                    <!-- Create Account Form -->
+                    <form id="create-account-form">
+                        <label for="create-email">Email:</label>
+                        <input type="email" id="create-email" placeholder="Enter your email" required>
+
+                        <label for="create-password">Password:</label>
+                        <input type="password" id="create-password" placeholder="Create your password" required>
+
+                        <button type="submit" class="button">Create Account</button>
+                    </form>
+
+                    <p id="message" class="message"></p>
+                </div>
+            </div>
         </div>
 
-        <div id="form-container">
-            <!-- Logon Form -->
-            <form id="logon-form" class="active-form">
-                <label for="login-email">Email:</label>
-                <input type="email" id="login-email" placeholder="Enter your email" required>
-
-                <label for="login-password">Password:</label>
-                <input type="password" id="login-password" placeholder="Enter your password" required>
-
-                <button type="submit" class="button">Logon</button>
-            </form>
-
-            <!-- Create Account Form -->
-            <form id="create-account-form">
-                <label for="create-email">Email:</label>
-                <input type="email" id="create-email" placeholder="Enter your email" required>
-
-                <label for="create-password">Password:</label>
-                <input type="password" id="create-password" placeholder="Create your password" required>
-
-                <button type="submit" class="button">Create Account</button>
-            </form>
-
-            <p id="message" class="message"></p>
+        <!-- Right Side (Image Area) -->
+        <div class="right-side">
+            <img src="images/logonimage.jpg" alt="Login Illustration">
         </div>
+
     </div>
 
     <script src="js/logon.js"></script>

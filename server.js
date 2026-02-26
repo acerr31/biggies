@@ -61,7 +61,7 @@ async function authenticateToken(req, res, next) {
 
             // Query the database to verify that the email is associated with an active account
             const [rows] = await connection.execute(
-                'SELECT email FROM user WHERE email = ?',
+                'SELECT email FROM users WHERE email = ?',
                 [decoded.email]
             );
 
@@ -98,16 +98,19 @@ app.post('/api/create-account', async (req, res) => {
     try {
         const connection = await createConnection();
         const hashedPassword = await bcrypt.hash(password, 10);  // Hash password
+        const username = email.split('@')[0]; // solving duplicate username problem
 
         const [result] = await connection.execute(
-            'INSERT INTO user (email, password) VALUES (?, ?)',
-            [email, hashedPassword]
+            'INSERT INTO users (email, password, username) VALUES (?, ?, ?)',
+            [email, hashedPassword, username]
         );
 
         await connection.end();  // Close connection
 
         res.status(201).json({ message: 'Account created successfully!' });
     } catch (error) {
+        console.log("CODE:", error.code);
+        console.log("SQL MESSAGE:", error.sqlMessage);
         if (error.code === 'ER_DUP_ENTRY') {
             res.status(409).json({ message: 'An account with this email already exists.' });
         } else {
@@ -129,7 +132,7 @@ app.post('/api/login', async (req, res) => {
         const connection = await createConnection();
 
         const [rows] = await connection.execute(
-            'SELECT * FROM user WHERE email = ?',
+            'SELECT * FROM users WHERE email = ?',
             [email]
         );
 
@@ -164,7 +167,7 @@ app.get('/api/users', authenticateToken, async (req, res) => {
     try {
         const connection = await createConnection();
 
-        const [rows] = await connection.execute('SELECT email FROM user');
+        const [rows] = await connection.execute('SELECT email FROM users');
 
         await connection.end();  // Close connection
 

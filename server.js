@@ -40,6 +40,7 @@ async function createConnection() {
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
+        port: process.env.DB_PORT,
     });
 }
 
@@ -89,30 +90,27 @@ async function authenticateToken(req, res, next) {
 //////////////////////////////////////
 // Route: Create Account
 app.post('/api/create-account', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, username, first_name, last_name, phone_number } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password are required.' });
+    if (!email || !username || !password || !first_name || !last_name || !phone_number) {
+        return res.status(400).json({ message: 'All fields are required.' });
     }
 
     try {
         const connection = await createConnection();
         const hashedPassword = await bcrypt.hash(password, 10);  // Hash password
-        const username = email.split('@')[0]; // solving duplicate username problem
 
         const [result] = await connection.execute(
-            'INSERT INTO users (email, password, username) VALUES (?, ?, ?)',
-            [email, hashedPassword, username]
+            'INSERT INTO users (email, username, password, first_name, last_name, phone_number) VALUES (?, ?, ?, ?, ?, ?)',
+            [email, username, hashedPassword, first_name, last_name, phone_number]
         );
 
         await connection.end();  // Close connection
 
         res.status(201).json({ message: 'Account created successfully!' });
     } catch (error) {
-        console.log("CODE:", error.code);
-        console.log("SQL MESSAGE:", error.sqlMessage);
         if (error.code === 'ER_DUP_ENTRY') {
-            res.status(409).json({ message: 'An account with this email already exists.' });
+            res.status(409).json({ message: 'An account with this email, username, and or phone number already exists.' });
         } else {
             console.error(error);
             res.status(500).json({ message: 'Error creating account.' });
@@ -142,15 +140,15 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
-        const user = rows[0];
+        const users = rows[0];
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await bcrypt.compare(password, users.password);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
         const token = jwt.sign(
-            { email: user.email },
+            { email: users.email },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -167,7 +165,7 @@ app.get('/api/users', authenticateToken, async (req, res) => {
     try {
         const connection = await createConnection();
 
-        const [rows] = await connection.execute('SELECT email FROM users');
+            res.sendFile(__dirname + '/public/logon.html');;
 
         await connection.end();  // Close connection
 

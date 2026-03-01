@@ -3,6 +3,7 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { access } = require('fs');
 
 const app = express();
 const port = 3000;
@@ -78,6 +79,44 @@ async function authenticateToken(req, res, next) {
             res.status(500).json({ message: 'Database error during authentication.' });
         }
     });
+
+    // Cookie Parser 
+    const cookieParser = require('cookie-parser');
+    app.use(cookieParser());
+
+    // helper: in-memory refresh token store (demo only)
+    const refreshTokens = new Map(); // key: refreshToken -> userId
+
+    // issue tokens function
+    function issueTokens(user) {
+        const accessToken = jwt.sign({ userId: user.id, email: user.email}, process.env.JWT_SECRET, {expiresIn: '15m'})
+        const refreshToken = require('crypto').randomBytes(40).toString('hex');
+        refreshTokens.set(refreshToken, user.id);
+        return { accessToken, refreshToken };
+    }
+
+    // refresh route
+    app.post('/api/token/refresh', async (req, res) => {
+        const token = req.cookies.refreshToken;
+        if (!token || !refreshTokens.has(token)) return res.status(401).json({ message: 'Invalid refresh token' });
+        const userId = refreshTokens.get(token);
+        // optionally re-check user active in DB
+        const connection = await createConnection();
+        const [rows] = await connection.execute('SELECT id, email FROM users WHERE id = ?', [userId]);
+        await connection.end();
+        if (!rows.length) return res.status(401).json({ message: 'Invalid user'});
+        const user = rows[0];
+        const accessToken = jwt.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '15m'});
+        res.json({ accessToken, expiresIn: '15m'});
+    });
+
+    // logout
+    app.post('/api/logout', (req, res) => {
+        const token = req.cookies.refreshToken;
+        if (token) refreshTokens.delete(token);
+        res.clearCookie('refreshToken');
+        res.json({ message: 'Logged out' });
+    });
 }
 /////////////////////////////////////////////////
 //END HELPER FUNCTIONS AND AUTHENTICATION MIDDLEWARE
@@ -97,7 +136,8 @@ app.post('/api/create-account', async (req, res) => {
 
     try {
         const connection = await createConnection();
-        const hashedPassword = await bcrypt.hash(password, 10);  // Hash password
+        const rounds = parseInt(process.env.BCRYPT_ROUNDS || '12', 10);
+        const hashedPassword = await bcrypt.hash(password, rounds);  // Hash password
         const username = email.split('@')[0]; // solving duplicate username problem
 
         const [result] = await connection.execute(
@@ -150,7 +190,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { email: user.email },
+            { userId: user.id, email: user.email },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );

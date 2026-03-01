@@ -25,6 +25,12 @@ app.get('/', (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/public/dashboard.html');
 });
+
+
+// profile route
+app.get('/profile', (req, res) => {
+    res.sendFile(__dirname + '/public/profile.html');
+});
 //////////////////////////////////////
 //END ROUTES TO SERVE HTML FILES
 //////////////////////////////////////
@@ -115,6 +121,32 @@ app.post('/api/create-account', async (req, res) => {
             console.error(error);
             res.status(500).json({ message: 'Error creating account.' });
         }
+    }
+});
+
+// for profile page 
+app.get('/api/profile', authenticateToken, async (req, res) => {
+    try {
+        const connection = await createConnection();
+
+        const [rows] = await connection.execute(
+            `SELECT email, username, first_name, last_name, phone_number
+             FROM users
+             WHERE email = ?
+             LIMIT 1`,
+            [req.user.email]
+        );
+
+        await connection.end(); // Close connection
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        res.status(200).json(rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching profile.' });
     }
 });
 

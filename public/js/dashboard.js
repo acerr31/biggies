@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //////////////////////////////////////////
     const logoutButton = document.getElementById('logoutButton');
     const refreshButton = document.getElementById('refreshButton');
+    const profileButton = document.getElementById('profileButton');
     //////////////////////////////////////////
     //END ELEMENTS TO ATTACH EVENT LISTENERS
     //////////////////////////////////////////
@@ -32,6 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshButton.addEventListener('click', async () => {
         renderUserList();
     });
+
+    profileButton.addEventListener("click", () => {
+    window.location.href = "/profile";
+     });
     //////////////////////////////////////////
     //END EVENT LISTENERS
     //////////////////////////////////////////

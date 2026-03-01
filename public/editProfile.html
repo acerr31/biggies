@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Profile</title>
+  <link rel="stylesheet" href="css/profile.css" />
+</head>
+
+<body>
+  <!-- Logo -->
+  <div class="logo">
+        <a href="dashboard.html" class="btn-link">
+        <img src="images/PlatedLogo.png" alt="Company Logo">
+        </a>  
+    </div>
+
+  <!-- Main Split Screen -->
+  <div class="main-wrapper">
+
+    <!-- Left Side (Edit Profile Area) -->
+    <div class="left-side">
+      <div class="container">
+        <h1>Lets Change That Profile!</h1>
+
+        <div class="profile-card">
+
+          <div class="profile-field">
+            <label>Email (cannot change):</label>
+            <p id="profile-email">Loading...</p>
+          </div>
+
+          <div class="profile-field">
+            <label for="edit-username">Username:</label>
+            <input id="edit-username" type="text" placeholder="Username" />
+          </div>
+
+          <div class="profile-field">
+            <label for="edit-first-name">First Name:</label>
+            <input id="edit-first-name" type="text" placeholder="First name" />
+          </div>
+
+          <div class="profile-field">
+            <label for="edit-last-name">Last Name:</label>
+            <input id="edit-last-name" type="text" placeholder="Last name" />
+          </div>
+
+          <div class="profile-field">
+            <label for="edit-phone">Phone Number:</label>
+            <input id="edit-phone" type="text" placeholder="Phone number" />
+          </div>
+
+          <div style="display:flex; gap:12px;">
+            <button class="button" id="save-profile-btn" type="button">Save Changes</button>
+            <button class="button" id="cancel-btn" type="button" style="background:#64748b;">Cancel</button>
+          </div>
+
+        </div>
+
+        <p id="message" class="message"></p>
+      </div>
+    </div>
+
+    <!-- Right Side (Image Area) -->
+    <div class="right-side">
+      <img src="images/logonimage.jpg" alt="Edit Profile Illustration">
+    </div>
+
+  </div>
+
+  <script src="/js/editProfile.js"></script>
+</body>
+</html>

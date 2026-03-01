@@ -26,6 +26,11 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/public/dashboard.html');
 });
 
+// Route to serve editProfile.html
+app.get('/edit-profile', (req, res) => {
+    res.sendFile(__dirname + '/public/editProfile.html');
+});
+
 
 // profile route
 app.get('/profile', (req, res) => {
@@ -147,6 +152,56 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error fetching profile.' });
+    }
+});
+
+// Route: Update Profile (username/first/last/phone)
+app.put('/api/profile', authenticateToken, async (req, res) => {
+    const { username, first_name, last_name, phone_number } = req.body;
+
+    if (!username || !first_name || !last_name) {
+        return res.status(400).json({ message: 'Username, first name, and last name are required.' });
+    }
+
+    // phone is optional, but if provided must be 10–15 digits
+    if (phone_number && !/^\d{10,15}$/.test(phone_number)) {
+        return res.status(400).json({ message: 'Phone number must be 10–15 digits (numbers only).' });
+    }
+
+    try {
+        const connection = await createConnection();
+
+        await connection.execute(
+            `UPDATE users
+             SET username = ?, first_name = ?, last_name = ?, phone_number = ?
+             WHERE email = ?`,
+            [username, first_name, last_name, phone_number || null, req.user.email]
+        );
+
+        // Return the updated profile (nice for frontend)
+        const [rows] = await connection.execute(
+            `SELECT email, username, first_name, last_name, phone_number
+             FROM users
+             WHERE email = ?
+             LIMIT 1`,
+            [req.user.email]
+        );
+
+        await connection.end();
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        return res.status(200).json(rows[0]);
+
+    } catch (error) {
+        // If username/phone are UNIQUE in DB, this catches duplicates
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: 'Username and/or phone number already exists.' });
+        }
+        console.error(error);
+        return res.status(500).json({ message: 'Error updating profile.' });
     }
 });
 

@@ -64,3 +64,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             "Server connection error.";
     }
 });
+
+const editBtn = document.getElementById("edit-profile-btn");
+if (editBtn) {
+  editBtn.addEventListener("click", () => {
+    window.location.href = "/edit-profile";
+  });
+}

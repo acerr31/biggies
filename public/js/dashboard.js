@@ -37,6 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
     profileButton.addEventListener("click", () => {
     window.location.href = "/profile";
      });
+
+     // Restaurant Button
+    restaurantButton.addEventListener("click", () => {
+    window.location.href = "/restaurant.html";
+     });
     //////////////////////////////////////////
     //END EVENT LISTENERS
     //////////////////////////////////////////

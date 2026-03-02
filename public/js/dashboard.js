@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //////////////////////////////////////////
     // Log out and redirect to login
     logoutButton.addEventListener('click', () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('jwtToken');
         window.location.href = '/';
     });
 

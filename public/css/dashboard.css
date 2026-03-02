@@ -69,6 +69,21 @@ h1 {
     background-color: #b27f3c; /* */
 }
 
+
+#restaurantButton {
+    background-color: #ffbf69; /*  */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#restaurantButton:hover {
+    background-color: #b27f3c; /* */
+}
+
+
 .user-list {
     margin-top: 20px;
 }

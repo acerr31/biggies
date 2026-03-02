@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //////////////////////////////////////////
     // Log out and redirect to login
     logoutButton.addEventListener('click', () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('jwtToken');
         window.location.href = '/';
     });
 
@@ -36,6 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     profileButton.addEventListener("click", () => {
     window.location.href = "/profile";
+     });
+
+     // Restaurant Button
+    restaurantButton.addEventListener("click", () => {
+    window.location.href = "/restaurant.html";
      });
     //////////////////////////////////////////
     //END EVENT LISTENERS

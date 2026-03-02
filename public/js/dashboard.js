@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //////////////////////////////////////////
     const logoutButton = document.getElementById('logoutButton');
     const refreshButton = document.getElementById('refreshButton');
+    const profileButton = document.getElementById('profileButton');
     //////////////////////////////////////////
     //END ELEMENTS TO ATTACH EVENT LISTENERS
     //////////////////////////////////////////
@@ -32,6 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshButton.addEventListener('click', async () => {
         renderUserList();
     });
+
+    profileButton.addEventListener("click", () => {
+    window.location.href = "/profile";
+     });
     //////////////////////////////////////////
     //END EVENT LISTENERS
     //////////////////////////////////////////
@@ -60,14 +65,32 @@ document.addEventListener('DOMContentLoaded', () => {
 //////////////////////////////////////////
 async function renderUserList() {
     const userListElement = document.getElementById('userList');
-    userListElement.innerHTML = '<div class="loading-message">Loading user list...</div>';
-    const users = await DataModel.getUsers(); 
+
+    // Show loading message
+    userListElement.innerHTML = `
+        <div class="loading-message">Loading user list...</div>
+    `;
+
+    const users = await DataModel.getUsers();
+
+    // Clear loading message
+    userListElement.innerHTML = '';
+
+    if (!users || users.length === 0) {
+        userListElement.innerHTML = `
+            <div class="empty-message">No users found.</div>
+        `;
+        return;
+    }
+
     users.forEach(user => {
         const userItem = document.createElement('div');
         userItem.classList.add('user-item');
         userItem.textContent = user;
         userListElement.appendChild(userItem);
     });
+
+    console.log("Users returned:", users);
 }
 //////////////////////////////////////////
 //END FUNCTIONS TO MANIPULATE THE DOM

@@ -32,7 +32,7 @@ h1 {
 
 #logoutButton {
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: #ffbf69;
     color: white;
     border: none;
     border-radius: 5px;
@@ -40,11 +40,11 @@ h1 {
 }
 
 #logoutButton:hover {
-    background-color: #0056b3;
+    background-color: #b27f3c;
 }
 
 #refreshButton {
-    background-color: #28a745; /* Same green color from logon button */
+    background-color: #ffbf69; /* */
     color: white;
     border: none;
     padding: 10px 20px;
@@ -53,7 +53,20 @@ h1 {
 }
 
 #refreshButton:hover {
-    background-color: #218838; /* Slightly darker green for hover effect */
+    background-color: #b27f3c; /* t */
+}
+
+#profileButton {
+    background-color: #ffbf69; /*  */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#profileButton:hover {
+    background-color: #b27f3c; /* */
 }
 
 .user-list {
@@ -63,4 +76,15 @@ h1 {
 .user-item {
     padding: 10px;
     border-bottom: 1px solid #ddd;
+}
+
+.logo{
+    position: absolute;
+    top: -40px;
+    left: -50px;
+    z-index: 10;
+}
+
+.logo img {
+    height: 250px;
 }

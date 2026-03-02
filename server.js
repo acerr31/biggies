@@ -26,6 +26,39 @@ app.get('/', (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/public/dashboard.html');
 });
+
+// Route to serve editProfile.html
+app.get('/edit-profile', (req, res) => {
+    res.sendFile(__dirname + '/public/editProfile.html');
+});
+
+
+// profile route
+app.get('/profile', (req, res) => {
+    res.sendFile(__dirname + '/public/profile.html');
+});
+
+
+// Route: Get All Email Addresses
+app.get('/api/users', authenticateToken, async (req, res) => {
+    try {
+        const connection = await createConnection();
+
+        const [rows] = await connection.execute(
+            'SELECT email FROM users'
+        );
+
+        await connection.end();
+
+        const emailList = rows.map(row => row.email);
+
+        res.status(200).json({ emails: emailList });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error retrieving users.' });
+    }
+});
 //////////////////////////////////////
 //END ROUTES TO SERVE HTML FILES
 //////////////////////////////////////
@@ -41,6 +74,7 @@ async function createConnection() {
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
+        port: process.env.DB_PORT,
     });
 }
 
@@ -128,35 +162,107 @@ async function authenticateToken(req, res, next) {
 //////////////////////////////////////
 // Route: Create Account
 app.post('/api/create-account', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, username, first_name, last_name, phone_number } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password are required.' });
+    if (!email || !username || !password || !first_name || !last_name || !phone_number) {
+        return res.status(400).json({ message: 'All fields are required.' });
     }
 
     try {
         const connection = await createConnection();
-        const rounds = parseInt(process.env.BCRYPT_ROUNDS || '12', 10);
-        const hashedPassword = await bcrypt.hash(password, rounds);  // Hash password
-        const username = email.split('@')[0]; // solving duplicate username problem
+        const hashedPassword = await bcrypt.hash(password, 10);  // Hash password
 
         const [result] = await connection.execute(
-            'INSERT INTO users (email, password, username) VALUES (?, ?, ?)',
-            [email, hashedPassword, username]
+            'INSERT INTO users (email, username, password, first_name, last_name, phone_number) VALUES (?, ?, ?, ?, ?, ?)',
+            [email, username, hashedPassword, first_name, last_name, phone_number]
         );
 
         await connection.end();  // Close connection
 
         res.status(201).json({ message: 'Account created successfully!' });
     } catch (error) {
-        console.log("CODE:", error.code);
-        console.log("SQL MESSAGE:", error.sqlMessage);
         if (error.code === 'ER_DUP_ENTRY') {
-            res.status(409).json({ message: 'An account with this email already exists.' });
+            res.status(409).json({ message: 'An account with this email, username, and or phone number already exists.' });
         } else {
             console.error(error);
             res.status(500).json({ message: 'Error creating account.' });
         }
+    }
+});
+
+// for profile page 
+app.get('/api/profile', authenticateToken, async (req, res) => {
+    try {
+        const connection = await createConnection();
+
+        const [rows] = await connection.execute(
+            `SELECT email, username, first_name, last_name, phone_number
+             FROM users
+             WHERE email = ?
+             LIMIT 1`,
+            [req.user.email]
+        );
+
+        await connection.end(); // Close connection
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        res.status(200).json(rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching profile.' });
+    }
+});
+
+// Route: Update Profile (username/first/last/phone)
+app.put('/api/profile', authenticateToken, async (req, res) => {
+    const { username, first_name, last_name, phone_number } = req.body;
+
+    if (!username || !first_name || !last_name) {
+        return res.status(400).json({ message: 'Username, first name, and last name are required.' });
+    }
+
+    // phone is optional, but if provided must be 10–15 digits
+    if (phone_number && !/^\d{10,15}$/.test(phone_number)) {
+        return res.status(400).json({ message: 'Phone number must be 10–15 digits (numbers only).' });
+    }
+
+    try {
+        const connection = await createConnection();
+
+        await connection.execute(
+            `UPDATE users
+             SET username = ?, first_name = ?, last_name = ?, phone_number = ?
+             WHERE email = ?`,
+            [username, first_name, last_name, phone_number || null, req.user.email]
+        );
+
+        // Return the updated profile (nice for frontend)
+        const [rows] = await connection.execute(
+            `SELECT email, username, first_name, last_name, phone_number
+             FROM users
+             WHERE email = ?
+             LIMIT 1`,
+            [req.user.email]
+        );
+
+        await connection.end();
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        return res.status(200).json(rows[0]);
+
+    } catch (error) {
+        // If username/phone are UNIQUE in DB, this catches duplicates
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: 'Username and/or phone number already exists.' });
+        }
+        console.error(error);
+        return res.status(500).json({ message: 'Error updating profile.' });
     }
 });
 
@@ -182,15 +288,15 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
-        const user = rows[0];
+        const users = rows[0];
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await bcrypt.compare(password, users.password);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
         const token = jwt.sign(
-            { userId: user.id, email: user.email },
+            { email: users.email },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -207,7 +313,7 @@ app.get('/api/users', authenticateToken, async (req, res) => {
     try {
         const connection = await createConnection();
 
-        const [rows] = await connection.execute('SELECT email FROM users');
+            res.sendFile(__dirname + '/public/logon.html');;
 
         await connection.end();  // Close connection
 

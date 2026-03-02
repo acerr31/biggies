@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+
+<body>
+
+    <!-- Logo -->
+    <div class="logo">
+        <a href="dashboard.html" class="btn-link">
+        <img src="images/PlatedLogo.png" alt="Company Logo">
+        </a>
+    </div>
+
+    <!-- Main Split Screen -->
+    <div class="main-wrapper">
+
+        <!-- Left Side (Profile Area) -->
+        <div class="left-side">
+            <div class="container">
+                <h1>Lets Check Your Profile!</h1>
+
+                <div class="profile-card">
+
+                    <div class="profile-field">
+                        <label>Email:</label>
+                        <p id="profile-email">Loading..</p>
+                    </div>
+
+                    <div class="profile-field">
+                        <label>Username:</label>
+                        <p id="profile-username">Loading...</p>
+                    </div>
+
+                    <div class="profile-field">
+                        <label>First Name:</label>
+                        <p id="profile-first-name">Loading...</p>
+                    </div>
+
+                    <div class="profile-field">
+                        <label>Last Name:</label>
+                        <p id="profile-last-name">Loading...</p>
+                    </div>
+
+                    <div class="profile-field">
+                        <label>Phone Number:</label>
+                        <p id="profile-phone">Loading...</p>
+                    </div>
+
+                    <button class="button" id="edit-profile-btn" type="button">Edit Profile</button>
+                </div>
+
+                <p id="message" class="message"></p>
+            </div>
+        </div>
+
+        <!-- Right Side (Image Area) -->
+        <div class="right-side"> 
+            <img src="images/logonimage.jpg" alt="Profile Illustration">
+        </div>
+
+    </div>
+
+<script src="/js/profile.js"></script>
+</body>

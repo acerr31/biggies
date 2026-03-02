@@ -36,6 +36,28 @@ app.get('/edit-profile', (req, res) => {
 app.get('/profile', (req, res) => {
     res.sendFile(__dirname + '/public/profile.html');
 });
+
+
+// Route: Get All Email Addresses
+app.get('/api/users', authenticateToken, async (req, res) => {
+    try {
+        const connection = await createConnection();
+
+        const [rows] = await connection.execute(
+            'SELECT email FROM users'
+        );
+
+        await connection.end();
+
+        const emailList = rows.map(row => row.email);
+
+        res.status(200).json({ emails: emailList });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error retrieving users.' });
+    }
+});
 //////////////////////////////////////
 //END ROUTES TO SERVE HTML FILES
 //////////////////////////////////////

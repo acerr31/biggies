@@ -114,7 +114,7 @@ async function authenticateToken(req, res, next) {
         }
     });
 
-    // Cookie Parser 
+    // Cookie Parser (reads cookies and turns them into strings to associate with a user session)
     const cookieParser = require('cookie-parser');
     app.use(cookieParser());
 

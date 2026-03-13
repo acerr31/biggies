@@ -1,70 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-    <link rel="stylesheet" href="css/profile.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile – Plated</title>
+  <link rel="stylesheet" href="css/profile.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
-
 <body>
 
-    <!-- Logo -->
-    <div class="logo">
-        <a href="dashboard.html" class="btn-link">
-        <img src="images/PlatedLogo.png" alt="Company Logo">
-        </a>
+  <!-- Top Nav -->
+  <header class="topbar">
+    <a href="dashboard.html" class="topbar-logo">
+      <img src="images/PlatedLogo.png" alt="Plated" />
+    </a>
+    <nav class="topbar-links">
+      <a href="dashboard.html" class="nav-link">Feed</a>
+      <a href="explore.html" class="nav-link">Explore</a>
+      <a href="#" class="nav-link">Leaderboard</a>
+      <a href="profile.html" class="nav-link active">Profile</a>
+    </nav>
+    <div class="topbar-right">
+      <div class="topbar-avatar" id="topbar-initials">?</div>
+      <span class="topbar-username" id="profile-username">—</span>
+    </div>
+  </header>
+
+  <!-- Page body -->
+  <main class="page">
+
+    <!-- ROW 1: identity | activity stats | rank card -->
+    <div class="grid-row row-top">
+
+      <!-- Identity card -->
+      <div class="card identity-card">
+        <div class="avatar-circle" id="avatar-initials">?</div>
+        <div class="identity-info">
+          <h2 class="identity-name" id="display-name">—</h2>
+          <p class="identity-handle">@<span id="handle-username">—</span></p>
+          <p class="identity-since">Member since 2025</p>
+        </div>
+        <div class="school-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          Arizona State University '26
+        </div>
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <span class="mini-stat-num">14</span>
+            <span class="mini-stat-lab">Followers</span>
+          </div>
+          <div class="mini-stat-divider"></div>
+          <div class="mini-stat">
+            <span class="mini-stat-num">14</span>
+            <span class="mini-stat-lab">Following</span>
+          </div>
+        </div>
+        <div class="identity-btns">
+          <button class="btn-primary" id="edit-profile-btn">Edit Profile</button>
+          <button class="btn-ghost">Share</button>
+        </div>
+      </div>
+
+      <!-- Activity stats card -->
+      <div class="card activity-card">
+        <p class="card-eyebrow">Restaurants visited</p>
+        <p class="activity-big-num">74</p>
+        <div class="activity-sub-row">
+          <div class="activity-sub">
+            <span class="activity-sub-num">16</span>
+            <span class="activity-sub-lab">Want to try</span>
+          </div>
+          <div class="activity-sub">
+            <span class="activity-sub-num">7 wks</span>
+            <span class="activity-sub-lab">Streak</span>
+          </div>
+        </div>
+        <div class="challenge-block">
+          <div class="challenge-top">
+            <span class="challenge-label">2026 Restaurant Challenge</span>
+            <span class="challenge-fraction">39 / 100</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:39%"></div>
+          </div>
+          <div class="challenge-footer">
+            <span>294 days left</span>
+            <a href="#" class="challenge-link">Your 2026 progress ›</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rank card -->
+      <div class="card rank-card">
+        <p class="card-eyebrow">Rank on Plated</p>
+        <p class="rank-num">#—</p>
+        <div class="rank-divider"></div>
+        <p class="card-eyebrow" style="margin-top:0;">Recs for you</p>
+        <a href="#" class="recs-link">View recommendations ›</a>
+      </div>
+
     </div>
 
-    <!-- Main Split Screen -->
-    <div class="main-wrapper">
+    <!-- ROW 2: lists | account details -->
+    <div class="grid-row row-bottom">
 
-        <!-- Left Side (Profile Area) -->
-        <div class="left-side">
-            <div class="container">
-                <h1>Lets Check Your Profile!</h1>
-
-                <div class="profile-card">
-
-                    <div class="profile-field">
-                        <label>Email:</label>
-                        <p id="profile-email">Loading..</p>
-                    </div>
-
-                    <div class="profile-field">
-                        <label>Username:</label>
-                        <p id="profile-username">Loading...</p>
-                    </div>
-
-                    <div class="profile-field">
-                        <label>First Name:</label>
-                        <p id="profile-first-name">Loading...</p>
-                    </div>
-
-                    <div class="profile-field">
-                        <label>Last Name:</label>
-                        <p id="profile-last-name">Loading...</p>
-                    </div>
-
-                    <div class="profile-field">
-                        <label>Phone Number:</label>
-                        <p id="profile-phone">Loading...</p>
-                    </div>
-
-                    <button class="button" id="edit-profile-btn" type="button">Edit Profile</button>
-                </div>
-
-                <p id="message" class="message"></p>
+      <!-- Lists card -->
+      <div class="card lists-card">
+        <p class="card-eyebrow">My lists</p>
+        <div class="list-rows">
+          <a href="#" class="list-row">
+            <div class="list-left">
+              <div class="list-icon">✓</div>
+              <span class="list-name">Been</span>
             </div>
+            <span class="list-meta">74 ›</span>
+          </a>
+          <a href="#" class="list-row">
+            <div class="list-left">
+              <div class="list-icon">🔖</div>
+              <span class="list-name">Want to Try</span>
+            </div>
+            <span class="list-meta">16 ›</span>
+          </a>
+          <a href="#" class="list-row">
+            <div class="list-left">
+              <div class="list-icon">♥</div>
+              <span class="list-name">Recs for You</span>
+            </div>
+            <span class="list-meta">›</span>
+          </a>
         </div>
+      </div>
 
-        <!-- Right Side (Image Area) -->
-        <div class="right-side"> 
-            <img src="images/logonimage.jpg" alt="Profile Illustration">
+      <!-- Account details card -->
+      <div class="card details-card">
+        <p class="card-eyebrow">Account details</p>
+        <div class="detail-rows">
+          <div class="detail-row">
+            <span class="detail-label">Email</span>
+            <span class="detail-value" id="profile-email">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Phone</span>
+            <span class="detail-value" id="profile-phone">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">First name</span>
+            <span class="detail-value" id="profile-first-name">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Last name</span>
+            <span class="detail-value" id="profile-last-name">—</span>
+          </div>
         </div>
+      </div>
 
     </div>
 
-<script src="/js/profile.js"></script>
+  </main>
+
+  <p id="message" class="message"></p>
+
+  <script src="/js/profile.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const observer = new MutationObserver(() => {
+        const u  = (document.getElementById("profile-username")?.textContent || "").trim();
+        const fn = (document.getElementById("profile-first-name")?.textContent || "").trim();
+        const ln = (document.getElementById("profile-last-name")?.textContent || "").trim();
+        if (u && u !== "—") {
+          const dn = document.getElementById("display-name");
+          const h  = document.getElementById("handle-username");
+          if (dn && dn.textContent === "—") dn.textContent = u;
+          if (h  && h.textContent  === "—") h.textContent  = u;
+        }
+        const initials = ((fn !== "—" ? fn[0] : "") + (ln !== "—" ? ln[0] : "")).toUpperCase() || "?";
+        ["avatar-initials", "topbar-initials"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && el.textContent !== initials) el.textContent = initials;
+        });
+      });
+      ["profile-username","profile-first-name","profile-last-name"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el, { childList: true, characterData: true, subtree: true });
+      });
+    });
+  </script>
 </body>
+</html>

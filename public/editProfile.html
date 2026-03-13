@@ -3,71 +3,124 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Edit Profile</title>
+  <title>Edit Profile – Plated</title>
   <link rel="stylesheet" href="css/profile.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
-
 <body>
-  <!-- Logo -->
-  <div class="logo">
-        <a href="dashboard.html" class="btn-link">
-        <img src="images/PlatedLogo.png" alt="Company Logo">
-        </a>  
+
+  <!-- Top Nav -->
+  <header class="topbar">
+    <a href="dashboard.html" class="topbar-logo">
+      <img src="images/PlatedLogo.png" alt="Plated" />
+    </a>
+    <nav class="topbar-links">
+      <a href="dashboard.html" class="nav-link">Feed</a>
+      <a href="explore.html" class="nav-link">Explore</a>
+      <a href="#" class="nav-link">Leaderboard</a>
+      <a href="profile.html" class="nav-link active">Profile</a>
+    </nav>
+    <div class="topbar-right">
+      <div class="topbar-avatar" id="topbar-initials">?</div>
+      <span class="topbar-username" id="topbar-email">—</span>
+    </div>
+  </header>
+
+  <!-- Page -->
+  <main class="page">
+
+    <!-- Page heading -->
+    <div class="edit-heading">
+      <a href="profile.html" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to profile
+      </a>
+      <h1 class="edit-title">Edit Profile</h1>
     </div>
 
-  <!-- Main Split Screen -->
-  <div class="main-wrapper">
+    <!-- Two-column grid -->
+    <div class="edit-grid">
 
-    <!-- Left Side (Edit Profile Area) -->
-    <div class="left-side">
-      <div class="container">
-        <h1>Lets Change That Profile!</h1>
+      <!-- LEFT: Avatar + static info -->
+      <div class="card edit-identity-card">
+        <div class="avatar-circle edit-avatar" id="avatar-initials">?</div>
+        <p class="edit-avatar-hint">Your initials are used as your avatar</p>
+        <div class="edit-static-row">
+          <span class="edit-static-label">Email</span>
+          <span class="edit-static-value" id="profile-email">—</span>
+        </div>
+        <p class="edit-cannot-change">Email cannot be changed</p>
+      </div>
 
-        <div class="profile-card">
+      <!-- RIGHT: Editable fields -->
+      <div class="card edit-fields-card">
+        <p class="card-eyebrow">Profile information</p>
 
-          <div class="profile-field">
-            <label>Email (cannot change):</label>
-            <p id="profile-email">Loading...</p>
+        <div class="edit-field-group">
+          <label class="edit-label" for="edit-username">Username</label>
+          <input class="edit-input" id="edit-username" type="text" placeholder="Enter username" />
+        </div>
+
+        <div class="edit-field-row">
+          <div class="edit-field-group">
+            <label class="edit-label" for="edit-first-name">First name</label>
+            <input class="edit-input" id="edit-first-name" type="text" placeholder="First name" />
           </div>
-
-          <div class="profile-field">
-            <label for="edit-username">Username:</label>
-            <input id="edit-username" type="text" placeholder="Username" />
+          <div class="edit-field-group">
+            <label class="edit-label" for="edit-last-name">Last name</label>
+            <input class="edit-input" id="edit-last-name" type="text" placeholder="Last name" />
           </div>
+        </div>
 
-          <div class="profile-field">
-            <label for="edit-first-name">First Name:</label>
-            <input id="edit-first-name" type="text" placeholder="First name" />
-          </div>
-
-          <div class="profile-field">
-            <label for="edit-last-name">Last Name:</label>
-            <input id="edit-last-name" type="text" placeholder="Last name" />
-          </div>
-
-          <div class="profile-field">
-            <label for="edit-phone">Phone Number:</label>
-            <input id="edit-phone" type="text" placeholder="Phone number" />
-          </div>
-
-          <div style="display:flex; gap:12px;">
-            <button class="button" id="save-profile-btn" type="button">Save Changes</button>
-            <button class="button" id="cancel-btn" type="button" style="background:#64748b;">Cancel</button>
-          </div>
-
+        <div class="edit-field-group">
+          <label class="edit-label" for="edit-phone">Phone number</label>
+          <input class="edit-input" id="edit-phone" type="text" placeholder="(123) 456-7890" />
         </div>
 
         <p id="message" class="message"></p>
+
+        <div class="edit-actions">
+          <button class="btn-primary" id="save-profile-btn">Save changes</button>
+          <button class="btn-ghost" id="cancel-btn">Cancel</button>
+        </div>
       </div>
-    </div>
 
-    <!-- Right Side (Image Area) -->
-    <div class="right-side">
-      <img src="images/logonimage.jpg" alt="Edit Profile Illustration">
     </div>
-
-  </div>
+  </main>
 
   <script src="/js/editProfile.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const observer = new MutationObserver(() => {
+        const fn = (document.getElementById("edit-first-name")?.value || "").trim();
+        const ln = (document.getElementById("edit-last-name")?.value  || "").trim();
+        const email = (document.getElementById("profile-email")?.textContent || "").trim();
+        const initials = ((fn ? fn[0] : "") + (ln ? ln[0] : "")).toUpperCase() || "?";
+        ["avatar-initials","topbar-initials"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = initials;
+        });
+        const tb = document.getElementById("topbar-email");
+        if (tb && email && email !== "—") tb.textContent = email;
+      });
+      ["profile-email"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el, { childList: true, characterData: true, subtree: true });
+      });
+      ["edit-first-name","edit-last-name"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", () => {
+          const fn = (document.getElementById("edit-first-name")?.value || "").trim();
+          const ln = (document.getElementById("edit-last-name")?.value  || "").trim();
+          const initials = ((fn ? fn[0] : "") + (ln ? ln[0] : "")).toUpperCase() || "?";
+          ["avatar-initials","topbar-initials"].forEach(i => {
+            const e = document.getElementById(i);
+            if (e) e.textContent = initials;
+          });
+        });
+      });
+    });
+  </script>
 </body>
 </html>

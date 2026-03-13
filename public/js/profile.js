@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("profile-last-name").textContent =
             data.last_name || "—";
 
-        // Format phone nicely
+        // phone format
         if (data.phone_number) {
             const digits = data.phone_number.replace(/\D/g, "");
 

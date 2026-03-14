@@ -305,7 +305,7 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
 }
 
 .logo img {
-  height: 60px;
+  height: 200px;
   width: auto;
   display: block;
 }

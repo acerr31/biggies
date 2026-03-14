@@ -300,8 +300,8 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
 /* Legacy stubs (keeps editProfile.html working unchanged)*/
 .logo {
   position: fixed;
-  top: -10px;
-  left: -15px;
+  top: 10px;
+  left: 15px;
   height: clamp(60px, 10vw, 140px);
   z-index: 200;
 }

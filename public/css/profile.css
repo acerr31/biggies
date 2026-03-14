@@ -73,7 +73,9 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   color: var(--accent-text);
 }
 .topbar-username { font-weight: 600; font-size: .88rem; }
-
+.topbar-spacer {
+  width: 160px;
+}
 /* Page */
 .page {
   max-width: 1140px;
@@ -296,7 +298,19 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
 .message.success { color: #27ae60; }
 
 /* Legacy stubs (keeps editProfile.html working unchanged)*/
-.logo { display: block; }
+.logo {
+  display: block;
+  position: fixed;
+  top: 10px;
+  left: 16px;
+  height: 42px;
+  z-index: 200;
+}
+.logo img {
+  height: 100%;
+  width: auto;
+  display: block;
+}
 .main-wrapper { display: block; }
 .left-side, .right-side { all: unset; display: block; }
 .container { all: unset; display: block; }

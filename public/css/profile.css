@@ -301,7 +301,7 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
 .logo {
   position: fixed;
   top: 10px;
-  left: 15px;
+  left: 20px;
   height: clamp(60px, 10vw, 140px);
   z-index: 200;
 }

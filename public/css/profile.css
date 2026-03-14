@@ -299,18 +299,19 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
 
 /* Legacy stubs (keeps editProfile.html working unchanged)*/
 .logo {
-  display: block;
   position: fixed;
-  top: 10px;
-  left: 16px;
-  height: 42px;
+  top: -10px;
+  left: -15px;
+  height: clamp(60px, 10vw, 140px);
   z-index: 200;
 }
+
 .logo img {
   height: 100%;
   width: auto;
   display: block;
 }
+
 .main-wrapper { display: block; }
 .left-side, .right-side { all: unset; display: block; }
 .container { all: unset; display: block; }

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plated – Home</title>
+    <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-inner">
+            <div class="nav-logo">
+                <div class="nav-logo">
+                    <img src="images/PlatedLogo.png" alt="Plated" height="140" onerror="this.style.display='none'">
+</div>
+            </div>
+            <div class="nav-links">
+                <a href="/home"      class="nav-link active">Home</a>
+                <a href="/explore"   class="nav-link">Explore</a>
+                <a href="/feed"      class="nav-link">Feed</a>
+            </div>
+            <div class="nav-actions">
+                <a href="/dashboard" class="nav-btn-ghost">Dev Tools</a>
+                <a href="/account"   class="nav-btn">Account</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="layout">
+
+            <!-- Left sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <p class="sidebar-label">Quick links</p>
+                    <a href="/feed"      class="sidebar-link">🍽️ My Feed</a>
+                    <a href="/explore"   class="sidebar-link">🔍 Explore</a>
+                    <a href="/account"   class="sidebar-link">👤 Account</a>
+                    <a href="/dashboard" class="sidebar-link">🛠️ Dev Tools</a>
+                </div>
+                <div class="sidebar-section">
+                    <p class="sidebar-label">Following</p>
+                    <div class="following-item">
+                        <div class="avatar" style="background:#ffbf69;">JC</div>
+                        <span>Julia Child</span>
+                    </div>
+                    <div class="following-item">
+                        <div class="avatar" style="background:#f4845f;">GR</div>
+                        <span>Gordon Ramsay</span>
+                    </div>
+                    <div class="following-item">
+                        <div class="avatar" style="background:#a8dadc;">NL</div>
+                        <span>Nobu Lau</span>
+                    </div>
+                    <a href="/explore" class="see-more">See more →</a>
+                </div>
+            </aside>
+
+            <!-- Feed -->
+            <section class="feed">
+                <div class="feed-header">
+                    <h2>Your Feed</h2>
+                    <p class="feed-sub">Recipes and posts from people you follow</p>
+                </div>
+
+                <article class="card">
+                    <div class="card-meta">
+                        <div class="avatar" style="background:#ffbf69;">JC</div>
+                        <div>
+                            <p class="card-author">Julia Child</p>
+                            <p class="card-time">2 hours ago</p>
+                        </div>
+                    </div>
+                    <div class="card-img" style="background:linear-gradient(135deg,#ffe8c2,#ffbf69);"></div>
+                    <div class="card-body">
+                        <h3>Classic Boeuf Bourguignon</h3>
+                        <p>A rich, slow-braised French beef stew with pearl onions, mushrooms, and a full bottle of Burgundy. Perfect for a Sunday dinner.</p>
+                        <div class="card-tags">
+                            <span class="tag">French</span>
+                            <span class="tag">Dinner</span>
+                            <span class="tag">Slow Cook</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="action-btn">❤️ 142</button>
+                        <button class="action-btn">💬 38</button>
+                        <button class="action-btn">🔖 Save</button>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-meta">
+                        <div class="avatar" style="background:#f4845f;">GR</div>
+                        <div>
+                            <p class="card-author">Gordon Ramsay</p>
+                            <p class="card-time">5 hours ago</p>
+                        </div>
+                    </div>
+                    <div class="card-img" style="background:linear-gradient(135deg,#fce4d6,#f4845f);"></div>
+                    <div class="card-body">
+                        <h3>Pan-Seared Filet Mignon</h3>
+                        <p>Butter-basted with fresh thyme and garlic, finished in a 450°F oven. Getting the perfect crust is all about a screaming hot pan.</p>
+                        <div class="card-tags">
+                            <span class="tag">Beef</span>
+                            <span class="tag">Fine Dining</span>
+                            <span class="tag">Quick</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="action-btn">❤️ 310</button>
+                        <button class="action-btn">💬 74</button>
+                        <button class="action-btn">🔖 Save</button>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-meta">
+                        <div class="avatar" style="background:#a8dadc;">NL</div>
+                        <div>
+                            <p class="card-author">Nobu Lau</p>
+                            <p class="card-time">Yesterday</p>
+                        </div>
+                    </div>
+                    <div class="card-img" style="background:linear-gradient(135deg,#d4f1f4,#a8dadc);"></div>
+                    <div class="card-body">
+                        <h3>Miso-Glazed Black Cod</h3>
+                        <p>Marinated for 48 hours in sweet white miso and sake, then broiled to caramelized perfection. A signature dish reinvented at home.</p>
+                        <div class="card-tags">
+                            <span class="tag">Japanese</span>
+                            <span class="tag">Seafood</span>
+                            <span class="tag">Umami</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="action-btn">❤️ 98</button>
+                        <button class="action-btn">💬 21</button>
+                        <button class="action-btn">🔖 Save</button>
+                    </div>
+                </article>
+
+            </section>
+
+            <!-- Right sidebar -->
+            <aside class="sidebar sidebar-right">
+                <div class="sidebar-section">
+                    <p class="sidebar-label">Trending today</p>
+                    <div class="trending-item">
+                        <span class="trend-num">1</span>
+                        <div><p class="trend-title">Smash Burgers</p><p class="trend-count">842 posts</p></div>
+                    </div>
+                    <div class="trending-item">
+                        <span class="trend-num">2</span>
+                        <div><p class="trend-title">Sourdough Bread</p><p class="trend-count">611 posts</p></div>
+                    </div>
+                    <div class="trending-item">
+                        <span class="trend-num">3</span>
+                        <div><p class="trend-title">Mango Sorbet</p><p class="trend-count">389 posts</p></div>
+                    </div>
+                    <div class="trending-item">
+                        <span class="trend-num">4</span>
+                        <div><p class="trend-title">Ramen from Scratch</p><p class="trend-count">274 posts</p></div>
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <p class="sidebar-label">Suggested follows</p>
+                    <div class="suggest-item">
+                        <div class="avatar" style="background:#c9b1d9;">SK</div>
+                        <div class="suggest-info">
+                            <p>Samin Kiani</p>
+                            <p class="suggest-sub">Salt, Fat, Acid, Heat</p>
+                        </div>
+                        <button class="follow-btn">Follow</button>
+                    </div>
+                    <div class="suggest-item">
+                        <div class="avatar" style="background:#b7e4c7;">OB</div>
+                        <div class="suggest-info">
+                            <p>Omar Basha</p>
+                            <p class="suggest-sub">Street food specialist</p>
+                        </div>
+                        <button class="follow-btn">Follow</button>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+    </main>
+
+    <script src="/js/home.js"></script>
+</body>
+</html>

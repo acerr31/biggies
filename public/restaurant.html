@@ -1,16 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="/css/restaurant.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plated | Restaurant</title>
+  <link rel="stylesheet" href="css/restaurant.css" />
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Restaurant</h1>
-        </div>
+  <!-- Top Bar (Google-like) -->
+  <header class="topbar">
+    <div class="topbar__inner">
+        <a href="dashboard.html" class="btn-link">
+         <img src="images/PlatedLogo.png" alt="Company Logo">
+         
+        </a>
+
+
+
+
     </div>
-    <script src="/js/restaurant.js"></script>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__inner">
+      <div class="hero__titleBlock">
+        <h1 class="hero__title">Copper Spoon Kitchen</h1>
+        <div class="hero__meta">
+          <span class="rating" aria-label="Rating 4.6 out of 5">
+            <span class="rating__stars" aria-hidden="true">★★★★★</span>
+            <span class="rating__value">4.6</span>
+          </span>
+          <span class="dot" aria-hidden="true">•</span>
+          <span class="hero__metaItem">1,204 reviews</span>
+          <span class="dot" aria-hidden="true">•</span>
+          <span class="hero__metaItem">$$</span>
+          <span class="dot" aria-hidden="true">•</span>
+          <span class="hero__metaItem">New American</span>
+          <span class="dot" aria-hidden="true">•</span>
+          <span class="status status--open">Open now</span>
+        </div>
+
+        <div class="hero__quickActions">
+          <a class="btn btn--primary" href="#">Directions</a>
+          <a class="btn btn--secondary" href="#">Call</a>
+          <a class="btn btn--secondary" href="#">Order</a>
+          <a class="btn btn--secondary" href="#">Reserve</a>
+        </div>
+      </div>
+
+      <!-- Simple gallery strip -->
+      <div class="hero__gallery" aria-label="Restaurant photos">
+        <figure class="photo photo--main">
+          <img src="https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=1400&q=80" alt="Dining room ambiance">
+        </figure>
+        <div class="photoGrid">
+          <figure class="photo">
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80" alt="Plated entree">
+          </figure>
+          <figure class="photo">
+            <img src="https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=800&q=80" alt="Restaurant interior">
+          </figure>
+          <figure class="photo">
+            <img src="https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=800&q=80" alt="Cocktail on the bar">
+          </figure>
+          <figure class="photo">
+            <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=800&q=80" alt="Dessert closeup">
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Layout -->
+  <main class="page">
+    <div class="page__inner">
+
+      <!-- Left: primary content -->
+      <section class="content" aria-label="Restaurant details">
+        <!-- Tabs -->
+        <div class="tabs" role="tablist" aria-label="Restaurant sections">
+          <a class="tab tab--active" href="#overview">Overview</a>
+          <a class="tab" href="#menu">Menu</a>
+          <a class="tab" href="#photos">Photos</a>
+          <a class="tab" href="#reviews">Reviews</a>
+          <a class="tab" href="#about">About</a>
+        </div>
+
+        <!-- Overview -->
+        <article class="card" id="overview">
+          <div class="card__header">
+            <h2 class="card__title">Overview</h2>
+            <div class="card__sub">Cozy, modern spot known for seasonal plates and a great wine list.</div>
+          </div>
+
+          <div class="highlights">
+            <div class="highlight">
+              <div class="highlight__label">Popular for</div>
+              <div class="highlight__value">Dinner • Date night • Happy hour</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight__label">Good to know</div>
+              <div class="highlight__value">Outdoor seating • Vegetarian options • Gluten-free options</div>
+            </div>
+            <div class="highlight">
+              <div class="highlight__label">Vibe</div>
+              <div class="highlight__value">Casual upscale • Warm lighting • Lively</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Menu -->
+        <article class="card" id="menu">
+          <div class="card__header">
+            <h2 class="card__title">Menu</h2>
+            <div class="card__sub">Sample items (mock data). Add your real menu later.</div>
+          </div>
+
+          <div class="menuGrid">
+            <section class="menuSection">
+              <h3 class="menuSection__title">Popular</h3>
+
+              <div class="menuItem">
+                <div class="menuItem__main">
+                  <div class="menuItem__name">Truffle Fries</div>
+                  <div class="menuItem__desc">Parmesan, garlic aioli, parsley</div>
+                </div>
+                <div class="menuItem__price">$10</div>
+              </div>
+
+              <div class="menuItem">
+                <div class="menuItem__main">
+                  <div class="menuItem__name">Seared Salmon</div>
+                  <div class="menuItem__desc">Lemon beurre blanc, seasonal veg</div>
+                </div>
+                <div class="menuItem__price">$26</div>
+              </div>
+
+              <div class="menuItem">
+                <div class="menuItem__main">
+                  <div class="menuItem__name">Short Rib Pasta</div>
+                  <div class="menuItem__desc">Pappardelle, red wine reduction</div>
+                </div>
+                <div class="menuItem__price">$28</div>
+              </div>
+            </section>
+
+            <section class="menuSection">
+              <h3 class="menuSection__title">Drinks</h3>
+
+              <div class="menuItem">
+                <div class="menuItem__main">
+                  <div class="menuItem__name">Citrus Spritz</div>
+                  <div class="menuItem__desc">Aperitif, sparkling wine, orange</div>
+                </div>
+                <div class="menuItem__price">$12</div>
+              </div>
+
+              <div class="menuItem">
+                <div class="menuItem__main">
+                  <div class="menuItem__name">House Red</div>
+                  <div class="menuItem__desc">Medium-bodied, berry forward</div>
+                </div>
+                <div class="menuItem__price">$11</div>
+              </div>
+
+              <div class="menuItem">
+                <div class="menuItem__main">
+                  <div class="menuItem__name">Cold Brew Martini</div>
+                  <div class="menuItem__desc">Vodka, espresso, vanilla</div>
+                </div>
+                <div class="menuItem__price">$14</div>
+              </div>
+            </section>
+          </div>
+
+          <div class="card__footer">
+            <a class="link" href="#">View full menu</a>
+            <span class="muted">•</span>
+            <a class="link" href="#">Dietary info</a>
+          </div>
+        </article>
+
+        <!-- Photos -->
+        <article class="card" id="photos">
+          <div class="card__header">
+            <h2 class="card__title">Photos</h2>
+            <div class="card__sub">Add as many as you want—layout stays flexible.</div>
+          </div>
+
+          <div class="photoWall">
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80" alt="Food photo 1">
+            <img src="https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=800&q=80" alt="Food photo 2">
+            <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=800&q=80" alt="Food photo 3">
+            <img src="https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=800&q=80" alt="Food photo 4">
+            <img src="https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=800&q=80" alt="Food photo 5">
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80" alt="Food photo 6">
+          </div>
+
+          <div class="card__footer">
+            <button class="chip" type="button">Add photos</button>
+            <span class="muted">Photos can be mock for now.</span>
+          </div>
+        </article>
+
+        <!-- Reviews -->
+        <article class="card" id="reviews">
+          <div class="card__header card__header--row">
+            <div>
+              <h2 class="card__title">Reviews</h2>
+              <div class="card__sub">What people are saying (mock data).</div>
+            </div>
+
+            <div class="reviewSummary">
+              <div class="reviewSummary__score">4.6</div>
+              <div class="reviewSummary__meta">
+                <div class="rating__stars" aria-hidden="true">★★★★★</div>
+                <div class="muted">1,204 reviews</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="reviewFilters">
+            <button class="chip chip--ghost" type="button">Most relevant</button>
+            <button class="chip chip--ghost" type="button">Newest</button>
+            <button class="chip chip--ghost" type="button">Highest</button>
+            <button class="chip chip--ghost" type="button">Lowest</button>
+          </div>
+
+          <div class="reviewList">
+            <div class="review">
+              <div class="review__top">
+                <div class="avatar" aria-hidden="true">AL</div>
+                <div class="review__who">
+                  <div class="review__name">Alyssa L.</div>
+                  <div class="review__meta">
+                    <span class="rating__stars" aria-hidden="true">★★★★★</span>
+                    <span class="muted">2 days ago</span>
+                  </div>
+                </div>
+              </div>
+              <p class="review__text">
+                Incredible vibe and the salmon was perfectly cooked. Great service and quick seating.
+              </p>
+              <div class="review__actions">
+                <button class="chip chip--ghost" type="button">Helpful</button>
+                <button class="chip chip--ghost" type="button">Share</button>
+              </div>
+            </div>
+
+            <div class="review">
+              <div class="review__top">
+                <div class="avatar" aria-hidden="true">JR</div>
+                <div class="review__who">
+                  <div class="review__name">Jordan R.</div>
+                  <div class="review__meta">
+                    <span class="rating__stars" aria-hidden="true">★★★★☆</span>
+                    <span class="muted">1 week ago</span>
+                  </div>
+                </div>
+              </div>
+              <p class="review__text">
+                Food was awesome. It got a little loud later in the evening, but still a great spot for dinner.
+              </p>
+              <div class="review__actions">
+                <button class="chip chip--ghost" type="button">Helpful</button>
+                <button class="chip chip--ghost" type="button">Share</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card__footer">
+            <a class="link" href="#">See all reviews</a>
+          </div>
+        </article>
+
+        <!-- About -->
+        <article class="card" id="about">
+          <div class="card__header">
+            <h2 class="card__title">About</h2>
+            <div class="card__sub">Extra details that users usually want.</div>
+          </div>
+
+          <div class="aboutGrid">
+            <div class="aboutItem">
+              <div class="aboutItem__label">Description</div>
+              <div class="aboutItem__value">
+                Copper Spoon Kitchen serves seasonal New American dishes with local ingredients.
+                Expect a rotating menu, craft cocktails, and a solid wine list.
+              </div>
+            </div>
+
+            <div class="aboutItem">
+              <div class="aboutItem__label">Amenities</div>
+              <div class="aboutItem__value">
+                Outdoor seating • Takeout • Delivery • Wheelchair accessible • Free Wi-Fi
+              </div>
+            </div>
+
+            <div class="aboutItem">
+              <div class="aboutItem__label">Best time to visit</div>
+              <div class="aboutItem__value">
+                Weeknights 6–7pm for faster seating. Weekends are busiest after 7pm.
+              </div>
+            </div>
+
+            <div class="aboutItem">
+              <div class="aboutItem__label">Notes</div>
+              <div class="aboutItem__value">
+                If you’re building features later: add “Popular dishes”, “Wait time”, “Reservations”, and “Nearby places”.
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Right: sidebar info -->
+      <aside class="sidebar" aria-label="Restaurant sidebar">
+        <div class="card card--sticky">
+          <div class="sideTop">
+            <div class="sideTop__row">
+              <div>
+                <div class="sideLabel">Address</div>
+                <div class="sideValue">123 W Maple Ave, Tempe, AZ</div>
+              </div>
+              <a class="miniLink" href="#">Copy</a>
+            </div>
+
+            <div class="sideTop__row">
+              <div>
+                <div class="sideLabel">Phone</div>
+                <div class="sideValue">(480) 555-0139</div>
+              </div>
+              <a class="miniLink" href="#">Call</a>
+            </div>
+
+            <div class="sideTop__row">
+              <div>
+                <div class="sideLabel">Website</div>
+                <div class="sideValue"><a class="link" href="#">copperspoonkitchen.com</a></div>
+              </div>
+              <a class="miniLink" href="#">Open</a>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="hours">
+              <div class="sideLabel">Hours</div>
+              <ul class="hoursList">
+                <li><span>Mon</span><span>11am – 9pm</span></li>
+                <li><span>Tue</span><span>11am – 9pm</span></li>
+                <li><span>Wed</span><span>11am – 9pm</span></li>
+                <li><span>Thu</span><span>11am – 10pm</span></li>
+                <li><span>Fri</span><span>11am – 11pm</span></li>
+                <li><span>Sat</span><span>10am – 11pm</span></li>
+                <li><span>Sun</span><span>10am – 8pm</span></li>
+              </ul>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="mapBox" aria-label="Map placeholder">
+              <div class="mapBox__inner">
+                <div class="mapBox__title">Map</div>
+                <div class="mapBox__hint">Embed a map later or use a screenshot.</div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="sideButtons">
+              <a class="btn btn--primary btn--full" href="#">Get Directions</a>
+              <a class="btn btn--secondary btn--full" href="#">Reserve a table</a>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+    </div>
+  </footer>
 </body>
+</html>

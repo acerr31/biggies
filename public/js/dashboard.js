@@ -42,6 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
     restaurantButton.addEventListener("click", () => {
     window.location.href = "/restaurant.html";
      });
+
+    // Explore Button
+    exploreButton.addEventListener("click", () => {
+        window.location.href = "/explore.html";
+    });
     //////////////////////////////////////////
     //END EVENT LISTENERS
     //////////////////////////////////////////

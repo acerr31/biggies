@@ -1,91 +1,175 @@
 <!--Aubrey and Kendahl Sprint 2: Explore/Restaurant Finder Front-End-->
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Explore Restaurants Near You</title>
-    <link rel="stylesheet" href="css/logon.css">
-    <style>
-        .restaurant-card {
-        background-color: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        transition: transform 0.2s ease;
-        cursor: pointer;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Explore — Plated</title>
+  <link rel="stylesheet" href="css/explore.css">
+  <style>
+    /* minimal card internals (keeps page self-contained until you move styles fully) */
+    .restaurant-card { background: var(--surface,#fff); border-radius:12px; overflow:hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.04); cursor:pointer; display:flex; gap:12px; }
+    .restaurant-image { width: 36%; min-width: 160px; background-size: cover; background-position: center; border-radius: 8px; }
+    .restaurant-details { padding: 12px; display:flex; flex-direction:column; gap:6px; flex:1; }
+    .restaurant-name { font-weight:700; color:var(--text-primary,#111); font-size:1rem; }
+    .rating, .category, .price, .distance { color: var(--text-secondary,#8a8278); font-size:.9rem; }
+    @media (max-width:820px) {
+      .restaurant-card { flex-direction:column; }
+      .restaurant-image { width:100%; min-height:140px; border-radius:8px; }
     }
-    </style>
+  </style>
 </head>
 
 <body>
-    <!-- Logo -->
-    <div class="logo">
-        <img src="images/PlatedLogo.png" alt="Company Logo">
+
+  <!-- Topbar: left logo, centered nav, right avatar -->
+  <header class="topbar topbar-centered">
+  <div class="topbar-inner">
+
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo">
+        <img src="images/PlatedLogo.png" alt="Plated">
+      </a>
     </div>
 
-    <header>
-        <h1>FoodFinder</h1>
-        <div class="search-bar">
-            <input type="text" placeholder="Search restaurants...">
-            <input type="text" placeholder="Near me">
-            <button>Search</button>
+    <nav class="topbar-center">
+      <a class="nav-link" href="feed.html">Feed</a>
+      <a class="nav-link active" href="explore.html">Explore</a>
+      <a class="nav-link" href="leaderboard.html">Leaderboard</a>
+      <a class="nav-link" href="profile.html">Profile</a>
+    </nav>
+
+    <div class="topbar-right">
+      <div class="topbar-avatar" id="topbarAvatar"></div>
+      <div class="topbar-username" id="topbarUsername"></div>
+    </div>
+
+  </div>
+</header>
+
+  <main class="explore-page">
+
+    <!-- top row -->
+    <div class="grid-row row-top">
+      <div class="card">
+        <div style="font-weight:600; margin-bottom:8px">Your lists</div>
+        <div style="color:var(--text-secondary)">Been, Want to try, Favorites</div>
+      </div>
+
+      <div class="card explore-hero">
+        <div class="hero-inner" style="align-items:center; width:100%;">
+          <div class="explore-title" style="flex:1">
+            <h1 style="margin:0; font-size:26px; color:var(--text-primary)">Explore</h1>
+            <p style="margin-top:6px; color:var(--text-secondary)">Discover restaurants near you, filter by cuisine, price, and rating</p>
+          </div>
+
+          <div class="search-filters" style="justify-self:end;">
+            <div class="search-bar" role="search" aria-label="Search restaurants">
+              <input type="search" placeholder="Search restaurants, cuisines..." />
+            </div>
+            <button class="filter-btn primary">Filters</button>
+          </div>
         </div>
-    </header>
+      </div>
 
-    <div class="location-banner">
-        Showing restaurants near <strong>Your Location</strong>
+      <div class="card">
+        <div style="font-weight:600; margin-bottom:8px">Quick Picks</div>
+        <div style="color:var(--text-secondary)">Near you, Highly rated</div>
+      </div>
     </div>
 
-    <div class="container">
+    <!-- bottom row: grid + sidebar -->
+    <div class="grid-row row-bottom" style="margin-top:10px;">
+      <div class="card">
+        <div class="explore-grid">
 
-        <div class="restaurant-card">
-            <div class="restaurant-image" style="background-image: url('https://picsum.photos/400/300?1');"></div>
+          <div class="explore-card restaurant-card">
+            <div class="restaurant-image" style="background-image:url('https://picsum.photos/400/300?1');"></div>
             <div class="restaurant-details">
-                <div class="restaurant-name">Sunset Grill</div>
-                <div class="rating">★★★★☆ (4.2)</div>
-                <div class="category">American • Burgers • Breakfast</div>
+              <div class="restaurant-name">Sunset Grill</div>
+              <div class="rating">★★★★☆ (4.2)</div>
+              <div class="category">American • Burgers • Breakfast</div>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:auto;">
                 <div class="price">$$</div>
                 <div class="distance">0.8 miles away</div>
+              </div>
             </div>
-        </div>
+          </div>
 
-        <div class="restaurant-card">
-            <div class="restaurant-image" style="background-image: url('https://picsum.photos/400/300?2');"></div>
+          <div class="explore-card restaurant-card">
+            <div class="restaurant-image" style="background-image:url('https://picsum.photos/400/300?2');"></div>
             <div class="restaurant-details">
-                <div class="restaurant-name">Bella Napoli</div>
-                <div class="rating">★★★★★ (4.8)</div>
-                <div class="category">Italian • Pizza • Pasta</div>
+              <div class="restaurant-name">Bella Napoli</div>
+              <div class="rating">★★★★★ (4.8)</div>
+              <div class="category">Italian • Pizza • Pasta</div>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:auto;">
                 <div class="price">$$$</div>
                 <div class="distance">1.2 miles away</div>
+              </div>
             </div>
-        </div>
+          </div>
 
-        <div class="restaurant-card">
-            <div class="restaurant-image" style="background-image: url('https://picsum.photos/400/300?4');"></div>
+          <div class="explore-card restaurant-card">
+            <div class="restaurant-image" style="background-image:url('https://picsum.photos/400/300?4');"></div>
             <div class="restaurant-details">
-                <div class="restaurant-name">Sushi Wave</div>
-                <div class="rating">★★★★☆ (4.3)</div>
-                <div class="category">Japanese • Sushi • Ramen</div>
+              <div class="restaurant-name">Sushi Wave</div>
+              <div class="rating">★★★★☆ (4.3)</div>
+              <div class="category">Japanese • Sushi • Ramen</div>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:auto;">
                 <div class="price">$$$</div>
                 <div class="distance">0.5 miles away</div>
+              </div>
             </div>
-        </div>
+          </div>
 
-        <div class="restaurant-card">
-            <div class="restaurant-image" style="background-image: url('https://picsum.photos/400/300?5');"></div>
+          <div class="explore-card restaurant-card">
+            <div class="restaurant-image" style="background-image:url('https://picsum.photos/400/300?5');"></div>
             <div class="restaurant-details">
-                <div class="restaurant-name">Green Garden Café</div>
-                <div class="rating">★★★★★ (4.9)</div>
-                <div class="category">Vegan • Healthy • Smoothies</div>
+              <div class="restaurant-name">Green Garden Café</div>
+              <div class="rating">★★★★★ (4.9)</div>
+              <div class="category">Vegan • Healthy • Smoothies</div>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:auto;">
                 <div class="price">$$</div>
                 <div class="distance">1.7 miles away</div>
+              </div>
             </div>
-        </div>
+          </div>
 
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-weight:600; margin-bottom:8px">Filters</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="filter-btn">Open Now</button>
+          <button class="filter-btn">Delivery</button>
+          <button class="filter-btn">Price</button>
+        </div>
+      </div>
     </div>
+
+  </main>
+
+  <script>
+/* Load user info from localStorage (same logic used on profile page) */
+
+const username = localStorage.getItem("username") || "Guest";
+
+/* Insert username */
+document.getElementById("topbarUsername").textContent = username;
+
+/* Generate avatar initials */
+const initials = username
+  .split(" ")
+  .map(word => word[0])
+  .join("")
+  .toUpperCase()
+  .slice(0,2);
+
+document.getElementById("topbarAvatar").textContent = initials;
+</script>
 
 </body>
 </html>

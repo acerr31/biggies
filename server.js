@@ -324,6 +324,65 @@ app.get('/api/users', authenticateToken, async (req, res) => {
         res.status(500).json({ message: 'Error retrieving email addresses.' });
     }
 });
+
+//route: for restaurant submission form
+app.post("/api/restaurants", async (req, res) => {
+  try {
+    const {
+      restaurantName,
+      phone,
+      address,
+      website,
+      tags,
+      about,
+      amenities,
+      timeToVisit,
+      notes
+    } = req.body;
+
+    // basic validation
+    if (!restaurantName || !phone || !address || !about || !tags) {
+      return res.status(400).json({
+        message: "Missing required fields"
+      });
+    }
+
+    const connection = await createConnection();
+
+    const sql = `
+      INSERT INTO restaurants
+      (restaurantName, phone, address, website, tags, about, amenities, timeToVisit, notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const values = [
+      restaurantName,
+      phone,
+      address,
+      website,
+      tags,
+      about,
+      amenities,
+      timeToVisit,
+      notes
+    ];
+
+    const [result] = await connection.execute(sql, values);
+
+    await connection.end();
+
+    res.status(201).json({
+      message: "Restaurant submitted successfully",
+      id: result.insertId
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error while submitting restaurant"
+    });
+  }
+});
+
 //////////////////////////////////////
 //END ROUTES TO HANDLE API REQUESTS
 //////////////////////////////////////

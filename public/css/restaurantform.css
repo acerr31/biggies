@@ -1,0 +1,19 @@
+:root {
+  --bg:            #f5f2ee;
+  --surface:       #ffffff;
+  --border:        #e8e3db;
+  --text-primary:  #1a1612;
+  --text-secondary:#8a8278;
+  --accent:        #d4872a;        /* warm amber */
+  --accent-light:  #fdf3e7;
+  --accent-text:   #7a4510;
+  --teal:          #1a9e8f;
+  --teal-light:    #e6f7f5;
+  --teal-text:     #0d6b61;
+  --font-display:  'DM Serif Display', Georgia, serif;
+  --font-body:     'DM Sans', 'Segoe UI', sans-serif;
+  --radius-card:   18px;
+  --radius-md:     10px;
+  --topbar-h:      62px;
+  --shadow:        0 2px 12px rgba(60,40,10,.07);
+}

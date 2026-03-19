@@ -42,7 +42,7 @@ function isValidPhone(value) {
 }
 
 function isValidUrl(value) {
-  if (!value) return true; // optional field
+  if (!value) return true;
   try {
     const url = new URL(value);
     return url.protocol === "http:" || url.protocol === "https:";
@@ -63,8 +63,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const tags = [];
+  const amenitiesList = [];
+
   const tagsInput = document.getElementById("tagsInput");
   const tagEntry = document.getElementById("tagEntry");
+
+  const amenitiesInput = document.getElementById("amenitiesInput");
+  const amenityEntry = document.getElementById("amenityEntry");
 
   function saveDraft() {
     const draft = {
@@ -73,10 +78,10 @@ document.addEventListener("DOMContentLoaded", () => {
       address: document.getElementById("address")?.value || "",
       website: document.getElementById("website")?.value || "",
       description: document.getElementById("description")?.value || "",
-      amenities: document.getElementById("amenities")?.value || "",
       bestTime: document.getElementById("bestTime")?.value || "",
       notes: document.getElementById("notes")?.value || "",
-      tags: [...tags]
+      tags: [...tags],
+      amenities: [...amenitiesList]
     };
 
     sessionStorage.setItem("restaurantFormDraft", JSON.stringify(draft));
@@ -110,6 +115,34 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function renderAmenities() {
+    if (!amenitiesInput || !amenityEntry) return;
+
+    document.querySelectorAll("#amenitiesInput .tag").forEach((tag) => tag.remove());
+
+    amenitiesList.forEach((amenityText, index) => {
+      const chip = document.createElement("span");
+      chip.className = "tag";
+
+      const label = document.createElement("span");
+      label.textContent = amenityText;
+
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.textContent = "×";
+
+      removeBtn.addEventListener("click", () => {
+        amenitiesList.splice(index, 1);
+        renderAmenities();
+        saveDraft();
+      });
+
+      chip.appendChild(label);
+      chip.appendChild(removeBtn);
+      amenitiesInput.insertBefore(chip, amenityEntry);
+    });
+  }
+
   function loadDraft() {
     const draft = JSON.parse(sessionStorage.getItem("restaurantFormDraft") || "{}");
 
@@ -118,7 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const addressEl = document.getElementById("address");
     const websiteEl = document.getElementById("website");
     const descriptionEl = document.getElementById("description");
-    const amenitiesEl = document.getElementById("amenities");
     const bestTimeEl = document.getElementById("bestTime");
     const notesEl = document.getElementById("notes");
 
@@ -127,7 +159,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (addressEl) addressEl.value = draft.address || "";
     if (websiteEl) websiteEl.value = draft.website || "";
     if (descriptionEl) descriptionEl.value = draft.description || "";
-    if (amenitiesEl) amenitiesEl.value = draft.amenities || "";
     if (bestTimeEl) bestTimeEl.value = draft.bestTime || "";
     if (notesEl) notesEl.value = draft.notes || "";
 
@@ -136,7 +167,13 @@ document.addEventListener("DOMContentLoaded", () => {
       tags.push(...draft.tags);
     }
 
+    amenitiesList.length = 0;
+    if (Array.isArray(draft.amenities)) {
+      amenitiesList.push(...draft.amenities);
+    }
+
     renderTags();
+    renderAmenities();
   }
 
   function addPendingTag() {
@@ -161,6 +198,27 @@ document.addEventListener("DOMContentLoaded", () => {
     saveDraft();
   }
 
+  function addPendingAmenity() {
+    if (!amenityEntry) return;
+
+    const value = amenityEntry.value.trim();
+    if (!value) return;
+
+    value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .forEach((item) => {
+        if (!amenitiesList.includes(item)) {
+          amenitiesList.push(item);
+        }
+      });
+
+    amenityEntry.value = "";
+    renderAmenities();
+    saveDraft();
+  }
+
   loadDraft();
   form.addEventListener("input", saveDraft);
 
@@ -179,10 +237,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  if (amenityEntry) {
+    amenityEntry.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === ",") {
+        e.preventDefault();
+        addPendingAmenity();
+      }
+
+      if (e.key === "Backspace" && amenityEntry.value === "" && amenitiesList.length > 0) {
+        amenitiesList.pop();
+        renderAmenities();
+        saveDraft();
+      }
+    });
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     addPendingTag();
+    addPendingAmenity();
     clearErrors();
     setSubmitMessage("");
 
@@ -191,13 +265,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const address = document.getElementById("address")?.value.trim() || "";
     const website = document.getElementById("website")?.value.trim() || "";
     const description = document.getElementById("description")?.value.trim() || "";
-    const amenities = document.getElementById("amenities")?.value.trim() || "";
     const bestTime = document.getElementById("bestTime")?.value.trim() || "";
     const notes = document.getElementById("notes")?.value.trim() || "";
 
     let isValid = true;
 
-    // required
     if (!name) {
       document.getElementById("err-name").textContent = "Name is required.";
       isValid = false;
@@ -226,14 +298,13 @@ document.addEventListener("DOMContentLoaded", () => {
       isValid = false;
     }
 
-    // optional
     if (website && !isValidUrl(website)) {
       document.getElementById("err-website").textContent = "Enter a valid website URL.";
       isValid = false;
     }
 
     if (!isValid) {
-      saveDraft(); // keep everything in case page changes/reloads later
+      saveDraft();
       setSubmitMessage("Please fix the highlighted fields.", "error");
       return;
     }
@@ -245,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
       website: website || null,
       tags: tags.join(", "),
       about: description,
-      amenities: amenities || null,
+      amenities: amenitiesList.length ? amenitiesList.join(", ") : null,
       timeToVisit: bestTime || null,
       notes: notes || null
     };
@@ -265,7 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
 
       if (!res.ok) {
-        saveDraft(); // preserve data on backend error
+        saveDraft();
         setSubmitMessage(data.message || "Failed to submit.", "error");
         return;
       }
@@ -274,13 +345,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       form.reset();
       tags.length = 0;
+      amenitiesList.length = 0;
       renderTags();
+      renderAmenities();
       sessionStorage.removeItem("restaurantFormDraft");
       clearErrors();
 
     } catch (err) {
       console.error("Frontend error:", err);
-      saveDraft(); // preserve data on network error
+      saveDraft();
       setSubmitMessage("Server connection error.", "error");
     }
   });
@@ -289,7 +362,9 @@ document.addEventListener("DOMContentLoaded", () => {
     resetBtn.addEventListener("click", () => {
       form.reset();
       tags.length = 0;
+      amenitiesList.length = 0;
       renderTags();
+      renderAmenities();
       clearErrors();
       setSubmitMessage("");
       sessionStorage.removeItem("restaurantFormDraft");

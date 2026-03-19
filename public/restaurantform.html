@@ -78,7 +78,12 @@
       border-radius:8px;
     }
     .tags-input input {
-      border: none; outline: none; min-width:120px;
+      border: none;
+      outline: none;
+      min-width: 120px;
+      width: auto;
+      flex: 1;
+      padding: 6px 0;
     }
     .tag {
       background:#f0f0f0; padding:6px 8px; border-radius:999px; font-size:13px; display:flex; gap:8px; align-items:center;
@@ -136,25 +141,31 @@
 
       <!-- About section -->
       <fieldset style="border:none; padding:0; margin-top:6px;">
-        <legend style="font-weight:700; margin-bottom:6px;">About *</legend>
+      <legend style="font-weight:700; margin-bottom:6px;">About *</legend>
 
-        <label for="description">Description (short) *</label>
-        <textarea id="description" name="description" required placeholder="Short summary of the restaurant"></textarea>
-        <div id="err-description" class="error" aria-live="polite"></div>
+      <label for="description">Description (short) *</label>
+      <textarea id="description" name="description" required placeholder="Short summary of the restaurant"></textarea>
+      <div id="err-description" class="error" aria-live="polite"></div>
 
-        <label for="amenities">Amenities (comma-separated)</label>
-        <input id="amenities" name="amenities" type="text" placeholder="Outdoor seating, Wi-Fi, Wheelchair accessible" />
-        
-        <label for="bestTime">Best time to visit</label>
-        <input id="bestTime" name="bestTime" type="text" placeholder="Weeknights, Weekend brunch, Happy hour 4–6pm" />
+      <label for="amenityEntry">Amenities</label>
+      <div class="tags-input" id="amenitiesInput" role="list">
+        <input
+          id="amenityEntry"
+          type="text"
+          placeholder="Type amenity and press Enter"
+          aria-label="Add amenity"
+        />
+      </div>
 
-        <label for="notes">Notes</label>
-        <textarea id="notes" name="notes" placeholder="Any extra notes (parking, reservations, specials)"></textarea>
+      <label for="bestTime">Best time to visit</label>
+      <input id="bestTime" name="bestTime" type="text" placeholder="Weeknights, Weekend brunch, Happy hour 4–6pm" />
 
-        <label for="hours">Hours (text is fine)</label>
-        <textarea id="hours" name="hours" placeholder="Mon–Thu: 8am–9pm; Fri–Sat: 8am–11pm; Sun: 9am–7pm"></textarea>
-      </fieldset>
+      <label for="notes">Notes</label>
+      <textarea id="notes" name="notes" placeholder="Any extra notes (parking, reservations, specials)"></textarea>
 
+      <label for="hours">Hours (text is fine)</label>
+      <textarea id="hours" name="hours" placeholder="Mon–Thu: 8am–9pm; Fri–Sat: 8am–11pm; Sun: 9am–7pm"></textarea>
+    </fieldset>
       <!-- Hidden-ish helper area to show result -->
       <div id="submitResult" class="small" aria-live="polite" style="margin-top:8px;"></div>
 

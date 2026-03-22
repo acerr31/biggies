@@ -471,3 +471,42 @@ hr {
 .sheet form > .row:nth-of-type(1) .col:nth-child(2) {
   animation: fadeUp .58s ease both;
 }
+
+
+/* Hours */
+.hours-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  
+}
+
+.day-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.day-row span {
+  font-weight: 600;
+}
+
+.day-row input {
+  padding: 6px;
+}
+
+.hours-grid input {
+  border-radius: 10px; /* match your page style */
+  border: 1px solid #ccc;
+  padding: 8px;
+  background-color: #fff;
+}
+
+.HourCol label {
+  text-align: center;
+  display: block;
+  gap: 10px;
+  padding: 1%;
+}
+

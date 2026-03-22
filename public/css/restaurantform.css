@@ -110,10 +110,10 @@ fieldset {
 }
 
 legend {
-    padding: 0 8px;
+    /*padding: 0 8px;*/
     font-weight: 700;
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: 26px;
 }
 
 /* Labels */

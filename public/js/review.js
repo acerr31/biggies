@@ -253,7 +253,7 @@
       // Build FormData so photos can be included
       const formData = new FormData();
       formData.append("data", JSON.stringify(payload));
-      selectedFiles.forEach((file, i) => formData.append(`photo_${i}`, file));
+      selectedFiles.forEach((file, i) => formData.append(`photos`, file));
 
       const res = await fetch("/api/reviews", {
         method: "POST",

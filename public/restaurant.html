@@ -385,5 +385,43 @@
     <div class="footer__inner">
     </div>
   </footer>
+
+  <!-- Floating Write a Review button -->
+  <a class="fab-review" id="fabReview" href="review.html" aria-label="Write a review">
+    <span class="fab-icon">+</span>
+    <span class="fab-label">Review</span>
+  </a>
+  <style>
+    .fab-review {
+      position: fixed; bottom: 36px; right: 36px; z-index: 200;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 22px 14px 18px;
+      background: #ffbf69; color: #1f2937; border-radius: 999px;
+      font-family: "DM Sans","Segoe UI",sans-serif; font-weight: 700; font-size: .92rem;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(255,191,105,.55);
+      transition: background .15s, transform .15s, box-shadow .15s;
+      animation: fabPop .4s cubic-bezier(.34,1.56,.64,1) .2s both;
+    }
+    .fab-review:hover { background: #f4a938; transform: translateY(-3px); }
+    .fab-icon { font-size: 1.4rem; line-height: 1; font-weight: 300; }
+    @keyframes fabPop {
+      from { opacity: 0; transform: scale(.7) translateY(12px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+  </style>
+  <script>
+    (function(){
+      var fab=document.getElementById("fabReview");
+      if(!fab)return;
+      var name=((document.querySelector(".hero__title")||{}).textContent||"").trim();
+      var sp=new URLSearchParams(window.location.search);
+      var id=sp.get("id")||"";
+      var q=new URLSearchParams();
+      if(id)q.set("id",id);
+      if(name)q.set("name",encodeURIComponent(name));
+      if([...q].length)fab.href="review.html?"+q.toString();
+    })();
+  <\/script>
 </body>
 </html>

@@ -366,3 +366,149 @@ h1 {
   font-size: 28px;
   color: #1e293b;
 }
+/* =============================================
+   Edit Profile page styles
+   ============================================= */
+
+/* Page heading + back link */
+.edit-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: fadeUp .36s ease both;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .84rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color .15s;
+}
+.back-link:hover { color: var(--text-primary); }
+
+.edit-title {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3vw, 30px);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Two-column grid */
+.edit-grid {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 20px;
+  animation: fadeUp .42s ease both;
+}
+
+/* Left identity card */
+.edit-identity-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.edit-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  border: 3px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+
+.edit-static-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.edit-static-label {
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text-secondary);
+}
+.edit-static-value {
+  font-size: .92rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Right fields card */
+.edit-fields-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edit-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.edit-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.edit-label {
+  font-size: .84rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.edit-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: var(--text-primary);
+  font-size: .92rem;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.edit-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(212,135,42,.14);
+}
+.edit-input::placeholder { color: #a39a90; }
+
+/* Action buttons row */
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* Topbar logo fix for editProfile (uses .topbar-logo not .logo) */
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.topbar-logo img {
+  height: 100px;
+  width: auto;
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .edit-grid { grid-template-columns: 1fr; }
+  .edit-field-row { grid-template-columns: 1fr; }
+}

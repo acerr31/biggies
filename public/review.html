@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leave a Review – Plated</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ── tokens (match restaurant.css palette) ── */
+    :root {
+      --bg:           #f5f2ee;
+      --surface:      #ffffff;
+      --border:       #e8e3db;
+      --text-primary: #1a1612;
+      --text-secondary:#8a8278;
+      --accent:       #ffbf69;
+      --accent-dark:  #f4a938;
+      --accent-ink:   #1f2937;
+      --teal:         #1a9e8f;
+      --teal-light:   #e6f7f5;
+      --danger:       #e53e3e;
+      --font-display: 'DM Serif Display', Georgia, serif;
+      --font-body:    'DM Sans', 'Segoe UI', sans-serif;
+      --radius-lg:    18px;
+      --radius-md:    12px;
+      --shadow:       0 4px 24px rgba(60,40,10,.10);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; background: var(--bg); }
+    body {
+      font-family: var(--font-body);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: var(--font-body); cursor: pointer; border: none; background: none; }
+
+    /* ── topbar ── */
+    .topbar {
+      height: 62px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 36px;
+      box-shadow: 0 2px 12px rgba(60,40,10,.07);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar img { height: 90px; width: auto; }
+
+    /* ── page shell ── */
+    .page {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 48px 24px 64px;
+    }
+
+    /* ── review card ── */
+    .review-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 680px;
+      overflow: hidden;
+      animation: slideUp .35s ease both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── card header ── */
+    .card-header {
+      padding: 28px 32px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      background: linear-gradient(180deg, rgba(255,191,105,0.08), transparent 100%);
+    }
+    .card-header-left { display: flex; flex-direction: column; gap: 4px; }
+    .card-restaurant-name {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .card-restaurant-meta {
+      font-size: .85rem;
+      color: var(--text-secondary);
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      transition: background .15s, color .15s;
+      white-space: nowrap;
+    }
+    .back-btn:hover { background: var(--bg); color: var(--text-primary); }
+    .back-btn svg { flex-shrink: 0; }
+
+    /* ── card body ── */
+    .card-body {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ── section label ── */
+    .section-label {
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    /* ── sentiment buttons (Beli-style) ── */
+    .sentiment-row {
+      display: flex;
+      gap: 16px;
+    }
+    .sentiment-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      transition: border-color .18s, background .18s, transform .12s;
+      cursor: pointer;
+    }
+    .sentiment-btn:hover { transform: translateY(-2px); }
+    .sentiment-dot {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: transform .18s;
+    }
+    .sentiment-btn:hover .sentiment-dot { transform: scale(1.08); }
+    .sentiment-btn .sentiment-label {
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: color .15s;
+    }
+
+    /* liked */
+    .sentiment-btn[data-val="liked"] .sentiment-dot  { background: rgba(72,199,142,.18); }
+    .sentiment-btn[data-val="liked"].active           { border-color: #48c78e; background: rgba(72,199,142,.07); }
+    .sentiment-btn[data-val="liked"].active .sentiment-label { color: #1a6e46; }
+
+    /* fine */
+    .sentiment-btn[data-val="fine"] .sentiment-dot   { background: rgba(255,191,105,.22); }
+    .sentiment-btn[data-val="fine"].active            { border-color: var(--accent); background: rgba(255,191,105,.09); }
+    .sentiment-btn[data-val="fine"].active .sentiment-label { color: #7a4a10; }
+
+    /* didnt */
+    .sentiment-btn[data-val="didnt"] .sentiment-dot  { background: rgba(229,62,62,.15); }
+    .sentiment-btn[data-val="didnt"].active           { border-color: var(--danger); background: rgba(229,62,62,.06); }
+    .sentiment-btn[data-val="didnt"].active .sentiment-label { color: var(--danger); }
+
+    /* ── star rating ── */
+    .stars-row {
+      display: flex;
+      gap: 8px;
+    }
+    .star-btn {
+      font-size: 2rem;
+      color: #ddd;
+      line-height: 1;
+      transition: color .12s, transform .1s;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0 2px;
+    }
+    .star-btn:hover,
+    .star-btn.hovered,
+    .star-btn.selected { color: var(--accent); }
+    .star-btn.selected { transform: scale(1.1); }
+
+    /* ── text inputs ── */
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    .field label {
+      font-weight: 600;
+      font-size: .88rem;
+      color: var(--text-primary);
+    }
+    .field label span {
+      font-weight: 400;
+      color: var(--text-secondary);
+      font-size: .82rem;
+    }
+    .field textarea,
+    .field input[type="text"] {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-family: var(--font-body);
+      font-size: .95rem;
+      color: var(--text-primary);
+      background: var(--surface);
+      outline: none;
+      resize: vertical;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .field textarea { min-height: 120px; line-height: 1.6; }
+    .field textarea:focus,
+    .field input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255,191,105,.18);
+    }
+    .field textarea::placeholder,
+    .field input[type="text"]::placeholder { color: #b0a89e; }
+    .char-count {
+      font-size: .76rem;
+      color: var(--text-secondary);
+      text-align: right;
+      margin-top: -4px;
+    }
+
+    /* ── visit date ── */
+    .field input[type="date"] {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 11px 14px;
+      font-family: var(--font-body);
+      font-size: .95rem;
+      color: var(--text-primary);
+      background: var(--surface);
+      outline: none;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .field input[type="date"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255,191,105,.18);
+    }
+
+    /* ── tags (favorite dishes) ── */
+    .tags-input-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      min-height: 48px;
+      padding: 8px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      background: white;
+      transition: border-color .15s, box-shadow .15s;
+      cursor: text;
+    }
+    .tags-input-box:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255,191,105,.18);
+    }
+    .tags-input-box input {
+      border: none;
+      outline: none;
+      padding: 4px;
+      min-width: 140px;
+      flex: 1;
+      font-family: var(--font-body);
+      font-size: .92rem;
+      background: transparent;
+    }
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,191,105,.18);
+      color: #7a4a10;
+      border: 1px solid rgba(255,191,105,.45);
+      border-radius: 999px;
+      padding: 4px 10px 4px 12px;
+      font-size: .82rem;
+      font-weight: 600;
+    }
+    .tag-chip button {
+      color: #7a4a10;
+      font-size: .95rem;
+      line-height: 1;
+      opacity: .7;
+      transition: opacity .1s;
+    }
+    .tag-chip button:hover { opacity: 1; }
+
+    /* ── divider ── */
+    .divider { height: 1px; background: var(--border); }
+
+    /* ── actions ── */
+    .card-actions {
+      padding: 20px 32px 28px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      border-top: 1px solid var(--border);
+    }
+    .btn-cancel {
+      padding: 10px 22px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border);
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--surface);
+      transition: background .15s, color .15s;
+    }
+    .btn-cancel:hover { background: var(--bg); color: var(--text-primary); }
+    .btn-submit {
+      padding: 10px 28px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: var(--accent-ink);
+      font-size: .9rem;
+      font-weight: 700;
+      border: none;
+      transition: background .15s, transform .1s, opacity .15s;
+    }
+    .btn-submit:hover  { background: var(--accent-dark); }
+    .btn-submit:active { transform: scale(.97); }
+    .btn-submit:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ── flash message ── */
+    .flash {
+      display: none;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      font-size: .88rem;
+      font-weight: 500;
+      margin: 0 32px 4px;
+    }
+    .flash.error   { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; display: block; }
+    .flash.success { background: var(--teal-light); color: #0d6b61; border: 1px solid #99d9d3; display: block; }
+
+    /* ── image upload ── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .18s, background .18s;
+      position: relative;
+      background: #fdfcfb;
+    }
+    .upload-zone:hover,
+    .upload-zone:focus,
+    .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(255,191,105,.06);
+      outline: none;
+    }
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .upload-zone__inner { pointer-events: none; }
+    .upload-zone__icon  { font-size: 2rem; margin-bottom: 8px; }
+    .upload-zone__text  { font-size: .92rem; color: var(--text-secondary); margin-bottom: 4px; }
+    .upload-zone__link  { color: var(--accent-dark); font-weight: 600; }
+    .upload-zone__hint  { font-size: .78rem; color: #b0a89e; }
+
+    /* preview grid */
+    .photo-previews {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .preview-item {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      aspect-ratio: 1 / 1;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      animation: fadeIn .2s ease both;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:scale(.94); } to { opacity:1; transform:scale(1); } }
+    .preview-item img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .preview-remove {
+      position: absolute;
+      top: 5px; right: 5px;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      font-size: .8rem;
+      line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      border: none; cursor: pointer;
+      transition: background .15s;
+    }
+    .preview-remove:hover { background: rgba(229,62,62,.85); }
+    .upload-count {
+      font-size: .78rem;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 600px) {
+      .card-header, .card-body, .card-actions { padding-left: 20px; padding-right: 20px; }
+      .sentiment-dot { width: 44px; height: 44px; font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a href="restaurant.html">
+      <img src="images/PlatedLogo.png" alt="Plated" />
+    </a>
+  </header>
+
+  <main class="page">
+    <div class="review-card">
+
+      <!-- Header -->
+      <div class="card-header">
+        <div class="card-header-left">
+          <p class="card-restaurant-name" id="restaurantName">Copper Spoon Kitchen</p>
+          <p class="card-restaurant-meta" id="restaurantMeta">$$ · New American</p>
+        </div>
+        <a href="restaurant.html" class="back-btn" id="backBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </a>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body" id="reviewForm">
+
+        <!-- 1. Sentiment -->
+        <div>
+          <p class="section-label">How was it?</p>
+          <div class="sentiment-row">
+            <button class="sentiment-btn" data-val="liked" type="button" aria-pressed="false">
+              <div class="sentiment-dot">✓</div>
+              <span class="sentiment-label">I liked it!</span>
+            </button>
+            <button class="sentiment-btn" data-val="fine" type="button" aria-pressed="false">
+              <div class="sentiment-dot">～</div>
+              <span class="sentiment-label">It was fine</span>
+            </button>
+            <button class="sentiment-btn" data-val="didnt" type="button" aria-pressed="false">
+              <div class="sentiment-dot">✕</div>
+              <span class="sentiment-label">Didn't like it</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 2. Star Rating -->
+        <div>
+          <p class="section-label">Star rating</p>
+          <div class="stars-row" id="starsRow" role="group" aria-label="Star rating">
+            <button class="star-btn" data-val="1" type="button" aria-label="1 star">★</button>
+            <button class="star-btn" data-val="2" type="button" aria-label="2 stars">★</button>
+            <button class="star-btn" data-val="3" type="button" aria-label="3 stars">★</button>
+            <button class="star-btn" data-val="4" type="button" aria-label="4 stars">★</button>
+            <button class="star-btn" data-val="5" type="button" aria-label="5 stars">★</button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 3. Notes -->
+        <div class="field">
+          <label for="reviewNotes">
+            Notes <span>(optional)</span>
+          </label>
+          <textarea id="reviewNotes" placeholder="What did you think? Describe the vibe, service, standout dishes…" maxlength="800"></textarea>
+          <p class="char-count"><span id="charCount">0</span> / 800</p>
+        </div>
+
+        <!-- 4. Favorite Dishes -->
+        <div class="field">
+          <label>Favorite dishes <span>(optional — press Enter or comma to add)</span></label>
+          <div class="tags-input-box" id="dishesBox">
+            <input id="dishEntry" type="text" placeholder="e.g. Truffle pasta, Short rib…" aria-label="Add a dish" />
+          </div>
+        </div>
+
+        <!-- 5. Visit Date -->
+        <div class="field">
+          <label for="visitDate">Visit date <span>(optional)</span></label>
+          <input type="date" id="visitDate" />
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 6. Photos -->
+        <div class="field">
+          <label>Add photos <span>(optional — up to 6 images)</span></label>
+
+          <div class="upload-zone" id="uploadZone" role="button" tabindex="0" aria-label="Upload photos">
+            <input type="file" id="photoInput" accept="image/*" multiple aria-hidden="true" />
+            <div class="upload-zone__inner">
+              <div class="upload-zone__icon">📷</div>
+              <p class="upload-zone__text">Drag & drop photos here, or <span class="upload-zone__link">browse</span></p>
+              <p class="upload-zone__hint">JPG, PNG, WEBP · Max 5 MB each</p>
+            </div>
+          </div>
+
+          <!-- Preview grid -->
+          <div class="photo-previews" id="photoPreviews"></div>
+        </div>
+
+      </div>
+
+      <!-- Flash -->
+      <p class="flash" id="flashMsg"></p>
+
+      <!-- Actions -->
+      <div class="card-actions">
+        <button class="btn-cancel" id="cancelBtn" type="button">Cancel</button>
+        <button class="btn-submit" id="submitBtn" type="button">Post Review</button>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/js/review.js"></script>
+</body>
+</html>

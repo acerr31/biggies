@@ -210,69 +210,30 @@
           <div class="card__header card__header--row">
             <div>
               <h2 class="card__title">Reviews</h2>
-              <div class="card__sub">What people are saying (mock data).</div>
+              <div class="card__sub" id="reviewSubtitle">Loading reviews…</div>
             </div>
-
             <div class="reviewSummary">
-              <div class="reviewSummary__score">4.6</div>
+              <div class="reviewSummary__score" id="avgScore">—</div>
               <div class="reviewSummary__meta">
-                <div class="rating__stars" aria-hidden="true">★★★★★</div>
-                <div class="muted">1,204 reviews</div>
+                <div class="rating__stars" aria-hidden="true" id="avgStars">☆☆☆☆☆</div>
+                <div class="muted" id="reviewCount">0 reviews</div>
               </div>
             </div>
           </div>
 
           <div class="reviewFilters">
-            <button class="chip chip--ghost" type="button">Most relevant</button>
-            <button class="chip chip--ghost" type="button">Newest</button>
-            <button class="chip chip--ghost" type="button">Highest</button>
-            <button class="chip chip--ghost" type="button">Lowest</button>
+            <button class="chip chip--ghost review-sort active-sort" data-sort="newest" type="button">Newest</button>
+            <button class="chip chip--ghost review-sort" data-sort="highest" type="button">Highest</button>
+            <button class="chip chip--ghost review-sort" data-sort="lowest" type="button">Lowest</button>
           </div>
 
-          <div class="reviewList">
-            <div class="review">
-              <div class="review__top">
-                <div class="avatar" aria-hidden="true">AL</div>
-                <div class="review__who">
-                  <div class="review__name">Alyssa L.</div>
-                  <div class="review__meta">
-                    <span class="rating__stars" aria-hidden="true">★★★★★</span>
-                    <span class="muted">2 days ago</span>
-                  </div>
-                </div>
-              </div>
-              <p class="review__text">
-                Incredible vibe and the salmon was perfectly cooked. Great service and quick seating.
-              </p>
-              <div class="review__actions">
-                <button class="chip chip--ghost" type="button">Helpful</button>
-                <button class="chip chip--ghost" type="button">Share</button>
-              </div>
-            </div>
-
-            <div class="review">
-              <div class="review__top">
-                <div class="avatar" aria-hidden="true">JR</div>
-                <div class="review__who">
-                  <div class="review__name">Jordan R.</div>
-                  <div class="review__meta">
-                    <span class="rating__stars" aria-hidden="true">★★★★☆</span>
-                    <span class="muted">1 week ago</span>
-                  </div>
-                </div>
-              </div>
-              <p class="review__text">
-                Food was awesome. It got a little loud later in the evening, but still a great spot for dinner.
-              </p>
-              <div class="review__actions">
-                <button class="chip chip--ghost" type="button">Helpful</button>
-                <button class="chip chip--ghost" type="button">Share</button>
-              </div>
-            </div>
+          <!-- Live review list -->
+          <div class="reviewList" id="reviewList">
+            <div class="review-loading">Loading…</div>
           </div>
 
-          <div class="card__footer">
-            <a class="link" href="#">See all reviews</a>
+          <div class="card__footer" id="reviewFooter" style="display:none;">
+            <span class="muted" id="showingCount"></span>
           </div>
         </article>
 
@@ -409,7 +370,36 @@
       from { opacity: 0; transform: scale(.7) translateY(12px); }
       to   { opacity: 1; transform: scale(1) translateY(0); }
     }
+
+    /* review dynamic styles */
+    .review-loading { padding: 24px; color: #8a8278; text-align: center; font-size: .9rem; }
+    .review-empty   { padding: 32px 24px; text-align: center; color: #8a8278; font-size: .95rem; }
+    .review-sentiment {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: .78rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 999px; margin-bottom: 6px;
+    }
+    .sentiment--liked  { background: rgba(72,199,142,.15); color: #1a6e46; }
+    .sentiment--fine   { background: rgba(255,191,105,.2);  color: #7a4a10; }
+    .sentiment--didnt  { background: rgba(229,62,62,.12);   color: #c0392b; }
+    .review__dishes { font-size: .82rem; color: #8a8278; margin-top: 6px; }
+    .review__dishes span { font-weight: 600; color: #1a1612; }
+    .review__photos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .review__photos img {
+      width: 80px; height: 80px; object-fit: cover;
+      border-radius: 8px; border: 1px solid #e8e3db; cursor: pointer;
+      transition: transform .15s;
+    }
+    .review__photos img:hover { transform: scale(1.05); }
+    .review-delete {
+      margin-left: auto; font-size: .78rem; color: #c0392b;
+      padding: 4px 10px; border-radius: 999px; border: 1px solid #fecaca;
+      background: #fef2f2; cursor: pointer; transition: background .15s;
+    }
+    .review-delete:hover { background: #fecaca; }
+    .active-sort { background: #ffbf69 !important; color: #1f2937 !important; border-color: transparent !important; }
   </style>
+
   <script>
     (function(){
       var fab=document.getElementById("fabReview");
@@ -422,6 +412,181 @@
       if(name)q.set("name",encodeURIComponent(name));
       if([...q].length)fab.href="review.html?"+q.toString();
     })();
+  <\/script>
+
+  <script>
+  (function () {
+    const params       = new URLSearchParams(window.location.search);
+    const restaurantId = params.get('id');
+    const token        = localStorage.getItem('jwtToken');
+    const currentEmail = token ? (JSON.parse(atob(token.split('.')[1]))||{}).email : null;
+
+    let allReviews = [];
+    let sortMode   = 'newest';
+
+    // ── helpers ──────────────────────────────────────────
+    function starsHtml(n) {
+      if (!n) return '';
+      return '★'.repeat(n) + '☆'.repeat(5 - n);
+    }
+
+    function sentimentHtml(s) {
+      if (!s) return '';
+      const map = { liked: ['liked',  '✓ Liked it'],
+                    fine:  ['fine',   '～ It was fine'],
+                    didnt: ['didnt',  '✕ Didn\'t like it'] };
+      const [cls, label] = map[s] || [];
+      return cls ? `<span class="review-sentiment sentiment--${cls}">${label}</span>` : '';
+    }
+
+    function timeAgo(dateStr) {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const mins  = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days  = Math.floor(diff / 86400000);
+      const weeks = Math.floor(days / 7);
+      const months= Math.floor(days / 30);
+      if (mins  < 60)  return mins  <= 1 ? 'just now' : `${mins} minutes ago`;
+      if (hours < 24)  return `${hours} hour${hours>1?'s':''} ago`;
+      if (days  < 7)   return `${days} day${days>1?'s':''} ago`;
+      if (weeks < 5)   return `${weeks} week${weeks>1?'s':''} ago`;
+      return `${months} month${months>1?'s':''} ago`;
+    }
+
+    function sortedReviews() {
+      const copy = [...allReviews];
+      if (sortMode === 'highest') copy.sort((a,b) => (b.stars||0) - (a.stars||0));
+      if (sortMode === 'lowest')  copy.sort((a,b) => (a.stars||0) - (b.stars||0));
+      // newest is default (already sorted by DB)
+      return copy;
+    }
+
+    // ── render ───────────────────────────────────────────
+    function renderReviews() {
+      const list = document.getElementById('reviewList');
+      const sorted = sortedReviews();
+
+      if (sorted.length === 0) {
+        list.innerHTML = '<div class="review-empty">No reviews yet — be the first to leave one!</div>';
+        return;
+      }
+
+      list.innerHTML = sorted.map(r => {
+        const isOwn = currentEmail && r.user_email === currentEmail;
+        const photosHtml = r.photos && r.photos.length
+          ? `<div class="review__photos">${r.photos.map(p => `<img src="${p}" alt="Review photo" loading="lazy">`).join('')}</div>`
+          : '';
+        const dishesHtml = r.favorite_dishes
+          ? `<p class="review__dishes">Favorite dishes: <span>${r.favorite_dishes}</span></p>`
+          : '';
+
+        return `
+          <div class="review" data-id="${r.id}">
+            <div class="review__top">
+              <div class="avatar">${r.initials}</div>
+              <div class="review__who">
+                <div class="review__name">${r.username}</div>
+                <div class="review__meta">
+                  ${r.stars ? `<span class="rating__stars">${starsHtml(r.stars)}</span>` : ''}
+                  <span class="muted">${timeAgo(r.created_at)}</span>
+                  ${r.visit_date ? `<span class="muted">· Visited ${r.visit_date}</span>` : ''}
+                </div>
+              </div>
+              ${isOwn ? `<button class="review-delete" data-id="${r.id}">Delete</button>` : ''}
+            </div>
+            ${sentimentHtml(r.sentiment)}
+            ${r.notes ? `<p class="review__text">${r.notes}</p>` : ''}
+            ${dishesHtml}
+            ${photosHtml}
+          </div>`;
+      }).join('');
+
+      // wire up delete buttons
+      list.querySelectorAll('.review-delete').forEach(btn => {
+        btn.addEventListener('click', () => deleteReview(btn.dataset.id));
+      });
+
+      // update footer count
+      const footer = document.getElementById('reviewFooter');
+      const showing = document.getElementById('showingCount');
+      footer.style.display = '';
+      showing.textContent = `Showing ${sorted.length} review${sorted.length !== 1 ? 's' : ''}`;
+    }
+
+    // ── fetch reviews ─────────────────────────────────────
+    async function loadReviews() {
+      if (!restaurantId) {
+        document.getElementById('reviewList').innerHTML =
+          '<div class="review-empty">No restaurant selected.</div>';
+        document.getElementById('reviewSubtitle').textContent = '';
+        return;
+      }
+
+      try {
+        const res  = await fetch(`/api/reviews/${restaurantId}`);
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message);
+
+        allReviews = data.reviews || [];
+
+        // compute average stars
+        const withStars = allReviews.filter(r => r.stars);
+        const avg = withStars.length
+          ? (withStars.reduce((s, r) => s + r.stars, 0) / withStars.length).toFixed(1)
+          : null;
+
+        document.getElementById('avgScore').textContent    = avg || '—';
+        document.getElementById('avgStars').textContent    = avg ? starsHtml(Math.round(avg)) : '☆☆☆☆☆';
+        document.getElementById('reviewCount').textContent = `${allReviews.length} review${allReviews.length !== 1 ? 's' : ''}`;
+        document.getElementById('reviewSubtitle').textContent = allReviews.length
+          ? 'What people are saying'
+          : 'No reviews yet — be the first!';
+
+        renderReviews();
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('reviewList').innerHTML =
+          '<div class="review-empty">Could not load reviews.</div>';
+      }
+    }
+
+    // ── delete ────────────────────────────────────────────
+    async function deleteReview(reviewId) {
+      if (!confirm('Delete your review?')) return;
+      if (!token) return;
+
+      try {
+        const res = await fetch(`/api/reviews/${reviewId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': token }
+        });
+        if (!res.ok) { const d = await res.json(); alert(d.message); return; }
+        allReviews = allReviews.filter(r => r.id != reviewId);
+        renderReviews();
+        // update count
+        document.getElementById('reviewCount').textContent =
+          `${allReviews.length} review${allReviews.length !== 1 ? 's' : ''}`;
+      } catch (err) {
+        console.error(err);
+        alert('Could not delete review.');
+      }
+    }
+
+    // ── sort buttons ──────────────────────────────────────
+    document.querySelectorAll('.review-sort').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.review-sort').forEach(b => b.classList.remove('active-sort'));
+        btn.classList.add('active-sort');
+        sortMode = btn.dataset.sort;
+        renderReviews();
+      });
+    });
+
+    // ── init ──────────────────────────────────────────────
+    loadReviews();
+  })();
   <\/script>
 </body>
 </html>

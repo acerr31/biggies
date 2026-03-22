@@ -4,6 +4,34 @@ const mysql = require('mysql2/promise');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { access } = require('fs');
+const multer = require('multer');
+const path   = require('path');
+const fs     = require('fs');
+
+const reviewUploadDir = path.join(__dirname, 'public', 'uploads', 'reviews');
+if (!fs.existsSync(reviewUploadDir)) fs.mkdirSync(reviewUploadDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, reviewUploadDir),
+  filename:    (req, file, cb) => {
+    const ext  = path.extname(file.originalname).toLowerCase();
+    const name = `review_${Date.now()}_${Math.round(Math.random() * 1e6)}${ext}`;
+    cb(null, name);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
+    if (allowed.includes(path.extname(file.originalname).toLowerCase())) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed.'));
+    }
+  }
+});
 
 const app = express();
 const port = 3000;
@@ -387,6 +415,197 @@ app.post("/api/restaurants", async (req, res) => {
 //END ROUTES TO HANDLE API REQUESTS
 //////////////////////////////////////
 
+
+//////////////////////////////////////////////////
+//ROUTES TO POST,GET,DELETE Reviews
+/////////////////////////////////////////////////
+
+// Route: POST /api/reviews — submit a new review (with optional photos)
+app.post('/api/reviews', authenticateToken, upload.array('photos', 6), async (req, res) => {
+    try {
+        // Parse the JSON payload sent alongside the FormData
+        let data;
+        try {
+            data = JSON.parse(req.body.data);
+        } catch {
+            return res.status(400).json({ message: 'Invalid review data.' });
+        }
+ 
+        const { restaurantId, sentiment, stars, notes, favoriteDishes, visitDate } = data;
+ 
+        if (!restaurantId) {
+            return res.status(400).json({ message: 'restaurantId is required.' });
+        }
+ 
+        // Validate sentiment if provided
+        const validSentiments = ['liked', 'fine', 'didnt'];
+        if (sentiment && !validSentiments.includes(sentiment)) {
+            return res.status(400).json({ message: 'Invalid sentiment value.' });
+        }
+ 
+        // Validate stars if provided
+        if (stars !== null && stars !== undefined) {
+            const s = parseInt(stars);
+            if (isNaN(s) || s < 1 || s > 5) {
+                return res.status(400).json({ message: 'Stars must be between 1 and 5.' });
+            }
+        }
+ 
+        const connection = await createConnection();
+ 
+        // Insert the review
+        const [result] = await connection.execute(
+            `INSERT INTO reviews
+             (restaurant_id, user_email, sentiment, stars, notes, favorite_dishes, visit_date)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                restaurantId,
+                req.user.email,
+                sentiment   || null,
+                stars       || null,
+                notes       || null,
+                Array.isArray(favoriteDishes) ? favoriteDishes.join(', ') : (favoriteDishes || null),
+                visitDate   || null
+            ]
+        );
+ 
+        const reviewId = result.insertId;
+ 
+        // Insert photo paths if any files were uploaded
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const relativePath = `/uploads/reviews/${file.filename}`;
+                await connection.execute(
+                    'INSERT INTO review_photos (review_id, file_path) VALUES (?, ?)',
+                    [reviewId, relativePath]
+                );
+            }
+        }
+ 
+        await connection.end();
+ 
+        res.status(201).json({
+            message: 'Review submitted successfully.',
+            reviewId
+        });
+ 
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        res.status(500).json({ message: 'Error submitting review.' });
+    }
+});
+ 
+ 
+// Route: GET /api/reviews/:restaurantId — get all reviews for a restaurant
+app.get('/api/reviews/:restaurantId', async (req, res) => {
+    try {
+        const { restaurantId } = req.params;
+ 
+        const connection = await createConnection();
+ 
+        // Fetch reviews joined with username and initials
+        const [reviews] = await connection.execute(
+            `SELECT
+                r.id,
+                r.sentiment,
+                r.stars,
+                r.notes,
+                r.favorite_dishes,
+                r.visit_date,
+                r.created_at,
+                u.username,
+                u.first_name,
+                u.last_name
+             FROM reviews r
+             JOIN users u ON r.user_email = u.email
+             WHERE r.restaurant_id = ?
+             ORDER BY r.created_at DESC`,
+            [restaurantId]
+        );
+ 
+        // Fetch photos for each review
+        const reviewIds = reviews.map(r => r.id);
+        let photoMap = {};
+ 
+        if (reviewIds.length > 0) {
+            const placeholders = reviewIds.map(() => '?').join(',');
+            const [photos] = await connection.execute(
+                `SELECT review_id, file_path FROM review_photos WHERE review_id IN (${placeholders})`,
+                reviewIds
+            );
+            photos.forEach(p => {
+                if (!photoMap[p.review_id]) photoMap[p.review_id] = [];
+                photoMap[p.review_id].push(p.file_path);
+            });
+        }
+ 
+        await connection.end();
+ 
+        // Attach photos and computed initials to each review
+        const enriched = reviews.map(r => ({
+            ...r,
+            photos: photoMap[r.id] || [],
+            initials: ((r.first_name?.[0] || '') + (r.last_name?.[0] || '')).toUpperCase() || r.username?.slice(0, 2).toUpperCase() || '?'
+        }));
+ 
+        res.status(200).json({ reviews: enriched });
+ 
+    } catch (error) {
+        console.error('Error fetching reviews:', error);
+        res.status(500).json({ message: 'Error fetching reviews.' });
+    }
+});
+ 
+ 
+// Route: DELETE /api/reviews/:reviewId — delete own review
+app.delete('/api/reviews/:reviewId', authenticateToken, async (req, res) => {
+    try {
+        const { reviewId } = req.params;
+        const connection = await createConnection();
+ 
+        // Make sure the review belongs to the requesting user
+        const [rows] = await connection.execute(
+            'SELECT id, user_email FROM reviews WHERE id = ?',
+            [reviewId]
+        );
+ 
+        if (rows.length === 0) {
+            await connection.end();
+            return res.status(404).json({ message: 'Review not found.' });
+        }
+ 
+        if (rows[0].user_email !== req.user.email) {
+            await connection.end();
+            return res.status(403).json({ message: 'You can only delete your own reviews.' });
+        }
+ 
+        // Fetch photo paths so we can delete the files too
+        const [photos] = await connection.execute(
+            'SELECT file_path FROM review_photos WHERE review_id = ?',
+            [reviewId]
+        );
+ 
+        // Delete from DB (cascade deletes review_photos rows too)
+        await connection.execute('DELETE FROM reviews WHERE id = ?', [reviewId]);
+        await connection.end();
+ 
+        // Delete photo files from disk
+        photos.forEach(p => {
+            const fullPath = path.join(__dirname, 'public', p.file_path);
+            fs.unlink(fullPath, err => { if (err) console.warn('Could not delete file:', fullPath); });
+        });
+ 
+        res.status(200).json({ message: 'Review deleted.' });
+ 
+    } catch (error) {
+        console.error('Error deleting review:', error);
+        res.status(500).json({ message: 'Error deleting review.' });
+    }
+});
+
+//////////////////////////////////////////////////
+//END ROUTES TO POST,GET,DELETE Reviews
+/////////////////////////////////////////////////
 
 // Start the server
 app.listen(port, () => {

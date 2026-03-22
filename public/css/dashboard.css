@@ -1,108 +1,239 @@
+/* =============================================
+   dashboard.css — Plated design system
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg:            #f5f2ee;
+  --surface:       #ffffff;
+  --border:        #e8e3db;
+  --text-primary:  #1a1612;
+  --text-secondary:#8a8278;
+  --accent:        #d4872a;
+  --accent-light:  #fdf3e7;
+  --accent-text:   #7a4510;
+  --teal:          #1a9e8f;
+  --font-display:  'DM Serif Display', Georgia, serif;
+  --font-body:     'DM Sans', 'Segoe UI', sans-serif;
+  --radius-card:   18px;
+  --radius-md:     10px;
+  --topbar-h:      62px;
+  --shadow:        0 2px 12px rgba(60,40,10,.07);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; background: var(--bg); }
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  min-height: 100vh;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+a { text-decoration: none; color: inherit; }
+button { font-family: var(--font-body); cursor: pointer; border: none; background: none; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.container {
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 60%;
-    margin: 0 auto;
-    margin-top: 20px;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.header div {
-    display: flex;
-    gap: 10px;
-}
-
-h1 {
-    margin: 0;
-}
-
-#logoutButton {
-    padding: 10px 20px;
-    background-color: #ffbf69;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#logoutButton:hover {
-    background-color: #b27f3c;
-}
-
-#refreshButton {
-    background-color: #ffbf69; /* */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#refreshButton:hover {
-    background-color: #b27f3c; /* t */
-}
-
-#profileButton {
-    background-color: #ffbf69; /*  */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#profileButton:hover {
-    background-color: #b27f3c; /* */
-}
-
-
-#restaurantButton {
-    background-color: #ffbf69; /*  */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#restaurantButton:hover {
-    background-color: #b27f3c; /* */
-}
-
-
-.user-list {
-    margin-top: 20px;
-}
-
-.user-item {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+/* ── Topbar ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 36px;
+  box-shadow: var(--shadow);
+  animation: fadeUp .28s ease both;
 }
 
 .logo {
-    position: absolute;
-    top: -10px;
-    left: -15px;
-    height: clamp(60px, 10vw, 140px);
-    z-index: 10;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.logo img {
+  height: 100px;
+  width: auto;
+  display: block;
 }
 
+.topbar-links {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+
+.nav-link {
+  font-size: .88rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding-bottom: 2px;
+  transition: color .15s;
+  text-decoration: none;
+}
+.nav-link:hover { color: var(--text-primary); }
+.nav-link.active {
+  color: var(--text-primary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--accent);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+
+.topbar-username {
+  font-weight: 600;
+  font-size: .88rem;
+  text-decoration: none;
+  color: inherit;
+}
+.topbar-username:hover {
+  opacity: 0.75;
+  border-bottom: 2px solid var(--accent);
+}
+
+
+.container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+  padding: 28px 32px;
+  width: min(900px, calc(100% - 48px));
+  margin: 32px auto;
+  animation: fadeUp .4s ease both;
+}
+
+/* Header row */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.header div {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 32px);
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.1;
+}
+
+/* ── Buttons ── */
+#logoutButton,
+#refreshButton,
+#profileButton,
+#restaurantButton,
+#exploreButton {
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  font-size: .875rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background .15s, transform .08s;
+}
+
+#refreshButton,
+#profileButton,
+#restaurantButton,
+#exploreButton {
+  background: var(--accent-light);
+  color: var(--accent-text);
+  border: 1px solid #f0d4a8;
+}
+#refreshButton:hover,
+#profileButton:hover,
+#restaurantButton:hover,
+#exploreButton:hover {
+  background: #f8e4c4;
+}
+
+#logoutButton {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+#logoutButton:hover {
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+#logoutButton:active,
+#refreshButton:active,
+#profileButton:active,
+#restaurantButton:active,
+#exploreButton:active {
+  transform: translateY(1px);
+}
+
+/* ── User list ── */
+.user-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-item {
+  padding: 13px 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: .92rem;
+  color: var(--text-primary);
+  transition: background .12s, padding-left .12s;
+  border-radius: 0;
+}
+.user-item:last-child { border-bottom: none; }
+.user-item:hover {
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  padding-left: 14px;
+}
+
+/* ── Logo — lives in topbar ── */
+.logo {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
 .logo img {
-    height: 100%;
-    width: auto;
-    display: block;
+  height: 100px;
+  width: auto;
+  display: block;
 }

@@ -1,137 +1,218 @@
-/* Reset & Base */
+/* =============================================
+   logon.css — Plated design system
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg:            #f5f2ee;
+  --surface:       #ffffff;
+  --border:        #e8e3db;
+  --text-primary:  #1a1612;
+  --text-secondary:#8a8278;
+  --accent:        #d4872a;
+  --accent-light:  #fdf3e7;
+  --accent-text:   #7a4510;
+  --teal:          #1a9e8f;
+  --font-display:  'DM Serif Display', Georgia, serif;
+  --font-body:     'DM Sans', 'Segoe UI', sans-serif;
+  --radius-card:   18px;
+  --radius-md:     10px;
+  --shadow:        0 2px 12px rgba(60,40,10,.07);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
 body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  min-height: 100vh;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+a { text-decoration: none; color: inherit; }
+button { font-family: var(--font-body); cursor: pointer; border: none; background: none; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Logo */
+/* ── Logo ── */
 .logo {
-    position: absolute;
-    top: -10px;
-    left: -15px;
-    height: clamp(60px, 10vw, 140px);
-    z-index: 10;
+  position: absolute;
+  top: 12px;
+  left: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
 }
-
 .logo img {
-    height: 100%;
-    width: auto;
-    display: block;
+  height: clamp(56px, 8vw, 100px);
+  width: auto;
+  display: block;
 }
 
-/* Split Screen Layout */
+/* ── Split screen layout ── */
 .main-wrapper {
-    display: flex;
-    min-height: 100vh;
+  display: flex;
+  min-height: 100vh;
 }
 
-/* Left Side */
 .left-side {
-    width: 50%;
-    background-color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 20px;
+  width: 50%;
+  background: var(--surface);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 40px 40px;
+  position: relative;
 }
 
-/* Right Side */
 .right-side {
-    width: 50%;
-    overflow: hidden;
+  width: 50%;
+  overflow: hidden;
+  position: relative;
 }
-
 .right-side img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-/* Login Card */
+/* Right-side decorative overlay */
+.right-side::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(212,135,42,.18) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── Login card ── */
 .container {
-    width: 100%;
-    max-width: 420px;
-    padding: 30px;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: 0 8px 32px rgba(60,40,10,.1);
+  padding: 36px 32px;
+  animation: fadeUp .4s ease both;
 }
 
 h1 {
-    text-align: center;
-    margin-bottom: 20px;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3vw, 28px);
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.2;
 }
 
-/* Tabs */
+/* ── Tabs ── */
 .tab {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 20px;
+  display: flex;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 24px;
 }
 
 .tab-button {
-    flex: 1;
-    padding: 10px 0;
-    border: none;
-    cursor: pointer;
-    background-color: #ddd;
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-size: .88rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background .15s, color .15s, box-shadow .15s;
 }
-
 .tab-button.active {
-    background-color: #ffbf69;
-    color: white;
+  background: var(--surface);
+  color: var(--accent-text);
+  font-weight: 600;
+  box-shadow: var(--shadow);
+}
+.tab-button:not(.active):hover {
+  color: var(--text-primary);
 }
 
-/* Forms */
+/* ── Forms ── */
 form {
-    display: none;
+  display: none;
 }
-
 form.active-form {
-    display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 label {
-    display: block;
-    margin: 10px 0 5px;
+  display: block;
+  font-size: .84rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 5px;
 }
 
 input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: var(--text-primary);
+  font-size: .92rem;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(212,135,42,.14);
+}
+input::placeholder {
+  color: #a39a90;
 }
 
-/* Buttons */
+/* ── Submit button ── */
 .button {
-    width: 100%;
-    padding: 10px;
-    background-color: #ffbf69;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  width: 100%;
+  padding: 11px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: .92rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background .15s, transform .08s;
+  margin-top: 4px;
 }
+.button:hover { background: #bf7520; }
+.button:active { transform: translateY(1px); }
 
-.button:hover {
-    background-color: #ffbf69;
-}
-
-/* Messages */
+/* ── Messages ── */
 .message {
-    margin-top: 10px;
-    text-align: center;
-    font-size: 14px;
+  margin-top: 4px;
+  text-align: center;
+  font-size: .84rem;
 }
+.success { color: var(--teal); }
+.error   { color: #c0392b; }
 
-.success {
-    color: green;
-}
-
-.error {
-    color: red;
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .main-wrapper { flex-direction: column; }
+  .left-side  { width: 100%; padding: 80px 24px 40px; }
+  .right-side { display: none; }
+  .logo { top: 16px; left: 16px; }
 }

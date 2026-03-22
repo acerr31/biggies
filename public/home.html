@@ -5,27 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plated – Home</title>
     <link rel="stylesheet" href="css/home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="nav-inner">
-            <div class="nav-logo">
-                <div class="nav-logo">
-                    <img src="images/PlatedLogo.png" alt="Plated" height="140" onerror="this.style.display='none'">
-</div>
-            </div>
-            <div class="nav-links">
-                <a href="/home"      class="nav-link active">Home</a>
-                <a href="/explore"   class="nav-link">Explore</a>
-                <a href="/feed"      class="nav-link">Feed</a>
-            </div>
-            <div class="nav-actions">
-                <a href="/dashboard" class="nav-btn-ghost">Dev Tools</a>
-                <a href="/account"   class="nav-btn">Account</a>
-            </div>
+    <!-- Plated Topbar -->
+    <header class="topbar">
+        <div class="logo">
+            <a href="dashboard.html">
+                <img src="images/PlatedLogo.png" alt="Plated" />
+            </a>
         </div>
-    </nav>
+        <nav class="topbar-links">
+            <a href="home.html" class="nav-link active">Feed</a>
+            <a href="explore.html" class="nav-link">Explore</a>
+            <a href="restaurantform.html" class="nav-link">Submit A Restaurant</a>
+            <a href="profile.html" class="nav-link">Profile</a>
+        </nav>
+        <div class="topbar-right">
+            <div class="topbar-avatar" id="topbarAvatar">?</div>
+            <a href="profile.html" class="topbar-username" id="topbarUsername">-</a>
+        </div>
+    </header>
 
     <main class="main">
         <div class="layout">
@@ -34,15 +36,15 @@
             <aside class="sidebar">
                 <div class="sidebar-section">
                     <p class="sidebar-label">Quick links</p>
-                    <a href="/feed"      class="sidebar-link">🍽️ My Feed</a>
-                    <a href="/explore"   class="sidebar-link">🔍 Explore</a>
-                    <a href="/account"   class="sidebar-link">👤 Account</a>
-                    <a href="/dashboard" class="sidebar-link">🛠️ Dev Tools</a>
+                    <a href="home.html"         class="sidebar-link">🍽️ My Feed</a>
+                    <a href="explore.html"      class="sidebar-link">🔍 Explore</a>
+                    <a href="profile.html"      class="sidebar-link">👤 Profile</a>
+                    <a href="dashboard.html"    class="sidebar-link">🛠️ Dev Tools</a>
                 </div>
                 <div class="sidebar-section">
                     <p class="sidebar-label">Following</p>
                     <div class="following-item">
-                        <div class="avatar" style="background:#ffbf69;">JC</div>
+                        <div class="avatar" style="background:#d4872a;">JC</div>
                         <span>Julia Child</span>
                     </div>
                     <div class="following-item">
@@ -50,10 +52,10 @@
                         <span>Gordon Ramsay</span>
                     </div>
                     <div class="following-item">
-                        <div class="avatar" style="background:#a8dadc;">NL</div>
+                        <div class="avatar" style="background:#1a9e8f;">NL</div>
                         <span>Nobu Lau</span>
                     </div>
-                    <a href="/explore" class="see-more">See more →</a>
+                    <a href="explore.html" class="see-more">See more →</a>
                 </div>
             </aside>
 
@@ -62,17 +64,22 @@
                 <div class="feed-header">
                     <h2>Your Feed</h2>
                     <p class="feed-sub">Recipes and posts from people you follow</p>
+                    <!-- Two action buttons per acceptance criteria -->
+                    <div class="feed-actions">
+                        <a href="restaurantform.html" class="feed-action-btn">+ Add a Restaurant</a>
+                        <a href="review.html" class="feed-action-btn feed-action-btn--secondary">+ Add a Review</a>
+                    </div>
                 </div>
 
                 <article class="card">
                     <div class="card-meta">
-                        <div class="avatar" style="background:#ffbf69;">JC</div>
+                        <div class="avatar" style="background:#d4872a;">JC</div>
                         <div>
                             <p class="card-author">Julia Child</p>
                             <p class="card-time">2 hours ago</p>
                         </div>
                     </div>
-                    <div class="card-img" style="background:linear-gradient(135deg,#ffe8c2,#ffbf69);"></div>
+                    <div class="card-img" style="background:linear-gradient(135deg,#fdf3e7,#d4872a);"></div>
                     <div class="card-body">
                         <h3>Classic Boeuf Bourguignon</h3>
                         <p>A rich, slow-braised French beef stew with pearl onions, mushrooms, and a full bottle of Burgundy. Perfect for a Sunday dinner.</p>
@@ -116,13 +123,13 @@
 
                 <article class="card">
                     <div class="card-meta">
-                        <div class="avatar" style="background:#a8dadc;">NL</div>
+                        <div class="avatar" style="background:#1a9e8f;">NL</div>
                         <div>
                             <p class="card-author">Nobu Lau</p>
                             <p class="card-time">Yesterday</p>
                         </div>
                     </div>
-                    <div class="card-img" style="background:linear-gradient(135deg,#d4f1f4,#a8dadc);"></div>
+                    <div class="card-img" style="background:linear-gradient(135deg,#e6f7f5,#1a9e8f);"></div>
                     <div class="card-body">
                         <h3>Miso-Glazed Black Cod</h3>
                         <p>Marinated for 48 hours in sweet white miso and sake, then broiled to caramelized perfection. A signature dish reinvented at home.</p>
@@ -187,5 +194,48 @@
     </main>
 
     <script src="/js/home.js"></script>
+
+    <!-- Topbar user info -->
+    <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const topbarUsername = document.getElementById("topbarUsername");
+        const topbarAvatar = document.getElementById("topbarAvatar");
+        const token = localStorage.getItem("jwtToken");
+
+        if (!token) {
+            topbarUsername.textContent = "Guest";
+            topbarAvatar.textContent = "G";
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/profile", {
+                method: "GET",
+                headers: { "Authorization": token, "Content-Type": "application/json" }
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                topbarUsername.textContent = "Guest";
+                topbarAvatar.textContent = "G";
+                return;
+            }
+
+            const username = data.username || "Guest";
+            topbarUsername.textContent = username;
+
+            const firstName = data.first_name || "";
+            const lastName = data.last_name || "";
+            let initials = (firstName[0] || "") + (lastName[0] || "");
+            if (!initials) initials = username.slice(0, 2);
+            topbarAvatar.textContent = initials.toUpperCase();
+
+        } catch (error) {
+            topbarUsername.textContent = "Guest";
+            topbarAvatar.textContent = "G";
+        }
+    });
+    </script>
+
 </body>
 </html>

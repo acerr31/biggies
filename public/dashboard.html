@@ -3,10 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Dashboard – Plated</title>
     <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
+
+    <!-- Plated Topbar -->
+    <header class="topbar">
+        <div class="logo">
+            <a href="dashboard.html">
+                <img src="images/PlatedLogo.png" alt="Plated" />
+            </a>
+        </div>
+        <nav class="topbar-links">
+            <a href="home.html" class="nav-link">Feed</a>
+            <a href="explore.html" class="nav-link">Explore</a>
+            <a href="restaurantform.html" class="nav-link">Submit A Restaurant</a>
+            <a href="profile.html" class="nav-link">Profile</a>
+        </nav>
+        <div class="topbar-right">
+            <div class="topbar-avatar" id="topbarAvatar">?</div>
+            <a href="profile.html" class="topbar-username" id="topbarUsername">-</a>
+        </div>
+    </header>
+
+    <!-- Main content -->
     <div class="container">
         <div class="header">
             <h1>Users</h1>
@@ -16,17 +39,54 @@
                 <button id="profileButton">Profile</button>
                 <button id="restaurantButton">Restaurant Frontend (move in future)</button>
                 <button id="exploreButton">Explore</button>
-                
-                
             </div>
-    <!-- Logo -->
-                <div class="logo">
-                    <img src="images/PlatedLogo.png" alt="Company Logo">
-                </div>
         </div>
         <div class="user-list" id="userList"></div>
     </div>
+
     <script src="/js/dashboard.js"></script>
     <script src="/js/datamodel.js"></script>
+
+    <!-- Topbar user info -->
+    <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const topbarUsername = document.getElementById("topbarUsername");
+        const topbarAvatar = document.getElementById("topbarAvatar");
+        const token = localStorage.getItem("jwtToken");
+
+        if (!token) {
+            topbarUsername.textContent = "Guest";
+            topbarAvatar.textContent = "G";
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/profile", {
+                method: "GET",
+                headers: { "Authorization": token, "Content-Type": "application/json" }
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                topbarUsername.textContent = "Guest";
+                topbarAvatar.textContent = "G";
+                return;
+            }
+
+            const username = data.username || "Guest";
+            topbarUsername.textContent = username;
+
+            const firstName = data.first_name || "";
+            const lastName = data.last_name || "";
+            let initials = (firstName[0] || "") + (lastName[0] || "");
+            if (!initials) initials = username.slice(0, 2);
+            topbarAvatar.textContent = initials.toUpperCase();
+
+        } catch (error) {
+            topbarUsername.textContent = "Guest";
+            topbarAvatar.textContent = "G";
+        }
+    });
+    </script>
 </body>
 </html>

@@ -1,181 +1,382 @@
+<!-- Restaurantform.html -->
+
 <!doctype html>
 <html lang="en">
 <head>
+  
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Submit a Restaurant</title>
   <link rel="stylesheet" href="css/restaurantform.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  <!-- Minimal styles to make the form readable; remove / replace as desired ->
-  <style>
-    :root{
-      --maxw: 820px;
-      --accent: #d4872a;
-      --muted: #6b6b6b;
-      --radius: 10px;
-    }
-    body{
-      font-family: Arial, Helvetica, sans-serif;
-      background: #fafafa;
-      margin: 24px;
-      display: flex;
-      justify-content: center;
-    }
-    .sheet {
-      width: 100%;
-      max-width: var(--maxw);
-      background: #fff;
-      border-radius: var(--radius);
-      padding: 20px 22px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-    }
-    h1 { margin: 0 0 10px 0; font-size: 20px; }
-    p.lead { margin: 0 0 18px 0; color: var(--muted); }
-
-    form { display: grid; gap: 12px; }
-
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .col { display:flex; flex-direction:column; gap:6px; }
-    label { font-weight:600; font-size: .95rem; }
-    input[type="text"], input[type="tel"], input[type="url"], textarea {
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 14px;
-      width:100%;
-    }
-    textarea { min-height: 100px; resize: vertical; }
-
-    .small { font-size: 13px; color: var(--muted); }
-    .error { color: #c0392b; font-size: 13px; }
-
-    .actions { display:flex; gap:12px; margin-top:8px; }
-    button.submit {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-weight:700;
-      cursor:pointer;
-    }
-    button.reset {
-      background: #fff;
-      border: 1px solid #ddd;
-      padding: 10px 14px;
-      border-radius: 8px;
-      cursor:pointer;
-    }
-
-    /* tags UI */
-    .tags-input {
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
-      padding:8px;
-      border:1px solid #ddd;
-      border-radius:8px;
-    }
-    .tags-input input {
-      border: none;
-      outline: none;
-      min-width: 120px;
-      width: auto;
-      flex: 1;
-      padding: 6px 0;
-    }
-    .tag {
-      background:#f0f0f0; padding:6px 8px; border-radius:999px; font-size:13px; display:flex; gap:8px; align-items:center;
-    }
-    .tag button { background:transparent; border:none; cursor:pointer; font-weight:700; color:#7a7a7a; }
-
-    @media (max-width:720px) {
-      .row { grid-template-columns: 1fr; }
-      .top-note { padding: 8px 0; }
-    }
-  </style> -->
 </head>
 <body>
 
-  <div class="sheet" role="main">
-    <h1>Submit a Restaurant</h1>
-    <p class="lead">Enter the required information. Fields marked with * are required.</p>
-
-    <form id="restaurantForm" novalidate>
-      <!-- Basic info -->
-      <div class="row">
-        <div class="col">
-          <label for="name">Name *</label>
-          <input id="name" name="name" type="text" required placeholder="Sunset Grill" />
-          <div id="err-name" class="error" aria-live="polite"></div>
-        </div>
-
-        <div class="col">
-          <label for="phone">Phone *</label>
-          <input id="phone" name="phone" type="tel" placeholder="(555) 555-5555" required />
-          <div id="err-phone" class="error" aria-live="polite"></div>
-        </div>
-      </div>
-
-      <div class="col">
-        <label for="address">Address *</label>
-        <input id="address" name="address" type="text" required placeholder="123 Main St, City, ST 12345" />
-        <div id="err-address" class="error" aria-live="polite"></div>
-      </div>
-
-      <div class="col">
-        <label for="website">Website</label>
-        <input id="website" name="website" type="url" placeholder="https://www.example.com" />
-        <div id="err-website" class="error" aria-live="polite"></div>
-      </div>
-
-      <!-- Tags (min 1) -->
-      <div class="col">
-        <label>Tags * <span class="small">(at least one, e.g., "Italian", "Vegan")</span></label>
-        <div class="tags-input" id="tagsInput" role="list">
-          <input id="tagEntry" placeholder="Type tag and press Enter" aria-label="Add tag" />
-        </div>
-        <div id="err-tags" class="error" aria-live="polite"></div>
-      </div>
-
-      <!-- About section -->
-      <fieldset style="border:none; padding:0; margin-top:12px;">
-      <legend style="font-weight:700; margin-bottom:12px;">About</legend>
-
-      <label for="description">Short Description *</label>
-      <textarea id="description" name="description" required placeholder="Short summary of the restaurant"></textarea>
-      <div id="err-description" class="error" aria-live="polite"></div>
-
-      <label for="amenityEntry">Amenities</label>
-      <div class="tags-input" id="amenitiesInput" role="list">
-        <input
-          id="amenityEntry"
-          type="text"
-          placeholder="Type amenity and press Enter"
-          aria-label="Add amenity"
-        />
-      </div>
-
-      <label for="bestTime">Best time to visit</label>
-      <input id="bestTime" name="bestTime" type="text" placeholder="Weeknights, Weekend brunch, Happy hour 4–6pm" />
-
-      <label for="notes">Notes</label>
-      <textarea id="notes" name="notes" placeholder="Any extra notes (parking, reservations, specials)"></textarea>
-
-      <label for="hours">Hours (text is fine)</label>
-      <textarea id="hours" name="hours" placeholder="Mon–Thu: 8am–9pm; Fri–Sat: 8am–11pm; Sun: 9am–7pm"></textarea>
-    </fieldset>
-      <!-- Hidden-ish helper area to show result -->
-      <div id="submitResult" class="small" aria-live="polite" style="margin-top:8px;"></div>
-
-      <div class="actions">
-        <button type="submit" class="submit">Submit Restaurant</button>
-        <button type="button" class="reset" id="resetBtn">Reset</button>
-      </div>
-    </form>
+  <!-- Start of Topbar Layout -->
+  <header class="topbar">
+  <div class="logo">
+    <a href="dashboard.html">
+      <img src="images/PlatedLogo.png" alt="Plated" />
+    </a>
   </div>
-  <script src="/js/restaurantForm.js"></script>
 
+  <nav class="topbar-links">
+    <a href="home.html" class="nav-link">Feed</a>
+    <a href="explore.html" class="nav-link">Explore</a>
+    <a href="restaurantform.html" class="nav-link active">Submit A Restaurant</a>
+    <a href="profile.html" class="nav-link">Profile</a>
+  </nav>
+
+  <div class="topbar-right">
+    <div class="topbar-avatar" id="topbarAvatar">?</div> <!-- Grabs Profile Pic/Letter -->
+    <a href="profile.html" class="topbar-username" id="topbarUsername">-</a> <!-- Grabs Username -->
+  </div>
+</header>
+
+<!-- Start of Page layout -->
+
+  <main class="page">
+    <section class="sheet">
+      <h1>Submit a Restaurant</h1>
+      <p class="lead">Enter the restaurant details below. Fields marked with * are required.</p>
+
+      <form id="restaurantForm" novalidate>
+        <div class="row">
+          <div class="col">
+            <label for="name">Name *</label>
+            <input id="name" name="name" type="text" required placeholder="Sunset Grill" />
+            <div id="err-name" class="error" aria-live="polite"></div>
+          </div>
+
+          <div class="col">
+            <label for="phone">Phone *</label>
+            <input id="phone" name="phone" type="tel" required placeholder="(555) 555-5555" />
+            <div id="err-phone" class="error" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="col">
+          <label for="address">Address *</label>
+          <input id="address" name="address" type="text" required placeholder="123 Main St, City, ST 12345" />
+          <div id="err-address" class="error" aria-live="polite"></div>
+        </div>
+
+        <div class="col">
+          <label for="website">Website</label>
+          <input id="website" name="website" type="url" placeholder="https://www.example.com" />
+          <div id="err-website" class="error" aria-live="polite"></div>
+        </div>
+
+        <div class="col">
+          <label>Tags * <span class="small">(type a tag, then press comma)</span></label>
+          <div class="tags-input" id="tagsInput" role="list">
+            <input id="tagEntry" type="text" placeholder="Italian, Vegan, Burgers, etc." aria-label="Add tag" />
+          </div>
+          <div id="err-tags" class="error" aria-live="polite"></div>
+        </div>
+
+        <fieldset>
+          <legend>About *</legend>
+
+          <div class="col">
+            <label for="description">Description *</label>
+            <textarea id="description" name="description" required placeholder="Short summary of the restaurant"></textarea>
+            <div id="err-description" class="error" aria-live="polite"></div>
+          </div>
+
+          <div class="col">
+            <label for="amenities">Amenities</label>
+            <input id="amenities" name="amenities" type="text" placeholder="Outdoor seating, Wi-Fi, Wheelchair accessible" />
+          </div>
+
+          <div class="col">
+            <label for="bestTime">Best time to visit</label>
+            <input id="bestTime" name="bestTime" type="text" placeholder="Weeknights, brunch, happy hour" />
+          </div>
+
+          <div class="col">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" placeholder="Parking, reservations, specials, etc."></textarea>
+          </div>
+
+          <div class="col">
+            <label for="hours">Hours</label>
+            <textarea id="hours" name="hours" placeholder="Mon-Thu: 8am-9pm, Fri-Sat: 8am-11pm, Sun: 9am-7pm"></textarea>
+          </div>
+        </fieldset>
+
+        <div id="submitResult" class="small" aria-live="polite"></div>
+
+        <div class="actions">
+          <button type="submit" class="submit">Submit Restaurant</button>
+          <button type="button" class="reset" id="resetBtn">Reset</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <!-- Script to Gather User's Details -->
+
+  <script>
+  document.addEventListener("DOMContentLoaded", async () => {
+  const topbarUsername = document.getElementById("topbarUsername");
+  const topbarAvatar = document.getElementById("topbarAvatar");
+
+  const token = localStorage.getItem("jwtToken");
+
+  if (!token) {
+    topbarUsername.textContent = "Guest";
+    topbarAvatar.textContent = "G";
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/profile", {
+      method: "GET",
+      headers: {
+        "Authorization": token,
+        "Content-Type": "application/json"
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      topbarUsername.textContent = "Guest";
+      topbarAvatar.textContent = "G";
+      return;
+    }
+
+    const username = data.username || "Guest";
+    topbarUsername.textContent = username;
+
+    // Use first + last name for initials
+    const firstName = data.first_name || "";
+    const lastName = data.last_name || "";
+
+    let initials = "G";
+
+    if (firstName || lastName) {
+      initials =
+        (firstName[0] || "") +
+        (lastName[0] || "");
+    } else {
+      // fallback to username if names don't exist
+      initials = username.slice(0, 2);
+    }
+
+    topbarAvatar.textContent = initials.toUpperCase();
+
+  } catch (error) {
+    console.error("Error loading topbar user:", error);
+    topbarUsername.textContent = "Guest";
+    topbarAvatar.textContent = "G";
+  }
+});
+</script>
+
+<!-- Script for Handling Tags -->
+
+  <script>
+    // Tags UI, commit only when a comma is typed
+    (function () {
+      const tags = [];
+      const tagsInput = document.getElementById('tagsInput');
+      const tagEntry = document.getElementById('tagEntry');
+      const errTags = document.getElementById('err-tags');
+
+      function renderTags() {
+        document.querySelectorAll('#tagsInput .tag').forEach(tag => tag.remove());
+
+        tags.forEach((tagText, index) => {
+          const chip = document.createElement('span');
+          chip.className = 'tag';
+          chip.setAttribute('role', 'listitem');
+
+          const text = document.createElement('span');
+          text.textContent = tagText;
+
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.setAttribute('aria-label', `Remove tag ${tagText}`);
+          removeBtn.textContent = '×';
+          removeBtn.addEventListener('click', () => {
+            tags.splice(index, 1);
+            renderTags();
+          });
+
+          chip.appendChild(text);
+          chip.appendChild(removeBtn);
+          tagsInput.insertBefore(chip, tagEntry);
+        });
+      }
+
+      function commitTag() {
+        const value = tagEntry.value.trim().replace(/,$/, '');
+        if (!value) return;
+
+        value
+          .split(',')
+          .map(t => t.trim())
+          .filter(Boolean)
+          .forEach(tag => {
+            if (!tags.includes(tag)) tags.push(tag);
+          });
+
+        tagEntry.value = '';
+        renderTags();
+        errTags.textContent = '';
+      }
+
+      tagEntry.addEventListener('keydown', (e) => {
+        if (e.key === ',') {
+          e.preventDefault();
+          commitTag();
+        }
+
+        if (e.key === 'Backspace' && tagEntry.value === '' && tags.length > 0) {
+          tags.pop();
+          renderTags();
+        }
+      });
+
+      tagEntry.addEventListener('paste', (e) => {
+        const pasted = (e.clipboardData || window.clipboardData).getData('text');
+        if (pasted.includes(',')) {
+          e.preventDefault();
+          pasted
+            .split(',')
+            .map(t => t.trim())
+            .filter(Boolean)
+            .forEach(tag => {
+              if (!tags.includes(tag)) tags.push(tag);
+            });
+          tagEntry.value = '';
+          renderTags();
+          errTags.textContent = '';
+        }
+      });
+
+      window.__restaurantTags = tags;
+    })();
+  </script>
+
+<!-- Restaurant Submission + Validation -->
+
+  <script>
+    // Submit + validation
+    (function () {
+      const form = document.getElementById('restaurantForm');
+
+      const isValidPhone = (s) => {
+        const digits = s.replace(/\D/g, '');
+        return digits.length >= 7 && digits.length <= 15;
+      };
+
+      const isValidUrl = (s) => {
+        if (!s) return true;
+        try {
+          const url = new URL(s);
+          return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch {
+          return false;
+        }
+      };
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        document.querySelectorAll('.error').forEach(n => n.textContent = '');
+        document.getElementById('submitResult').textContent = '';
+
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const website = document.getElementById('website').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const amenities = document.getElementById('amenities').value.trim();
+        const bestTime = document.getElementById('bestTime').value.trim();
+        const notes = document.getElementById('notes').value.trim();
+        const hours = document.getElementById('hours').value.trim();
+        const tags = window.__restaurantTags || [];
+
+        let ok = true;
+
+        if (!name) {
+          document.getElementById('err-name').textContent = 'Name is required.';
+          ok = false;
+        }
+        if (!address) {
+          document.getElementById('err-address').textContent = 'Address is required.';
+          ok = false;
+        }
+        if (!phone || !isValidPhone(phone)) {
+          document.getElementById('err-phone').textContent = 'Please enter a valid phone number.';
+          ok = false;
+        }
+        if (website && !isValidUrl(website)) {
+          document.getElementById('err-website').textContent = 'Please enter a valid URL starting with http:// or https://';
+          ok = false;
+        }
+        if (!description) {
+          document.getElementById('err-description').textContent = 'Description is required.';
+          ok = false;
+        }
+        if (tags.length < 1) {
+          document.getElementById('err-tags').textContent = 'Please add at least one tag.';
+          ok = false;
+        }
+
+        if (!ok) {
+          document.getElementById('submitResult').textContent = 'Please fix the errors above and resubmit.';
+          return;
+        }
+
+        const restaurant = {
+          name,
+          address,
+          phone,
+          website: website || null,
+          tags,
+          about: {
+            description,
+            amenities: amenities ? amenities.split(',').map(s => s.trim()).filter(Boolean) : [],
+            bestTime: bestTime || null,
+            notes: notes || null,
+            hours: hours || null
+          },
+          submittedAt: new Date().toISOString()
+        };
+
+        console.log('Restaurant submission:', restaurant);
+
+        try {
+          const key = 'submittedRestaurants_v1';
+          const existing = JSON.parse(localStorage.getItem(key) || '[]');
+          existing.unshift(restaurant);
+          localStorage.setItem(key, JSON.stringify(existing));
+        } catch (err) {
+          console.warn('Could not save to localStorage', err);
+        }
+
+        document.getElementById('submitResult').textContent = 'Thanks, restaurant submitted locally.';
+
+        form.reset();
+        window.__restaurantTags.length = 0;
+        document.querySelectorAll('#tagsInput .tag').forEach(t => t.remove());
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        form.reset();
+        window.__restaurantTags.length = 0;
+        document.querySelectorAll('#tagsInput .tag').forEach(t => t.remove());
+        document.querySelectorAll('.error').forEach(n => n.textContent = '');
+        document.getElementById('submitResult').textContent = '';
+      });
+    })();
+
+  </script>
 </body>
 </html>

@@ -154,6 +154,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const bestTimeEl = document.getElementById("bestTime");
     const notesEl = document.getElementById("notes");
 
+    // hours add on...
+    const mondayOpen = document.getElementById("mondayOpen")?.value.trim() || "";
+    const mondayClose = document.getElementById("mondayClose")?.value.trim() || "";
+    const tuesdayOpen = document.getElementById("tuesdayOpen")?.value.trim() || "";
+    const tuesdayClose = document.getElementById("tuesdayClose")?.value.trim() || "";
+    const wednesdayOpen = document.getElementById("wednesdayOpen")?.value.trim() || "";
+    const wednesdayClose = document.getElementById("wednesdayClose")?.value.trim() || "";
+    const thursdayOpen = document.getElementById("thursdayOpen")?.value.trim() || "";
+    const thursdayClose = document.getElementById("thursdayClose")?.value.trim() || "";
+    const fridayOpen = document.getElementById("fridayOpen")?.value.trim() || "";
+    const fridayClose = document.getElementById("fridayClose")?.value.trim() || "";
+    const saturdayOpen = document.getElementById("saturdayOpen")?.value.trim() || "";
+    const saturdayClose = document.getElementById("saturdayClose")?.value.trim() || "";
+    const sundayOpen = document.getElementById("sundayOpen")?.value.trim() || "";
+    const sundayClose = document.getElementById("sundayClose")?.value.trim() || "";
+
     if (nameEl) nameEl.value = draft.name || "";
     if (phoneEl) phoneEl.value = draft.phone || "";
     if (addressEl) addressEl.value = draft.address || "";
@@ -267,6 +283,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const description = document.getElementById("description")?.value.trim() || "";
     const bestTime = document.getElementById("bestTime")?.value.trim() || "";
     const notes = document.getElementById("notes")?.value.trim() || "";
+    const amenities = amenitiesList.join(", ");
+
+    // hours add on...
+    const mondayOpen = document.getElementById("mondayOpen")?.value.trim() || "";
+    const mondayClose = document.getElementById("mondayClose")?.value.trim() || "";
+    const tuesdayOpen = document.getElementById("tuesdayOpen")?.value.trim() || "";
+    const tuesdayClose = document.getElementById("tuesdayClose")?.value.trim() || "";
+    const wednesdayOpen = document.getElementById("wednesdayOpen")?.value.trim() || "";
+    const wednesdayClose = document.getElementById("wednesdayClose")?.value.trim() || "";
+    const thursdayOpen = document.getElementById("thursdayOpen")?.value.trim() || "";
+    const thursdayClose = document.getElementById("thursdayClose")?.value.trim() || "";
+    const fridayOpen = document.getElementById("fridayOpen")?.value.trim() || "";
+    const fridayClose = document.getElementById("fridayClose")?.value.trim() || "";
+    const saturdayOpen = document.getElementById("saturdayOpen")?.value.trim() || "";
+    const saturdayClose = document.getElementById("saturdayClose")?.value.trim() || "";
+    const sundayOpen = document.getElementById("sundayOpen")?.value.trim() || "";
+    const sundayClose = document.getElementById("sundayClose")?.value.trim() || "";
 
     let isValid = true;
 
@@ -309,6 +342,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // hours add on
+    function combineHours(open, close) {
+      if (!open && !close) return null;
+      return `${open},${close}`;
+    }
+
     const payload = {
       restaurantName: name,
       phone: digitsOnly(phone),
@@ -316,9 +355,17 @@ document.addEventListener("DOMContentLoaded", () => {
       website: website || null,
       tags: tags.join(", "),
       about: description,
-      amenities: amenitiesList.length ? amenitiesList.join(", ") : null,
+      amenities: amenities || null,
       timeToVisit: bestTime || null,
-      notes: notes || null
+      notes: notes || null,
+
+      mondayHours: combineHours(mondayOpen, mondayClose),
+      tuesdayHours: combineHours(tuesdayOpen, tuesdayClose),
+      wednesdayHours: combineHours(wednesdayOpen, wednesdayClose),
+      thursdayHours: combineHours(thursdayOpen, thursdayClose),
+      fridayHours: combineHours(fridayOpen, fridayClose),
+      saturdayHours: combineHours(saturdayOpen, saturdayClose),
+      sundayHours: combineHours(sundayOpen, sundayClose)
     };
 
     try {

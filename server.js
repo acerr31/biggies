@@ -365,7 +365,14 @@ app.post("/api/restaurants", async (req, res) => {
       about,
       amenities,
       timeToVisit,
-      notes
+      notes,
+      mondayHours,
+      tuesdayHours,
+      wednesdayHours,
+      thursdayHours,
+      fridayHours,
+      saturdayHours,
+      sundayHours
     } = req.body;
 
     // basic validation
@@ -378,9 +385,26 @@ app.post("/api/restaurants", async (req, res) => {
     const connection = await createConnection();
 
     const sql = `
-      INSERT INTO restaurants
-      (restaurantName, phone, address, website, tags, about, amenities, timeToVisit, notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO restaurants
+    (
+        restaurantName,
+        phone,
+        address,
+        website,
+        tags,
+        about,
+        amenities,
+        timeToVisit,
+        notes,
+        mondayHours,
+        tuesdayHours,
+        wednesdayHours,
+        thursdayHours,
+        fridayHours,
+        saturdayHours,
+        sundayHours
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
@@ -392,7 +416,14 @@ app.post("/api/restaurants", async (req, res) => {
       about,
       amenities,
       timeToVisit,
-      notes
+      notes,
+      mondayHours,
+      tuesdayHours,
+      wednesdayHours,
+      thursdayHours,
+      fridayHours,
+      saturdayHours,
+      sundayHours
     ];
 
     const [result] = await connection.execute(sql, values);

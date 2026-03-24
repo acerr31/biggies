@@ -101,10 +101,57 @@
             <textarea id="notes" name="notes" placeholder="Parking, reservations, specials, etc."></textarea>
           </div>
 
-          <div class="col">
-            <label for="hours">Hours</label>
-            <textarea id="hours" name="hours" placeholder="Mon-Thu: 8am-9pm, Fri-Sat: 8am-11pm, Sun: 9am-7pm"></textarea>
+          <div class="HourCol">
+          <label>Hours</label>
+
+
+          <div class="hours-grid">
+
+            <div class="day-row">
+              <span>Mon</span>
+              <input type="time" id="mondayOpen">
+              <input type="time" id="mondayClose">
+            </div>
+
+            <div class="day-row">
+              <span>Tue</span>
+              <input type="time" id="tuesdayOpen">
+              <input type="time" id="tuesdayClose">
+            </div>
+
+            <div class="day-row">
+              <span>Wed</span>
+              <input type="time" id="wednesdayOpen">
+              <input type="time" id="wednesdayClose">
+            </div>
+
+            <div class="day-row">
+              <span>Thu</span>
+              <input type="time" id="thursdayOpen">
+              <input type="time" id="thursdayClose">
+            </div>
+
+            <div class="day-row">
+              <span>Fri</span>
+              <input type="time" id="fridayOpen">
+              <input type="time" id="fridayClose">
+            </div>
+
+            <div class="day-row">
+              <span>Sat</span>
+              <input type="time" id="saturdayOpen">
+              <input type="time" id="saturdayClose">
+            </div>
+
+            <div class="day-row">
+              <span>Sun</span>
+              <input type="time" id="sundayOpen">
+              <input type="time" id="sundayClose">
+            </div>
+
           </div>
+        </div>
+</div>
         </fieldset>
 
         <div id="submitResult" class="small" aria-live="polite"></div>
@@ -178,7 +225,8 @@
 </script>
 
 <!-- Script for Handling Tags -->
-
+  <script src="/js/restaurantForm.js"></script> <!-- This connection to the JS file must be here for the backend connection to work 
+  (we can reduce code if needed in the future for optimization)-->
   <script>
     // Tags UI, commit only when a comma is typed
     (function () {

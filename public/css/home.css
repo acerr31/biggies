@@ -4,41 +4,63 @@
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
+/* ── Variables ── */
 :root {
-  --bg:            #f5f2ee;
-  --surface:       #ffffff;
-  --border:        #e8e3db;
-  --text-primary:  #1a1612;
-  --text-secondary:#8a8278;
-  --accent:        #d4872a;
-  --accent-light:  #fdf3e7;
-  --accent-text:   #7a4510;
-  --teal:          #1a9e8f;
-  --font-display:  'DM Serif Display', Georgia, serif;
-  --font-body:     'DM Sans', 'Segoe UI', sans-serif;
-  --radius-card:   18px;
-  --radius-md:     10px;
-  --topbar-h:      62px;
-  --shadow:        0 2px 12px rgba(60,40,10,.07);
+  --bg:             #f5f2ee;
+  --surface:        #ffffff;
+  --border:         #e8e3db;
+  --text-primary:   #1a1612;
+  --text-secondary: #8a8278;
+  --accent:         #d4872a;
+  --accent-light:   #fdf3e7;
+  --accent-text:    #7a4510;
+  --teal:           #1a9e8f;
+  --font-display:   'DM Serif Display', Georgia, serif;
+  --font-body:      'DM Sans', 'Segoe UI', sans-serif;
+  --radius-card:    18px;
+  --radius-md:      10px;
+  --topbar-h:       62px;
+  --shadow:         0 2px 12px rgba(60, 40, 10, .07);
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 16px; background: var(--bg); }
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  background: var(--bg);
+}
+
 body {
   font-family: var(--font-body);
   color: var(--text-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
-a { text-decoration: none; color: inherit; }
-button { font-family: var(--font-body); cursor: pointer; border: none; background: none; }
 
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* ── Animations ── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Topbar (matches explore/profile) ── */
+/* ── Topbar ── */
 .topbar {
   position: sticky;
   top: 0;
@@ -102,49 +124,12 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   border-bottom: 2px solid var(--accent);
 }
 
-/* ── Navbar (kept for fallback) ── */
-.navbar { display: none; }
-
-/* ── Feed action buttons ── */
-.feed-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
+/* ── Navbar (hidden by default, kept for fallback) ── */
+.navbar {
+  display: none;
 }
 
-.feed-action-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 9px 18px;
-  border-radius: var(--radius-md);
-  font-size: .88rem;
-  font-weight: 600;
-  text-decoration: none;
-  background: var(--accent);
-  color: #fff;
-  transition: background .15s, transform .08s;
-}
-.feed-action-btn:hover { background: #bf7520; }
-.feed-action-btn:active { transform: translateY(1px); }
-
-.feed-action-btn--secondary {
-  background: var(--accent-light);
-  color: var(--accent-text);
-  border: 1px solid #f0d4a8;
-}
-.feed-action-btn--secondary:hover { background: #f8e4c4; }
-
-
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  height: var(--topbar-h);
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  animation: fadeUp .28s ease both;
-}
-
+/* ── Nav inner layout ── */
 .nav-inner {
   max-width: 1140px;
   margin: 0 auto;
@@ -155,7 +140,6 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   justify-content: space-between;
 }
 
-/* Logo */
 .nav-logo {
   display: flex;
   align-items: center;
@@ -173,7 +157,6 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   color: var(--text-primary);
 }
 
-/* Nav links */
 .nav-links {
   display: flex;
   gap: 28px;
@@ -194,7 +177,6 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   border-bottom: 2px solid var(--accent);
 }
 
-/* Nav action buttons */
 .nav-actions {
   display: flex;
   gap: 10px;
@@ -225,6 +207,35 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   transition: background .15s;
 }
 .nav-btn:hover { background: #bf7520; }
+
+/* ── Feed action buttons ── */
+.feed-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.feed-action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  font-size: .88rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--accent);
+  color: #fff;
+  transition: background .15s, transform .08s;
+}
+.feed-action-btn:hover { background: #bf7520; }
+.feed-action-btn:active { transform: translateY(1px); }
+
+.feed-action-btn--secondary {
+  background: var(--accent-light);
+  color: var(--accent-text);
+  border: 1px solid #f0d4a8;
+}
+.feed-action-btn--secondary:hover { background: #f8e4c4; }
 
 /* ── Page layout ── */
 .main {
@@ -339,7 +350,7 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   transition: box-shadow .15s, transform .15s;
 }
 .card:hover {
-  box-shadow: 0 8px 28px rgba(60,40,10,.1);
+  box-shadow: 0 8px 28px rgba(60, 40, 10, .1);
   transform: translateY(-2px);
 }
 
@@ -420,9 +431,7 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   color: var(--accent-text);
 }
 
-/* ── Right sidebar ── */
-.sidebar-right .sidebar-section { }
-
+/* ── Right Sidebar ── */
 .trending-item {
   display: flex;
   align-items: center;
@@ -490,6 +499,7 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   .layout { grid-template-columns: 1fr; }
   .sidebar-right { display: none; }
 }
+
 @media (max-width: 600px) {
   .sidebar { display: none; }
   .nav-links { display: none; }

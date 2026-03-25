@@ -154,6 +154,16 @@
 </div>
         </fieldset>
 
+        <!-- Photo Upload Section -->
+        <div class="col">
+          <label>Photos <span class="small">(optional — up to 6 images, max 5 MB each)</span></label>
+          <label class="upload-zone" id="restaurantUploadZone" for="restaurantPhotoInput" tabindex="0" aria-label="Upload photos">
+            <input type="file" id="restaurantPhotoInput" accept="image/jpeg,image/png,image/webp" multiple hidden />
+            <span>📷 Drag & drop photos here, or <strong>browse</strong></span>
+            <span class="small">JPG, PNG, WEBP · Max 5 MB each</span>
+          </label>
+          <div id="restaurantPhotoPreviews"></div>
+        </div>
         <div id="submitResult" class="small" aria-live="polite"></div>
 
         <div class="actions">
@@ -309,122 +319,6 @@
 
       window.__restaurantTags = tags;
     })();
-  </script>
-
-<!-- Restaurant Submission + Validation -->
-
-  <script>
-    // Submit + validation
-    (function () {
-      const form = document.getElementById('restaurantForm');
-
-      const isValidPhone = (s) => {
-        const digits = s.replace(/\D/g, '');
-        return digits.length >= 7 && digits.length <= 15;
-      };
-
-      const isValidUrl = (s) => {
-        if (!s) return true;
-        try {
-          const url = new URL(s);
-          return url.protocol === 'http:' || url.protocol === 'https:';
-        } catch {
-          return false;
-        }
-      };
-
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        document.querySelectorAll('.error').forEach(n => n.textContent = '');
-        document.getElementById('submitResult').textContent = '';
-
-        const name = document.getElementById('name').value.trim();
-        const phone = document.getElementById('phone').value.trim();
-        const address = document.getElementById('address').value.trim();
-        const website = document.getElementById('website').value.trim();
-        const description = document.getElementById('description').value.trim();
-        const amenities = document.getElementById('amenities').value.trim();
-        const bestTime = document.getElementById('bestTime').value.trim();
-        const notes = document.getElementById('notes').value.trim();
-        const hours = document.getElementById('hours').value.trim();
-        const tags = window.__restaurantTags || [];
-
-        let ok = true;
-
-        if (!name) {
-          document.getElementById('err-name').textContent = 'Name is required.';
-          ok = false;
-        }
-        if (!address) {
-          document.getElementById('err-address').textContent = 'Address is required.';
-          ok = false;
-        }
-        if (!phone || !isValidPhone(phone)) {
-          document.getElementById('err-phone').textContent = 'Please enter a valid phone number.';
-          ok = false;
-        }
-        if (website && !isValidUrl(website)) {
-          document.getElementById('err-website').textContent = 'Please enter a valid URL starting with http:// or https://';
-          ok = false;
-        }
-        if (!description) {
-          document.getElementById('err-description').textContent = 'Description is required.';
-          ok = false;
-        }
-        if (tags.length < 1) {
-          document.getElementById('err-tags').textContent = 'Please add at least one tag.';
-          ok = false;
-        }
-
-        if (!ok) {
-          document.getElementById('submitResult').textContent = 'Please fix the errors above and resubmit.';
-          return;
-        }
-
-        const restaurant = {
-          name,
-          address,
-          phone,
-          website: website || null,
-          tags,
-          about: {
-            description,
-            amenities: amenities ? amenities.split(',').map(s => s.trim()).filter(Boolean) : [],
-            bestTime: bestTime || null,
-            notes: notes || null,
-            hours: hours || null
-          },
-          submittedAt: new Date().toISOString()
-        };
-
-        console.log('Restaurant submission:', restaurant);
-
-        try {
-          const key = 'submittedRestaurants_v1';
-          const existing = JSON.parse(localStorage.getItem(key) || '[]');
-          existing.unshift(restaurant);
-          localStorage.setItem(key, JSON.stringify(existing));
-        } catch (err) {
-          console.warn('Could not save to localStorage', err);
-        }
-
-        document.getElementById('submitResult').textContent = 'Thanks, restaurant submitted locally.';
-
-        form.reset();
-        window.__restaurantTags.length = 0;
-        document.querySelectorAll('#tagsInput .tag').forEach(t => t.remove());
-      });
-
-      document.getElementById('resetBtn').addEventListener('click', () => {
-        form.reset();
-        window.__restaurantTags.length = 0;
-        document.querySelectorAll('#tagsInput .tag').forEach(t => t.remove());
-        document.querySelectorAll('.error').forEach(n => n.textContent = '');
-        document.getElementById('submitResult').textContent = '';
-      });
-    })();
-
   </script>
 </body>
 </html>

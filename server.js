@@ -14,10 +14,11 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key:    process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,npm
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
+// Storage for review photos
+const reviewStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: 'plated/reviews',
@@ -26,8 +27,23 @@ const storage = new CloudinaryStorage({
   },
 });
 
-const upload = multer({
-  storage,
+// Storage for restaurant photos
+const restaurantStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'plated/restaurants',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 1200, crop: 'limit' }]
+  },
+});
+
+const uploadReview = multer({
+  storage: reviewStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+const uploadRestaurant = multer({
+  storage: restaurantStorage,
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
@@ -289,9 +305,16 @@ app.get('/api/users', authenticateToken, async (req, res) => {
     }
 });
 
-// Route: Restaurant Submission Form
-app.post("/api/restaurants", async (req, res) => {
+// Route: Restaurant Submission Form — accepts photos and uploads to Cloudinary
+app.post("/api/restaurants", authenticateToken, uploadRestaurant.array("photos", 6), async (req, res) => {
   try {
+    let payload;
+    try {
+      payload = JSON.parse(req.body.data);
+    } catch {
+      return res.status(400).json({ message: "Invalid restaurant data." });
+    }
+
     const {
       restaurantName,
       phone,
@@ -309,7 +332,7 @@ app.post("/api/restaurants", async (req, res) => {
       fridayHours,
       saturdayHours,
       sundayHours
-    } = req.body;
+    } = payload;
 
     if (!restaurantName || !phone || !address || !about || !tags) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -360,14 +383,27 @@ app.post("/api/restaurants", async (req, res) => {
     ];
 
     const [result] = await connection.execute(sql, values);
+    const restaurantId = result.insertId;
+
+    // Insert Cloudinary photo URLs into restaurant_photos
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        await connection.execute(
+          "INSERT INTO restaurant_photos (restaurant_id, file_path) VALUES (?, ?)",
+          [restaurantId, file.path]
+        );
+      }
+    }
+
     await connection.end();
 
     res.status(201).json({
       message: "Restaurant submitted successfully",
-      id: result.insertId
+      id: restaurantId
     });
 
   } catch (error) {
+    console.error("Error submitting restaurant:", error);
     res.status(500).json({ message: "Server error while submitting restaurant" });
   }
 });
@@ -382,7 +418,7 @@ app.post("/api/restaurants", async (req, res) => {
 /////////////////////////////////////////////////
 
 // Route: POST /api/reviews — submit a new review with optional Cloudinary photo upload
-app.post('/api/reviews', authenticateToken, upload.array('photos', 6), async (req, res) => {
+app.post('/api/reviews', authenticateToken, uploadReview.array('photos', 6), async (req, res) => {
     try {
         let data;
         try {
@@ -431,7 +467,6 @@ app.post('/api/reviews', authenticateToken, upload.array('photos', 6), async (re
         // Insert Cloudinary URLs into review_photos
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
-                // file.path = full Cloudinary URL (e.g. https://res.cloudinary.com/...)
                 await connection.execute(
                     'INSERT INTO review_photos (review_id, file_path) VALUES (?, ?)',
                     [reviewId, file.path]
@@ -543,7 +578,6 @@ app.delete('/api/reviews/:reviewId', authenticateToken, async (req, res) => {
 
         // Delete photos from Cloudinary
         for (const p of photos) {
-            // Extract public_id from the Cloudinary URL
             const publicId = p.file_path.split('/').slice(-2).join('/').replace(/\.[^/.]+$/, '');
             await cloudinary.uploader.destroy(publicId).catch(err =>
                 console.warn('Could not delete from Cloudinary:', err)

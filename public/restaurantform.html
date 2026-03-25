@@ -87,8 +87,17 @@
           </div>
 
           <div class="col">
-            <label for="amenities">Amenities</label>
-            <input id="amenities" name="amenities" type="text" placeholder="Outdoor seating, Wi-Fi, Wheelchair accessible" />
+            <label>Amenities <span class="small">(type a amenity, then press comma)</span></label>
+            <div class="col">
+              <div id="amenitiesInput" class="tags-input" aria-live="polite">
+                <input
+                  id="amenityEntry"
+                  type="text"
+                  placeholder="Outdoor Seating, Private Dining, Curbside Pickup, Free Wifi, etc."
+                  aria-label="Add amenity"
+                />
+              </div>
+            </div>
           </div>
 
           <div class="col">

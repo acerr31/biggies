@@ -408,6 +408,58 @@ app.post("/api/restaurants", authenticateToken, uploadRestaurant.array("photos",
   }
 });
 
+
+//route: get restaurant information
+app.get("/api/restaurants/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const connection = await createConnection();
+
+    const [rows] = await connection.execute(
+      `
+      SELECT
+        restaurant_ID,
+        restaurantName,
+        phone,
+        address,
+        website,
+        tags,
+        about,
+        amenities,
+        timeToVisit,
+        notes,
+        mondayHours,
+        tuesdayHours,
+        wednesdayHours,
+        thursdayHours,
+        fridayHours,
+        saturdayHours,
+        sundayHours
+      FROM restaurants
+      WHERE restaurant_ID = ?
+      `,
+      [id]
+    );
+
+    await connection.end();
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "Restaurant not found"
+      });
+    }
+
+    res.status(200).json({
+      restaurant: rows[0]
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error while loading restaurant"
+    });
+  }
+});
+
 //////////////////////////////////////
 //END ROUTES TO HANDLE API REQUESTS
 //////////////////////////////////////

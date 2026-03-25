@@ -154,22 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const bestTimeEl = document.getElementById("bestTime");
     const notesEl = document.getElementById("notes");
 
-    // hours add on...
-    const mondayOpen = document.getElementById("mondayOpen")?.value.trim() || "";
-    const mondayClose = document.getElementById("mondayClose")?.value.trim() || "";
-    const tuesdayOpen = document.getElementById("tuesdayOpen")?.value.trim() || "";
-    const tuesdayClose = document.getElementById("tuesdayClose")?.value.trim() || "";
-    const wednesdayOpen = document.getElementById("wednesdayOpen")?.value.trim() || "";
-    const wednesdayClose = document.getElementById("wednesdayClose")?.value.trim() || "";
-    const thursdayOpen = document.getElementById("thursdayOpen")?.value.trim() || "";
-    const thursdayClose = document.getElementById("thursdayClose")?.value.trim() || "";
-    const fridayOpen = document.getElementById("fridayOpen")?.value.trim() || "";
-    const fridayClose = document.getElementById("fridayClose")?.value.trim() || "";
-    const saturdayOpen = document.getElementById("saturdayOpen")?.value.trim() || "";
-    const saturdayClose = document.getElementById("saturdayClose")?.value.trim() || "";
-    const sundayOpen = document.getElementById("sundayOpen")?.value.trim() || "";
-    const sundayClose = document.getElementById("sundayClose")?.value.trim() || "";
-
     if (nameEl) nameEl.value = draft.name || "";
     if (phoneEl) phoneEl.value = draft.phone || "";
     if (addressEl) addressEl.value = draft.address || "";
@@ -238,6 +222,80 @@ document.addEventListener("DOMContentLoaded", () => {
   loadDraft();
   form.addEventListener("input", saveDraft);
 
+  // ── Photo upload handling (mirrors review.js exactly) ──
+  const MAX_PHOTOS  = 6;
+  const MAX_BYTES   = 5 * 1024 * 1024;
+  const selectedFiles = [];
+
+  const uploadZone    = document.getElementById("restaurantUploadZone");
+  const photoInput    = document.getElementById("restaurantPhotoInput");
+  const photoPreviews = document.getElementById("restaurantPhotoPreviews");
+
+  function renderPreviews() {
+    photoPreviews.innerHTML = "";
+    selectedFiles.forEach((file, idx) => {
+      const url  = URL.createObjectURL(file);
+      const item = document.createElement("div");
+      item.className = "preview-item";
+      item.innerHTML = `
+        <img src="${url}" alt="Preview ${idx + 1}" />
+        <button class="preview-remove" type="button" aria-label="Remove photo ${idx + 1}">×</button>
+      `;
+      item.querySelector(".preview-remove").addEventListener("click", () => {
+        URL.revokeObjectURL(url);
+        selectedFiles.splice(idx, 1);
+        renderPreviews();
+      });
+      photoPreviews.appendChild(item);
+    });
+
+    const existing = photoPreviews.querySelector(".upload-count");
+    if (existing) existing.remove();
+    if (selectedFiles.length > 0) {
+      const count = document.createElement("p");
+      count.className = "upload-count";
+      count.textContent = `${selectedFiles.length} / ${MAX_PHOTOS} photo${selectedFiles.length !== 1 ? "s" : ""} selected`;
+      photoPreviews.appendChild(count);
+    }
+  }
+
+  function addFiles(fileList) {
+    const remaining = MAX_PHOTOS - selectedFiles.length;
+    let skipped = 0;
+
+    Array.from(fileList).slice(0, remaining).forEach((file) => {
+      if (!file.type.startsWith("image/")) { skipped++; return; }
+      if (file.size > MAX_BYTES)           { skipped++; return; }
+      selectedFiles.push(file);
+    });
+
+    renderPreviews();
+    photoInput.disabled = selectedFiles.length >= MAX_PHOTOS;
+  }
+
+  // Mirrors review.js exactly — input change fires when file is selected
+  photoInput.addEventListener("change", (e) => {
+    addFiles(e.target.files);
+    photoInput.value = "";
+  });
+
+  // drag & drop
+  uploadZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    uploadZone.classList.add("drag-over");
+  });
+  uploadZone.addEventListener("dragleave", () => uploadZone.classList.remove("drag-over"));
+  uploadZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove("drag-over");
+    addFiles(e.dataTransfer.files);
+  });
+
+  // keyboard accessibility
+  uploadZone.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); photoInput.click(); }
+  });
+
   if (tagEntry) {
     tagEntry.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === ",") {
@@ -276,30 +334,30 @@ document.addEventListener("DOMContentLoaded", () => {
     clearErrors();
     setSubmitMessage("");
 
-    const name = document.getElementById("name")?.value.trim() || "";
-    const phone = document.getElementById("phone")?.value.trim() || "";
-    const address = document.getElementById("address")?.value.trim() || "";
-    const website = document.getElementById("website")?.value.trim() || "";
+    const name        = document.getElementById("name")?.value.trim()        || "";
+    const phone       = document.getElementById("phone")?.value.trim()       || "";
+    const address     = document.getElementById("address")?.value.trim()     || "";
+    const website     = document.getElementById("website")?.value.trim()     || "";
     const description = document.getElementById("description")?.value.trim() || "";
-    const bestTime = document.getElementById("bestTime")?.value.trim() || "";
-    const notes = document.getElementById("notes")?.value.trim() || "";
-    const amenities = amenitiesList.join(", ");
+    const bestTime    = document.getElementById("bestTime")?.value.trim()    || "";
+    const notes       = document.getElementById("notes")?.value.trim()       || "";
+    const amenities   = amenitiesList.join(", ");
 
-    // hours add on...
-    const mondayOpen = document.getElementById("mondayOpen")?.value.trim() || "";
-    const mondayClose = document.getElementById("mondayClose")?.value.trim() || "";
-    const tuesdayOpen = document.getElementById("tuesdayOpen")?.value.trim() || "";
-    const tuesdayClose = document.getElementById("tuesdayClose")?.value.trim() || "";
-    const wednesdayOpen = document.getElementById("wednesdayOpen")?.value.trim() || "";
+    // hours
+    const mondayOpen     = document.getElementById("mondayOpen")?.value.trim()     || "";
+    const mondayClose    = document.getElementById("mondayClose")?.value.trim()    || "";
+    const tuesdayOpen    = document.getElementById("tuesdayOpen")?.value.trim()    || "";
+    const tuesdayClose   = document.getElementById("tuesdayClose")?.value.trim()   || "";
+    const wednesdayOpen  = document.getElementById("wednesdayOpen")?.value.trim()  || "";
     const wednesdayClose = document.getElementById("wednesdayClose")?.value.trim() || "";
-    const thursdayOpen = document.getElementById("thursdayOpen")?.value.trim() || "";
-    const thursdayClose = document.getElementById("thursdayClose")?.value.trim() || "";
-    const fridayOpen = document.getElementById("fridayOpen")?.value.trim() || "";
-    const fridayClose = document.getElementById("fridayClose")?.value.trim() || "";
-    const saturdayOpen = document.getElementById("saturdayOpen")?.value.trim() || "";
-    const saturdayClose = document.getElementById("saturdayClose")?.value.trim() || "";
-    const sundayOpen = document.getElementById("sundayOpen")?.value.trim() || "";
-    const sundayClose = document.getElementById("sundayClose")?.value.trim() || "";
+    const thursdayOpen   = document.getElementById("thursdayOpen")?.value.trim()   || "";
+    const thursdayClose  = document.getElementById("thursdayClose")?.value.trim()  || "";
+    const fridayOpen     = document.getElementById("fridayOpen")?.value.trim()     || "";
+    const fridayClose    = document.getElementById("fridayClose")?.value.trim()    || "";
+    const saturdayOpen   = document.getElementById("saturdayOpen")?.value.trim()   || "";
+    const saturdayClose  = document.getElementById("saturdayClose")?.value.trim()  || "";
+    const sundayOpen     = document.getElementById("sundayOpen")?.value.trim()     || "";
+    const sundayClose    = document.getElementById("sundayClose")?.value.trim()    || "";
 
     let isValid = true;
 
@@ -307,7 +365,6 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("err-name").textContent = "Name is required.";
       isValid = false;
     }
-
     if (!phone) {
       document.getElementById("err-phone").textContent = "Phone is required.";
       isValid = false;
@@ -315,22 +372,18 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("err-phone").textContent = "Enter a valid phone number.";
       isValid = false;
     }
-
     if (!address) {
       document.getElementById("err-address").textContent = "Address is required.";
       isValid = false;
     }
-
     if (!description) {
       document.getElementById("err-description").textContent = "Description is required.";
       isValid = false;
     }
-
     if (tags.length < 1) {
       document.getElementById("err-tags").textContent = "Add at least one tag.";
       isValid = false;
     }
-
     if (website && !isValidUrl(website)) {
       document.getElementById("err-website").textContent = "Enter a valid website URL.";
       isValid = false;
@@ -342,7 +395,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // hours add on
     function combineHours(open, close) {
       if (!open && !close) return null;
       return `${open},${close}`;
@@ -350,34 +402,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const payload = {
       restaurantName: name,
-      phone: digitsOnly(phone),
+      phone:          digitsOnly(phone),
       address,
-      website: website || null,
-      tags: tags.join(", "),
-      about: description,
-      amenities: amenities || null,
-      timeToVisit: bestTime || null,
-      notes: notes || null,
-
-      mondayHours: combineHours(mondayOpen, mondayClose),
-      tuesdayHours: combineHours(tuesdayOpen, tuesdayClose),
+      website:        website || null,
+      tags:           tags.join(", "),
+      about:          description,
+      amenities:      amenities || null,
+      timeToVisit:    bestTime || null,
+      notes:          notes || null,
+      mondayHours:    combineHours(mondayOpen,    mondayClose),
+      tuesdayHours:   combineHours(tuesdayOpen,   tuesdayClose),
       wednesdayHours: combineHours(wednesdayOpen, wednesdayClose),
-      thursdayHours: combineHours(thursdayOpen, thursdayClose),
-      fridayHours: combineHours(fridayOpen, fridayClose),
-      saturdayHours: combineHours(saturdayOpen, saturdayClose),
-      sundayHours: combineHours(sundayOpen, sundayClose)
+      thursdayHours:  combineHours(thursdayOpen,  thursdayClose),
+      fridayHours:    combineHours(fridayOpen,    fridayClose),
+      saturdayHours:  combineHours(saturdayOpen,  saturdayClose),
+      sundayHours:    combineHours(sundayOpen,    sundayClose)
     };
 
     try {
       const token = localStorage.getItem("jwtToken");
 
+      // Build FormData exactly like review.js
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(payload));
+      selectedFiles.forEach((file) => formData.append("photos", file));
+
       const res = await fetch("/api/restaurants", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           ...(token ? { Authorization: token } : {})
         },
-        body: JSON.stringify(payload)
+        body: formData
       });
 
       const data = await res.json();
@@ -393,8 +448,10 @@ document.addEventListener("DOMContentLoaded", () => {
       form.reset();
       tags.length = 0;
       amenitiesList.length = 0;
+      selectedFiles.length = 0;
       renderTags();
       renderAmenities();
+      renderPreviews();
       sessionStorage.removeItem("restaurantFormDraft");
       clearErrors();
 
@@ -410,8 +467,10 @@ document.addEventListener("DOMContentLoaded", () => {
       form.reset();
       tags.length = 0;
       amenitiesList.length = 0;
+      selectedFiles.length = 0;
       renderTags();
       renderAmenities();
+      renderPreviews();
       clearErrors();
       setSubmitMessage("");
       sessionStorage.removeItem("restaurantFormDraft");

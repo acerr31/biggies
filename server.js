@@ -415,7 +415,7 @@ app.get("/api/restaurants/:id", async (req, res) => {
     const { id } = req.params;
     const connection = await createConnection();
 
-    const [rows] = await connection.execute(
+    const [restaurantRows] = await connection.execute(
       `
       SELECT
         restaurant_ID,
@@ -441,16 +441,27 @@ app.get("/api/restaurants/:id", async (req, res) => {
       [id]
     );
 
-    await connection.end();
-
-    if (rows.length === 0) {
-      return res.status(404).json({
-        message: "Restaurant not found"
-      });
+    if (restaurantRows.length === 0) {
+      await connection.end();
+      return res.status(404).json({ message: "Restaurant not found" });
     }
 
+    const [photoRows] = await connection.execute(
+      `
+      SELECT file_path
+      FROM restaurant_photos
+      WHERE restaurant_id = ?
+      `,
+      [id]
+    );
+
+    await connection.end();
+
     res.status(200).json({
-      restaurant: rows[0]
+      restaurant: {
+        ...restaurantRows[0],
+        photos: photoRows.map(row => row.file_path)
+      }
     });
 
   } catch (error) {

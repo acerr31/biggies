@@ -15,10 +15,11 @@
   <style>
     /* minimal card internals (keeps page self-contained until you move styles fully) */
     .restaurant-card { background: var(--surface,#fff); border-radius:12px; overflow:hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.04); cursor:pointer; display:flex; gap:12px; }
-    .restaurant-image { width: 36%; min-width: 160px; background-size: cover; background-position: center; border-radius: 8px; }
+    .restaurant-image { width: 36%; min-width: 160px; background-size: cover; background-position: center; border-radius: 8px; min-height: 120px }
     .restaurant-details { padding: 12px; display:flex; flex-direction:column; gap:6px; flex:1; }
     .restaurant-name { font-weight:700; color:var(--text-primary,#111); font-size:1rem; }
-    .rating, .category, .price, .distance { color: var(--text-secondary,#8a8278); font-size:.9rem; }
+    .rating, .category, .address-preview { color: var(--text-secondary,#8a8278); font-size:.9rem; }
+    .address-preview { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
     @media (max-width:820px) {
       .restaurant-card { flex-direction:column; }
       .restaurant-image { width:100%; min-height:140px; border-radius:8px; }
@@ -69,7 +70,7 @@
 
           <div class="search-filters" style="justify-self:end;">
             <div class="search-bar" role="search" aria-label="Search restaurants">
-              <input type="search" placeholder="Search restaurants, cuisines..." />
+              <input type="search" id="searchInput" placeholder="Search restaurants, cuisines..." />
             </div>
             <button class="filter-btn primary">Filters</button>
           </div>
@@ -85,7 +86,7 @@
     <!-- bottom row: grid + sidebar -->
     <div class="grid-row row-bottom" style="margin-top:10px;">
       <div class="card">
-        <div class="explore-grid">
+        <!-- <div class="explore-grid">
 
           <div class="explore-card restaurant-card">
             <div class="restaurant-image" style="background-image:url('https://picsum.photos/400/300?1');"></div>
@@ -101,13 +102,13 @@
           </div>
 
           <div class="explore-card restaurant-card">
-            <div class="restaurant-image" style="background-image:url('https://picsum.photos/400/300?2');"></div>
-            <div class="restaurant-details">
+            <div class="restaurant-image" style="background-image:url('https://picsum.photos/400/300?2');"></div> -->
+            <!-- <div class="restaurant-details">
               <div class="restaurant-name">Bella Napoli</div>
               <div class="rating">★★★★★ (4.8)</div>
               <div class="category">Italian • Pizza • Pasta</div>
-              <div style="display:flex; gap:8px; align-items:center; margin-top:auto;">
-                <div class="price">$$$</div>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:auto;"> -->
+                <!-- <div class="price">$$$</div>
                 <div class="distance">1.2 miles away</div>
               </div>
             </div>
@@ -124,8 +125,8 @@
                 <div class="distance">0.5 miles away</div>
               </div>
             </div>
-          </div>
-
+          </div> -->
+<!-- 
           <div class="explore-card restaurant-card">
             <div class="restaurant-image" style="background-image:url('https://picsum.photos/400/300?5');"></div>
             <div class="restaurant-details">
@@ -140,6 +141,13 @@
           </div>
 
         </div>
+      </div> -->
+    <div class="grid-row row-bottom" style="margin-top:10px;">
+      <div class="card">
+        <!-- Dynamic restaurant grid — populated by explore.js -->
+        <div class="explore-grid" id="restaurantGrid">
+          <div class="loader"></div>
+        </div>
       </div>
 
       <div class="card">
@@ -153,6 +161,16 @@
     </div>
 
   </main>
+
+  <!-- ── Detail Panel ── -->
+  <div class="detail-overlay" id="detailOverlay" onclick="closeDetailPanel()"></div>
+ 
+  <aside class="detail-panel" id="detailPanel" aria-label="Restaurant details">
+    <button class="detail-close" onclick="closeDetailPanel()" aria-label="Close">&#x2715;</button>
+    <div class="detail-body" id="detailBody">
+      <!-- Populated by explore.js -->
+    </div>
+  </aside>
 
     <!-- Script to Gather User's Details -->
 
@@ -213,6 +231,9 @@ topbarAvatar.textContent = initials.toUpperCase();
   }
 });
 </script>
+
+  <!-- Explore logic -->
+  <script src="js/explore.js"></script>
 
 </body>
 </html>

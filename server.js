@@ -739,6 +739,63 @@ app.delete('/api/reviews/:reviewId', authenticateToken, async (req, res) => {
         console.error('Error deleting review:', error);
         res.status(500).json({ message: 'Error deleting review.' });
     }
+});  // ← ADD THIS to close the delete route
+
+// Route: GET /api/reviews — get ALL recent reviews for the home feed
+app.get('/api/reviews', async (req, res) => {
+    try {
+        const connection = await createConnection();
+
+        const [reviews] = await connection.execute(
+            `SELECT
+                r.id,
+                r.restaurant_id,
+                r.sentiment,
+                r.stars,
+                r.notes,
+                r.favorite_dishes,
+                r.visit_date,
+                r.created_at,
+                u.username,
+                u.first_name,
+                u.last_name,
+                res.restaurantName AS restaurant_name
+             FROM reviews r
+             JOIN users u ON r.user_email = u.email
+             JOIN restaurants res ON r.restaurant_id = res.restaurant_ID
+             ORDER BY r.created_at DESC
+             LIMIT 50`
+        );
+
+        const reviewIds = reviews.map(r => r.id);
+        let photoMap = {};
+
+        if (reviewIds.length > 0) {
+            const placeholders = reviewIds.map(() => '?').join(',');
+            const [photos] = await connection.execute(
+                `SELECT review_id, file_path FROM review_photos WHERE review_id IN (${placeholders})`,
+                reviewIds
+            );
+            photos.forEach(p => {
+                if (!photoMap[p.review_id]) photoMap[p.review_id] = [];
+                photoMap[p.review_id].push(p.file_path);
+            });
+        }
+
+        await connection.end();
+
+        const enriched = reviews.map(r => ({
+            ...r,
+            photos: photoMap[r.id] || [],
+            initials: ((r.first_name?.[0] || '') + (r.last_name?.[0] || '')).toUpperCase() || r.username?.slice(0, 2).toUpperCase() || '?'
+        }));
+
+        res.status(200).json({ reviews: enriched });
+
+    } catch (error) {
+        console.error('Error fetching feed:', error);
+        res.status(500).json({ message: 'Error fetching feed.' });
+    }    
 });
 
 //////////////////////////////////////////////////

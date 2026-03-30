@@ -416,19 +416,48 @@ app.get("/api/restaurants", async (req, res) => {
 
     // Fetch all restaurants with their computed average star rating
     const [restaurants] = await connection.execute(`
-      SELECT
-        r.restaurant_ID,
-        r.restaurantName,
-        r.address,
-        r.tags,
-        r.about,
-        AVG(rv.stars) AS avg_rating,
-        COUNT(rv.id)  AS review_count
-      FROM restaurants r
-      LEFT JOIN reviews rv ON rv.restaurant_id = r.restaurant_ID
-      GROUP BY r.restaurant_ID
-      ORDER BY r.restaurantName ASC
-    `);
+  SELECT
+    r.restaurant_ID,
+    r.restaurantName,
+    r.phone,
+    r.address,
+    r.website,
+    r.tags,
+    r.about,
+    r.amenities,
+    r.timeToVisit,
+    r.notes,
+    r.mondayHours,
+    r.tuesdayHours,
+    r.wednesdayHours,
+    r.thursdayHours,
+    r.fridayHours,
+    r.saturdayHours,
+    r.sundayHours,
+    AVG(rv.stars) AS avg_rating,
+    COUNT(rv.id)  AS review_count
+  FROM restaurants r
+  LEFT JOIN reviews rv ON rv.restaurant_id = r.restaurant_ID
+  GROUP BY
+    r.restaurant_ID,
+    r.restaurantName,
+    r.phone,
+    r.address,
+    r.website,
+    r.tags,
+    r.about,
+    r.amenities,
+    r.timeToVisit,
+    r.notes,
+    r.mondayHours,
+    r.tuesdayHours,
+    r.wednesdayHours,
+    r.thursdayHours,
+    r.fridayHours,
+    r.saturdayHours,
+    r.sundayHours
+  ORDER BY r.restaurantName ASC
+`);
 
     if (restaurants.length === 0) {
       await connection.end();

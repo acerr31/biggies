@@ -4,7 +4,11 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   loadRestaurants();
+  setupOpenNowFilter();
 });
+
+let allRestaurants = [];
+let openNowOnly = false;
 
 /* ── 1. Fetch all restaurants and render cards ── */
 async function loadRestaurants() {
@@ -15,7 +19,7 @@ async function loadRestaurants() {
     if (!res.ok) throw new Error("Failed to load restaurants");
     const data = await res.json();
 
-    grid.innerHTML = ""; // clear any placeholder content
+    /* grid.innerHTML = ""; // clear any placeholder content
 
     if (!data.restaurants || data.restaurants.length === 0) {
       grid.innerHTML = `<div class="no-results">No restaurants found yet. <a href="restaurantform.html">Be the first to submit one!</a></div>`;
@@ -25,7 +29,10 @@ async function loadRestaurants() {
     data.restaurants.forEach(r => {
       const card = buildCard(r);
       grid.appendChild(card);
-    });
+    }); */
+
+    allRestaurants = data.restaurants || [];
+    renderRestaurants(allRestaurants);
 
   } catch (err) {
     console.error(err);
@@ -191,7 +198,11 @@ function buildDetailHTML(r, reviews) {
     <div class="dp-content">
       <div class="dp-header">
         <div>
-          <h2 class="dp-name">${escHtml(r.restaurantName)}</h2>
+          <h2 class="dp-name">
+            <a href="restaurant.html?id=${r.restaurant_ID}" class="dp-name-link">
+              ${escHtml(r.restaurantName)}
+            </a>
+          </h2>
           ${avgRating
             ? `<div class="dp-rating">${renderStars(avgRating)} <span>${avgRating.toFixed(1)} · ${reviews.filter(rv => rv.stars).length} review${reviews.filter(rv => rv.stars).length !== 1 ? "s" : ""}</span></div>`
             : `<div class="dp-rating">No ratings yet</div>`
@@ -294,6 +305,110 @@ function closeDetailPanel() {
 
 // Expose to inline onclick in HTML
 window.closeDetailPanel = closeDetailPanel;
+
+/* ── Render Restaurants ── */
+function renderRestaurants(restaurants) {
+  const grid = document.getElementById("restaurantGrid");
+  grid.innerHTML = "";
+
+  if (!restaurants || restaurants.length === 0) {
+    grid.innerHTML = `<div class="no-results">No Restaurants Found. 🥺 
+      <a href="restaurantform.html"> 
+      Be the first to submit one!
+      </a>
+    </div>`;
+    return;
+  }
+
+  restaurants.forEach(r => {
+    const card = buildCard(r);
+    grid.appendChild(card);
+  });
+}
+
+/* ── Filter Restaurants by Open Now button ── */
+function setupOpenNowFilter() {
+  const btn = document.getElementById("openNowBtn");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+  openNowOnly = !openNowOnly;
+  btn.classList.toggle("active", openNowOnly);
+
+  if (openNowOnly) {
+    const filtered = allRestaurants.filter(getOpenStatus);
+    console.log("Filtered restaurants:", filtered);
+    renderRestaurants(filtered);
+  } else {
+    renderRestaurants(allRestaurants);
+  }
+});
+
+// console.log("All restaurants:", allRestaurants);
+
+// const filtered = allRestaurants.filter(restaurant => {
+//   const todayHours = getTodayHours(restaurant);
+//   console.log("Checking:", restaurant.restaurantName, todayHours);
+//   return isOpenNow(todayHours);
+// });
+
+// console.log("Filtered result:", filtered);
+}
+
+function getTodayHours(restaurant) {
+  const todayIndex = new Date().getDay(); // 0 = Sun, 6 = Sat
+
+  const hoursMap = [
+    restaurant.sundayHours,
+    restaurant.mondayHours,
+    restaurant.tuesdayHours,
+    restaurant.wednesdayHours,
+    restaurant.thursdayHours,
+    restaurant.fridayHours,
+    restaurant.saturdayHours
+  ];
+
+  return hoursMap[todayIndex] || null;
+}
+
+function isOpenNow(hoursString) {
+  if (!hoursString) return false;
+
+  const cleaned = String(hoursString).trim();
+  const parts = cleaned.split(",");
+
+  if (parts.length !== 2) return false;
+
+  const [open, close] = parts.map(s => s.trim());
+  if (!open || !close) return false;
+
+  const now = new Date();
+  // now.setHours(13, 0, 0, 0); // test time, 1 PM
+
+  const [openH, openM] = open.split(":").map(Number);
+  const [closeH, closeM] = close.split(":").map(Number);
+
+  if ([openH, openM, closeH, closeM].some(Number.isNaN)) {
+    return false;
+  }
+
+  const openTime = new Date();
+  openTime.setHours(openH, openM, 0, 0);
+
+  const closeTime = new Date();
+  closeTime.setHours(closeH, closeM, 0, 0);
+
+  return now >= openTime && now <= closeTime;
+}
+
+function getOpenStatus(restaurant) {
+  const todayHours = getTodayHours(restaurant);
+  console.log("Open Now check:", restaurant.restaurantName, todayHours);
+  // console.log(allRestaurants[0].mondayHours);
+  return isOpenNow(todayHours);
+}
+
+
 
 /* ── Utilities ── */
 function escHtml(str) {

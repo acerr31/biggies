@@ -39,10 +39,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!restaurant) return;
 
     // Hero title
-    const heroTitle = document.querySelector(".hero__title");
-    if (heroTitle) {
-      heroTitle.textContent = restaurant.restaurantName || "Restaurant";
-    }
+const heroTitle = document.querySelector(".hero__title");
+if (heroTitle) {
+  heroTitle.textContent = restaurant.restaurantName || "Restaurant";
+}
+
+// Update Review title with the correct name
+const fab = document.getElementById("fabReview");
+if (fab) {
+  const q = new URLSearchParams();
+  if (restaurantId) q.set("id", restaurantId);
+  if (restaurant.restaurantName) q.set("name", encodeURIComponent(restaurant.restaurantName));
+  if ([...q].length) fab.href = "review.html?" + q.toString();
+}
 
     //Top Tags:
     const metaItems = document.querySelectorAll(".hero__metaItem");

@@ -49,7 +49,7 @@ const fab = document.getElementById("fabReview");
 if (fab) {
   const q = new URLSearchParams();
   if (restaurantId) q.set("id", restaurantId);
-  if (restaurant.restaurantName) q.set("name", encodeURIComponent(restaurant.restaurantName));
+  if (restaurant.restaurantName) q.set("name", restaurant.restaurantName);
   if ([...q].length) fab.href = "review.html?" + q.toString();
 }
 

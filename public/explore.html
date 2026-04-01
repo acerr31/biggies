@@ -143,21 +143,39 @@
         </div>
       </div> -->
     <div class="grid-row row-bottom" style="margin-top:10px;">
-      <div class="card">
-        <!-- Dynamic restaurant grid — populated by explore.js -->
-        <div class="explore-grid" id="restaurantGrid">
-          <div class="loader"></div>
+      <div class="card results-shell">
+        <div class="results-layout">
+          <div class="results-main">
+            <div class="results-header">
+              <h2>Restaurants</h2>
+            </div>
+
+            <!-- Dynamic restaurant grid — populated by explore.js -->
+            <div class="explore-grid" id="restaurantGrid">
+              <div class="loader"></div>
+            </div>
+          </div>
+
+          <div class="results-filters">
+            <div style="font-weight:600; margin-bottom:8px">Filters</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button class="filter-btn" id="openNowBtn">Open Now</button>
+              <button class="filter-btn">Reviews</button>
+              <button class="filter-btn">Price</button>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="card">
+      <!-- <div class="card">
         <div style="font-weight:600; margin-bottom:8px">Filters</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <button class="filter-btn" id="openNowBtn">Open Now</button>
           <button class="filter-btn">Reviews</button>
           <button class="filter-btn">Price</button>
         </div>
-      </div>
+      </div> -->
     </div>
 
   </main>

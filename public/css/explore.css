@@ -188,8 +188,124 @@ body { font-family: var(--font-body); color: var(--text-primary); min-height: 10
   text-decoration: underline;
 }
 
+/* Results Header */
+
+/* Results section */
+.row-bottom {
+  grid-template-columns: 1fr;
+}
+
+.results-shell {
+  width: 100%;
+  padding: 18px;
+}
+
+.results-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 16px;
+  align-items: start;
+}
+
+.results-main {
+  min-width: 0;
+}
+
+.results-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding: 0 4px;
+}
+
+.results-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.results-filters {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  background: var(--surface);
+}
+
+#restaurantGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+  gap: 12px;
+}
+
+.restaurant-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  min-height: 255px;
+}
+
+.restaurant-image {
+  width: 100%;
+  height: 125px;
+  min-width: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 16px 16px 0 0;
+}
+
+.restaurant-details {
+  padding: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.restaurant-name {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.rating,
+.category,
+.address-preview {
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+}
+
+.address-preview {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 900px) {
+  .results-layout {
+    grid-template-columns: 1fr;
+  }
+
+  #restaurantGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.address-preview {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* grid of results */
-.explore-grid { display:grid; gap:18px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+/* .explore-grid { display:grid; gap:18px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); } */
 
 /* explore card */
 .explore-card {

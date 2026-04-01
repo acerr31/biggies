@@ -189,7 +189,7 @@ function buildDetailHTML(r, reviews) {
             : ""}
         </div>
       `).join("")
-    : `<p class="no-results" style="padding:0">No reviews yet. <a href="review.html">Be the first!</a></p>`;
+    : `<p class="no-results" style="padding:0">No reviews yet. <a href="review.html?id=${r.restaurant_ID}&name=Loading%2520Title">Be the first!</a></p>`;
 
   /* ---- Assemble ---- */
   return `
@@ -208,7 +208,7 @@ function buildDetailHTML(r, reviews) {
             : `<div class="dp-rating">No ratings yet</div>`
           }
         </div>
-        <a href="restaurantform.html?id=${r.restaurant_ID}" class="btn secondary dp-edit-btn">Write a Review</a>
+        <a href="review.html?id=${r.restaurant_ID}&name=Loading%2520Title" class="btn secondary dp-edit-btn">Write a Review</a>
       </div>
 
       ${tagsHtml ? `<div class="dp-tags">${tagsHtml}</div>` : ""}
@@ -311,8 +311,12 @@ function renderRestaurants(restaurants) {
   const grid = document.getElementById("restaurantGrid");
   grid.innerHTML = "";
 
+  // if (count) {
+  //   count.textContent = `${restaurants.length} restaurant${restaurants.length === 1 ? "" : "s"}`;
+  // }
+
   if (!restaurants || restaurants.length === 0) {
-    grid.innerHTML = `<div class="no-results">No Restaurants Found. 🥺 
+    grid.innerHTML = `<div class="no-results">No Restaurants Found. \r🥺 
       <a href="restaurantform.html"> 
       Be the first to submit one!
       </a>

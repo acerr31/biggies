@@ -49,7 +49,7 @@ function buildCard(r) {
   // Use the first photo if available, otherwise a placeholder
   const imgUrl = r.photos && r.photos.length > 0
     ? r.photos[0]
-    : `https://picsum.photos/seed/${r.restaurant_ID}/400/300`;
+    : "/images/PlatedLogo.png";
 
   // Parse tags for category display (tags stored as comma-separated string)
   const categoryText = r.tags
@@ -92,20 +92,45 @@ async function openDetailPanel(id) {
 
   try {
     // Fetch restaurant detail and reviews in parallel
-    const [rRes, revRes] = await Promise.all([
+    const [rRes, revRes, photoRes] = await Promise.all([
       fetch(`/api/restaurants/${id}`),
-      fetch(`/api/reviews/${id}`)
+      fetch(`/api/reviews/${id}`),
+      fetch(`/api/restaurants/${id}/photos`)
     ]);
 
-    const rData   = rRes.ok   ? await rRes.json()   : null;
-    const revData = revRes.ok ? await revRes.json()  : { reviews: [] };
+    const rData    = rRes.ok    ? await rRes.json()   : null;
+    const revData  = revRes.ok  ? await revRes.json() : { reviews: [] };
+    const photoData = photoRes.ok ? await photoRes.json() : { photos: [] };
 
     if (!rData) {
       body.innerHTML = `<p class="no-results">Could not load restaurant details.</p>`;
       return;
     }
 
-    body.innerHTML = buildDetailHTML(rData.restaurant, revData.reviews || []);
+    const uploadedPhotosFromDetail = Array.isArray(rData.restaurant?.photos)
+  ? rData.restaurant.photos
+  : [];
+
+    const uploadedPhotosFromPhotoRoute = Array.isArray(photoData.photos)
+      ? photoData.photos
+      : [];
+
+    const reviewPhotos = (revData.reviews || []).flatMap(review =>
+      Array.isArray(review.photos) ? review.photos : []
+    );
+
+    const mergedRestaurant = {
+      ...rData.restaurant,
+      photos: [
+        ...new Set([
+          ...uploadedPhotosFromDetail,
+          ...uploadedPhotosFromPhotoRoute,
+          ...reviewPhotos
+        ])
+      ]
+    };
+
+    body.innerHTML = buildDetailHTML(mergedRestaurant, revData.reviews || []);
 
     // Wire up photo carousel navigation if there are multiple photos
     initCarousel();

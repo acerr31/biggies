@@ -135,15 +135,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("profile-last-name").textContent =
             data.last_name || "—";
 
+        // Avatar initials (shown when no photo)
+        const fn = data.first_name || "";
+        const ln = data.last_name  || "";
+
         // Identity card display name + handle
         const displayName = document.getElementById("display-name");
         const handleSpan  = document.getElementById("handle-username");
         if (displayName) displayName.textContent = (fn && ln) ? `${fn} ${ln}` : data.username || "—";
         if (handleSpan)  handleSpan.textContent  = data.username || "—";
-
-        // Avatar initials (shown when no photo)
-        const fn = data.first_name || "";
-        const ln = data.last_name  || "";
         const initials = ((fn[0] || "") + (ln[0] || "")).toUpperCase() || "?";
         const avatarEl = document.getElementById("avatar-initials");
         if (avatarEl) {

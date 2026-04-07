@@ -37,9 +37,9 @@
 
       <!-- Identity card -->
       <div class="card identity-card">
-        <div class="avatar-circle" id="avatar-initials" title="Click to upload photo">
+        <div class="avatar-circle" id="avatar-initials" title="Click to change photo">
           <img id="avatar-photo" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
-          <input type="file" id="avatar-upload" accept="image/jpeg,image/png,image/webp" style="display:none;" />
+          <input type="file" id="avatar-upload" accept="image/*" style="display:none;" />
         </div>
         <div class="identity-info">
           <h2 class="identity-name" id="display-name">—</h2>
@@ -64,14 +64,19 @@
         <div class="identity-btns">
           <button class="btn-primary" id="edit-profile-btn">Edit Profile</button>
           <button class="btn-ghost" id="share-profile-btn">Share</button>
+          <button class="btn-logout" id="logout-btn">Log Out</button>
         </div>
       </div>
 
       <!-- Activity stats card (challenge removed) -->
       <div class="card activity-card">
         <p class="card-eyebrow">Restaurants visited</p>
-        <p class="activity-big-num">0</p>
+        <p class="activity-big-num" id="visited-count">0</p>
         <div class="activity-sub-row">
+          <div class="activity-sub">
+            <span class="activity-sub-num">0</span>
+            <span class="activity-sub-lab">Want to try</span>
+          </div>
           <div class="activity-sub">
             <span class="activity-sub-num">0 wks</span>
             <span class="activity-sub-lab">Streak</span>
@@ -97,10 +102,17 @@
       <div class="card lists-card">
         <p class="card-eyebrow">My lists</p>
         <div class="list-rows">
-          <a href="#" class="list-row">
+          <a href="#been-section" class="list-row" id="been-list-row">
             <div class="list-left">
               <div class="list-icon">✓</div>
               <span class="list-name">Been</span>
+            </div>
+            <span class="list-meta" id="been-list-count">0 ›</span>
+          </a>
+          <a href="#" class="list-row">
+            <div class="list-left">
+              <div class="list-icon">🔖</div>
+              <span class="list-name">Want to Try</span>
             </div>
             <span class="list-meta">0 ›</span>
           </a>
@@ -139,34 +151,23 @@
 
     </div>
 
+    <!-- ROW 3: Been — review history -->
+    <div class="grid-row row-been" id="been-section" style="display:none;">
+      <div class="card been-card">
+        <div class="been-header">
+          <p class="card-eyebrow" style="margin-bottom:0;">Been — My Reviews</p>
+          <span class="been-count-label" id="been-header-count"></span>
+        </div>
+        <div class="been-grid" id="been-grid">
+          <!-- review cards injected by JS -->
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <p id="message" class="message"></p>
 
   <script src="/js/profile.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const observer = new MutationObserver(() => {
-        const u  = (document.getElementById("profile-username")?.textContent || "").trim();
-        const fn = (document.getElementById("profile-first-name")?.textContent || "").trim();
-        const ln = (document.getElementById("profile-last-name")?.textContent || "").trim();
-        if (u && u !== "—") {
-          const dn = document.getElementById("display-name");
-          const h  = document.getElementById("handle-username");
-          if (dn && dn.textContent === "—") dn.textContent = u;
-          if (h  && h.textContent  === "—") h.textContent  = u;
-        }
-        const initials = ((fn !== "—" ? fn[0] : "") + (ln !== "—" ? ln[0] : "")).toUpperCase() || "?";
-        ["avatar-initials", "topbar-initials"].forEach(id => {
-          const el = document.getElementById(id);
-          if (el && el.textContent !== initials) el.textContent = initials;
-        });
-      });
-      ["profile-username","profile-first-name","profile-last-name"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) observer.observe(el, { childList: true, characterData: true, subtree: true });
-      });
-    });
-  </script>
 </body>
 </html>

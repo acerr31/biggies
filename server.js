@@ -592,26 +592,30 @@ app.get("/api/restaurants/:id", async (req, res) => {
 
     const [restaurantRows] = await connection.execute(
       `
-      SELECT
-        restaurant_ID,
-        restaurantName,
-        phone,
-        address,
-        website,
-        tags,
-        about,
-        amenities,
-        timeToVisit,
-        notes,
-        mondayHours,
-        tuesdayHours,
-        wednesdayHours,
-        thursdayHours,
-        fridayHours,
-        saturdayHours,
-        sundayHours
-      FROM restaurants
-      WHERE restaurant_ID = ?
+        SELECT
+            r.restaurant_ID,
+            r.restaurantName,
+            r.phone,
+            r.address,
+            r.website,
+            r.tags,
+            r.about,
+            r.amenities,
+            r.timeToVisit,
+            r.notes,
+            r.mondayHours,
+            r.tuesdayHours,
+            r.wednesdayHours,
+            r.thursdayHours,
+            r.fridayHours,
+            r.saturdayHours,
+            r.sundayHours,
+            r.email,
+            u.first_name,
+            u.last_name
+        FROM restaurants r
+        LEFT JOIN users u ON r.email = u.email
+        WHERE r.restaurant_ID = ?
       `,
       [id]
     );

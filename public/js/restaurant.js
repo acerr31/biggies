@@ -105,6 +105,22 @@ document.addEventListener("DOMContentLoaded", async () => {
             statusEl.classList.add("status--closed");
         }
         }
+
+    // User logic
+    // Hero quick action: show who submitted the restaurant
+    const heroButtons = document.querySelectorAll(".hero__quickActions a");
+    const postedByBtn = heroButtons[1];
+
+    if (postedByBtn) {
+      if (restaurant.first_name && restaurant.last_name) {
+        postedByBtn.textContent = `Posted by ${restaurant.first_name} ${restaurant.last_name}`;
+      } else if (restaurant.email) {
+        // fallback
+        postedByBtn.textContent = `Posted by ${restaurant.email.split("@")[0]}`;
+      } else {
+        postedByBtn.textContent = "Posted by unknown";
+      }
+    }
         
     // Overview subtitle
     const overviewSub = document.querySelector("#overview .card__sub");

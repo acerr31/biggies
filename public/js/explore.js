@@ -6,10 +6,15 @@ document.addEventListener("DOMContentLoaded", () => {
   loadRestaurants();
   loadWeeklyTopRestaurants();
   setupOpenNowFilter();
+  setupReviewsFilter();
+  setupReviewRatingFilter();
 });
 
 let allRestaurants = [];
 let openNowOnly = false;
+let reviewsOnly = false;
+let ratingOnly = false;
+
 
 /* ── 1. Fetch all restaurants and render cards ── */
 async function loadRestaurants() {
@@ -453,23 +458,63 @@ function renderRestaurants(restaurants) {
   });
 }
 
-/* ── Filter Restaurants by Open Now button ── */
+/* ── Filter Restaurants by Open Now button and review ── */
 function setupOpenNowFilter() {
   const btn = document.getElementById("openNowBtn");
   if (!btn) return;
 
   btn.addEventListener("click", () => {
-  openNowOnly = !openNowOnly;
-  btn.classList.toggle("active", openNowOnly);
+    openNowOnly = !openNowOnly;
+    btn.classList.toggle("active", openNowOnly);
 
-  if (openNowOnly) {
-    const filtered = allRestaurants.filter(getOpenStatus);
-    console.log("Filtered restaurants:", filtered);
-    renderRestaurants(filtered);
-  } else {
-    renderRestaurants(allRestaurants);
-  }
-});
+    if (openNowOnly) {
+      const filtered = allRestaurants.filter(getOpenStatus);
+      renderRestaurants(filtered);
+    } else {
+      renderRestaurants(allRestaurants);
+    }
+  });
+}
+
+function setupReviewsFilter() {
+  const btn = document.getElementById("reviewsBtn");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    reviewsOnly = !reviewsOnly;
+    btn.classList.toggle("active", reviewsOnly);
+
+    if (reviewsOnly) {
+      const sorted = [...allRestaurants].sort(
+        (a, b) => Number(b.review_count || 0) - Number(a.review_count || 0)
+      );
+      renderRestaurants(sorted);
+    } else {
+      renderRestaurants(allRestaurants);
+    }
+  });
+}
+
+function setupReviewRatingFilter() {
+  const btn = document.getElementById("reviewsRateBtn");
+  if (!btn) return;
+
+  // let ratingOnly = false;
+
+  btn.addEventListener("click", () => {
+    ratingOnly = !ratingOnly;
+    btn.classList.toggle("active", ratingOnly);
+
+    if (ratingOnly) {
+      const sorted = [...allRestaurants].sort(
+        (a, b) => Number(b.avg_rating || 0) - Number(a.avg_rating || 0)
+      );
+      renderRestaurants(sorted);
+    } else {
+      renderRestaurants(allRestaurants);
+    }
+  });
+}
 
 // console.log("All restaurants:", allRestaurants);
 
@@ -480,7 +525,7 @@ function setupOpenNowFilter() {
 // });
 
 // console.log("Filtered result:", filtered);
-}
+
 
 function getTodayHours(restaurant) {
   const todayIndex = new Date().getDay(); // 0 = Sun, 6 = Sat

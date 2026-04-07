@@ -12,7 +12,7 @@
   --surface-tinted: #fdfaf6;
   --border:         #e8e0d5;
   --border-light:   #f0ebe3;
-  --text-primary:   #1a1410;
+  --text-primary:   #1a1612;
   --text-secondary: #8c8076;
   --text-muted:     #b8afa6;
   --accent:         #c97b2a;
@@ -182,15 +182,13 @@ img { display: block; max-width: 100%; }
 .nav-link.active {
   color: var(--text-primary);
   font-weight: 600;
-  background: var(--accent-light);
-  color: var(--accent-text);
 }
 .nav-link.active::after {
   content: '';
   position: absolute;
-  bottom: -2px;
-  left: 14px;
-  right: 14px;
+  bottom: 0;       /* directly under text */
+  left: 0;
+  width: 100%;     /* full width of the text container */
   height: 2px;
   background: var(--accent);
   border-radius: 999px;

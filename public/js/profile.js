@@ -43,11 +43,58 @@ async function copyProfileInvite(username) {
     }
 }
 
+function setAvatarPhoto(url) {
+    const circle = document.getElementById("avatar-initials");
+    const img    = document.getElementById("avatar-photo");
+    if (!circle || !img) return;
+    img.src = url;
+    img.style.display = "block";
+    // Hide the initials text without removing the img/input children
+    Array.from(circle.childNodes)
+        .filter(n => n.nodeType === Node.TEXT_NODE)
+        .forEach(n => n.textContent = "");
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     console.log("Profile page loaded");
 
-    const token = localStorage.getItem("jwtToken");
-    const shareBtn = document.getElementById("share-profile-btn");
+    const token     = localStorage.getItem("jwtToken");
+    const shareBtn  = document.getElementById("share-profile-btn");
+    const circle    = document.getElementById("avatar-initials");
+    const fileInput = document.getElementById("avatar-upload");
+
+    // Click avatar → open file picker
+    circle?.addEventListener("click", () => fileInput?.click());
+
+    // File chosen → upload
+    fileInput?.addEventListener("change", async () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("photo", file);
+
+        circle.classList.add("avatar-uploading");
+        try {
+            const res  = await fetch("/api/profile/photo", {
+                method: "POST",
+                headers: { "Authorization": token },
+                body: formData
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setAvatarPhoto(data.profile_photo);
+            } else {
+                document.getElementById("message").textContent = data.message || "Upload failed.";
+            }
+        } catch (err) {
+            console.error("Photo upload error:", err);
+            document.getElementById("message").textContent = "Upload error.";
+        } finally {
+            circle.classList.remove("avatar-uploading");
+            fileInput.value = "";
+        }
+    });
 
     // If no token, redirect to login
     if (!token) {
@@ -101,6 +148,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         } else {
             document.getElementById("profile-phone").textContent = "—";
         }
+        // Show profile photo if one exists
+        if (data.profile_photo) {
+            setAvatarPhoto(data.profile_photo);
+        }
+
         if (shareBtn) {
             shareBtn.addEventListener("click", async () => {
             const username = (document.getElementById("profile-username")?.textContent || "").trim();

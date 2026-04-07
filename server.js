@@ -47,6 +47,21 @@ const uploadRestaurant = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
+// Storage for profile photos
+const profileStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'plated/profiles',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }]
+  },
+});
+
+const uploadProfile = multer({
+  storage: profileStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
 const app = express();
 const port = 3000;
 
@@ -177,7 +192,7 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
         const connection = await createConnection();
 
         const [rows] = await connection.execute(
-            `SELECT email, username, first_name, last_name, phone_number
+            `SELECT email, username, first_name, last_name, phone_number, profile_photo
              FROM users
              WHERE email = ?
              LIMIT 1`,
@@ -194,6 +209,26 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error fetching profile.' });
+    }
+});
+
+// Route: Upload profile photo
+app.post('/api/profile/photo', authenticateToken, uploadProfile.single('photo'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No photo uploaded.' });
+        }
+        const photoUrl = req.file.path;
+        const connection = await createConnection();
+        await connection.execute(
+            'UPDATE users SET profile_photo = ? WHERE email = ?',
+            [photoUrl, req.user.email]
+        );
+        await connection.end();
+        res.status(200).json({ profile_photo: photoUrl });
+    } catch (error) {
+        console.error('Error uploading profile photo:', error);
+        res.status(500).json({ message: 'Error uploading profile photo.' });
     }
 });
 

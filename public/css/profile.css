@@ -138,6 +138,34 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   font-size: 1.3rem;
   font-weight: 600;
   color: var(--accent-text);
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: border-color .15s;
+}
+.avatar-circle:hover::after {
+  content: "✎";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.42);
+  color: #fff;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.avatar-circle.avatar-uploading::after {
+  content: "…";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.42);
+  color: #fff;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
 .identity-name {
   font-family: var(--font-display);

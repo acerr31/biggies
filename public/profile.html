@@ -37,7 +37,10 @@
 
       <!-- Identity card -->
       <div class="card identity-card">
-        <div class="avatar-circle" id="avatar-initials">?</div>
+        <div class="avatar-circle" id="avatar-initials" title="Click to upload photo">
+          <img id="avatar-photo" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+          <input type="file" id="avatar-upload" accept="image/jpeg,image/png,image/webp" style="display:none;" />
+        </div>
         <div class="identity-info">
           <h2 class="identity-name" id="display-name">—</h2>
           <p class="identity-handle">@<span id="handle-username">—</span></p>

@@ -235,6 +235,21 @@
                 </div>`;
         }
 
+        // ── format date/time ───────────────────────────────────────────────────
+        function formatDate(dateStr) {
+            if (!dateStr) return "";
+            const d = new Date(dateStr);
+
+            // prevent crash if invalid date
+            if (isNaN(d)) return "";
+
+            return d.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+            });
+        }
+
         // ── render ───────────────────────────────────────────────────
         function renderReviews(reviews) {
             const list = document.getElementById("feedList");
@@ -256,8 +271,8 @@
                     : "";
 
                 const visitHtml = r.visit_date
-                    ? `<span style="color:#8a8278; font-size:.82rem;"> · Visited ${r.visit_date}</span>`
-                    : "";
+                ? `<span style="color:#8a8278; font-size:.82rem;"> · Visited ${formatDate(r.visit_date)}</span>`
+                : "";
 
                 return `
                 <article class="card">

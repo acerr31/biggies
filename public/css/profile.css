@@ -138,34 +138,6 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   font-size: 1.3rem;
   font-weight: 600;
   color: var(--accent-text);
-  cursor: pointer;
-  overflow: hidden;
-  position: relative;
-  transition: border-color .15s;
-}
-.avatar-circle:hover::after {
-  content: "✎";
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,.42);
-  color: #fff;
-  font-size: 1.3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-.avatar-circle.avatar-uploading::after {
-  content: "…";
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,.42);
-  color: #fff;
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
 }
 .identity-name {
   font-family: var(--font-display);
@@ -233,7 +205,7 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
 }
 .btn-ghost:hover { background: var(--bg); }
 
-/* â”€â”€ Activity card â”€â”€ */
+/* ── Activity card ── */
 .activity-card { display: flex; flex-direction: column; gap: 0; }
 .activity-big-num {
   font-family: var(--font-display);
@@ -535,6 +507,102 @@ h1 {
   display: block;
 }
 
+/* ── Been section ── */
+.row-been { grid-template-columns: 1fr; animation-delay: .14s; }
+
+.been-card { }
+
+.been-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.been-count-label {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.been-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+/* Individual review card */
+.review-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .15s, transform .15s;
+}
+.review-card:hover {
+  box-shadow: 0 4px 16px rgba(60,40,10,.1);
+  transform: translateY(-2px);
+}
+.rc-photo {
+  height: 130px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+.rc-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rc-restaurant {
+  font-size: .97rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.rc-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rc-sentiment {
+  font-size: .72rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+.sent-liked { background: #e6f7f0; color: #0d6b4a; }
+.sent-fine  { background: #fdf3e7; color: var(--accent-text); }
+.sent-didnt { background: #fdf2f2; color: #c0392b; }
+
+.rc-stars {
+  font-size: .8rem;
+  color: var(--accent);
+  letter-spacing: .5px;
+}
+.rc-date {
+  font-size: .75rem;
+  color: var(--text-secondary);
+}
+.rc-notes {
+  font-size: .82rem;
+  color: var(--text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.rc-dishes {
+  font-size: .78rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Responsive */
 @media (max-width: 700px) {
   .edit-grid { grid-template-columns: 1fr; }
@@ -564,4 +632,7 @@ h1 {
 .share-toast.show {
   opacity: 1;
   transform: translateY(0);
+  .row-top { grid-template-columns: 1fr; }
+  .row-bottom { grid-template-columns: 1fr; }
+  .been-grid { grid-template-columns: 1fr 1fr; }
 }

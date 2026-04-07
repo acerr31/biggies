@@ -399,6 +399,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!open && !close) return null;
       return `${open},${close}`;
     }
+    const token = localStorage.getItem("jwtToken");
+
+      let userEmail = null;
+      try {
+        if (token) {
+          userEmail = JSON.parse(atob(token.split(".")[1])).email || null;
+        }
+      } catch {
+        userEmail = null;
+      }
 
     const payload = {
       restaurantName: name,
@@ -416,11 +426,11 @@ document.addEventListener("DOMContentLoaded", () => {
       thursdayHours:  combineHours(thursdayOpen,  thursdayClose),
       fridayHours:    combineHours(fridayOpen,    fridayClose),
       saturdayHours:  combineHours(saturdayOpen,  saturdayClose),
-      sundayHours:    combineHours(sundayOpen,    sundayClose)
+      sundayHours:    combineHours(sundayOpen,    sundayClose),
+      email:          userEmail
     };
 
     try {
-      const token = localStorage.getItem("jwtToken");
 
       // Build FormData exactly like review.js
       const formData = new FormData();

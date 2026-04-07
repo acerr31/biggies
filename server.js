@@ -331,7 +331,8 @@ app.post("/api/restaurants", authenticateToken, uploadRestaurant.array("photos",
       thursdayHours,
       fridayHours,
       saturdayHours,
-      sundayHours
+      sundayHours,
+      email
     } = payload;
 
     if (!restaurantName || !phone || !address || !about || !tags) {
@@ -358,9 +359,10 @@ app.post("/api/restaurants", authenticateToken, uploadRestaurant.array("photos",
         thursdayHours,
         fridayHours,
         saturdayHours,
-        sundayHours
+        sundayHours,
+        email
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
@@ -379,7 +381,8 @@ app.post("/api/restaurants", authenticateToken, uploadRestaurant.array("photos",
       thursdayHours,
       fridayHours,
       saturdayHours,
-      sundayHours
+      sundayHours,
+      email
     ];
 
     const [result] = await connection.execute(sql, values);

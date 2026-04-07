@@ -24,6 +24,98 @@
       .restaurant-card { flex-direction:column; }
       .restaurant-image { width:100%; min-height:140px; border-radius:8px; }
     }
+    .compact-top-row{
+  display:block;
+}
+.compact-hero-inner{
+  padding: 2px 18px;
+}
+.results-layout{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) 320px;
+  gap:16px;
+  align-items:start;
+}
+.results-search-row{
+  display:flex;
+  align-items:center;
+  margin-bottom:14px;
+  width:100%;
+}
+.full-width-search{
+  flex:1;
+  min-width:0;
+}
+.full-width-search input{
+  width:100%;
+}
+.results-filters{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.sidebar-weekly-card{
+  padding:16px;
+}
+.filters-card{
+  padding:16px;
+}
+.weekly-top-header{
+  margin-bottom:12px;
+}
+.weekly-top-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.weekly-top-item{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:10px;
+  border:1px solid #e6e0d9;
+  border-radius:12px;
+  background:#fff;
+}
+.weekly-top-rank{
+  min-width:30px;
+  height:30px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  font-size:13px;
+  background:#f5eee5;
+  color:#3d342b;
+}
+.weekly-top-content{
+  min-width:0;
+  flex:1;
+}
+.weekly-top-name{
+  font-weight:700;
+  margin-bottom:4px;
+  font-size:14px;
+  line-height:1.25;
+}
+.weekly-top-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  color:#7b7268;
+  font-size:13px;
+  line-height:1.3;
+}
+.weekly-top-empty{
+  color:#7b7268;
+  font-size:14px;
+}
+@media (max-width: 980px){
+  .results-layout{
+    grid-template-columns:1fr;
+  }
+}
   </style>
 </head>
 
@@ -54,13 +146,13 @@
 
   <main class="explore-page">
 
-    <!-- top row -->
+    <!-- top row
     <div class="grid-row row-top">
-      <div class="card">
+      <!-- <div class="card">
         <div style="font-weight:600; margin-bottom:8px">Your lists</div>
         <div style="color:var(--text-secondary)">Been, Want to try, Favorites</div>
-      </div>
-
+      </div> -->
+<!-- 
       <div class="card explore-hero">
         <div class="hero-inner" style="align-items:center; width:100%;">
           <div class="explore-title" style="flex:1">
@@ -81,7 +173,19 @@
         <div style="font-weight:600; margin-bottom:8px">Quick Picks</div>
         <div style="color:var(--text-secondary)">Near you, Highly rated</div>
       </div>
+    </div> -->
+<div class="grid-row row-top compact-top-row">
+  <div class="card explore-hero">
+    <div class="hero-inner compact-hero-inner">
+      <div class="explore-title" style="width:100%;">
+        <h1 style="margin:0; font-size:26px; color:var(--text-primary)">Explore</h1>
+        <p style="margin-top:6px; color:var(--text-secondary)">
+          Discover restaurants near you, filter by cuisine, price, and rating
+        </p>
+      </div>
     </div>
+  </div>
+</div>
 
     <!-- bottom row: grid + sidebar -->
     <div class="grid-row row-bottom" style="margin-top:10px;">
@@ -146,27 +250,41 @@
       <div class="card results-shell">
         <div class="results-layout">
           <div class="results-main">
-            <div class="results-header">
-              <h2>Restaurants</h2>
-            </div>
+  <div class="results-search-row">
+  <div class="search-bar full-width-search" role="search" aria-label="Search restaurants">
+    <input type="search" id="searchInput" placeholder="Search restaurants, cuisines..." />
+  </div>
+</div>
 
-            <!-- Dynamic restaurant grid — populated by explore.js -->
-            <div class="explore-grid" id="restaurantGrid">
-              <div class="loader"></div>
-            </div>
-          </div>
+  <div class="results-header">
+    <h2>Restaurants</h2>
+  </div>
+
+  <div class="explore-grid" id="restaurantGrid">
+    <div class="loader"></div>
+  </div>
+</div>
 
           <div class="results-filters">
-            <div style="font-weight:600; margin-bottom:8px">Filters</div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              <button class="filter-btn" id="openNowBtn">Open Now</button>
-              <button class="filter-btn">Reviews</button>
-              <!-- <button class="filter-btn">Price</button> -->
-            </div>
-          </div>
-        </div>
-      </div>
+  <div class="card filters-card">
+    <div style="font-weight:600; margin-bottom:8px">Filters</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="filter-btn" id="openNowBtn">Open Now</button>
+      <button class="filter-btn">Reviews</button>
     </div>
+  </div>
+
+  <div class="card weekly-top-card sidebar-weekly-card">
+    <div class="weekly-top-header">
+      <div style="font-weight:600; margin-bottom:8px">Weekly Top Restaurants</div>
+      <div style="color:var(--text-secondary)">Most active restaurants this week</div>
+    </div>
+
+    <div id="weeklyTopRestaurants" class="weekly-top-list">
+      <div class="weekly-top-empty">Loading weekly rankings...</div>
+    </div>
+  </div>
+</div>
 
       <!-- <div class="card">
         <div style="font-weight:600; margin-bottom:8px">Filters</div>

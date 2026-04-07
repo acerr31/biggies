@@ -302,20 +302,20 @@ function renderBeenDropdown(reviews) {
         const sentLabel = SENT_LABEL[r.sentiment] || "";
         const stars = r.stars ? "★".repeat(r.stars) + "☆".repeat(5 - r.stars) : "";
         return `
-        <div class="been-item">
+        <a href="restaurant.html?id=${r.restaurant_id}" class="been-item">
           <span class="been-restaurant">${escHtml(r.restaurant_name)}</span>
           <div class="been-item-right">
             ${sentLabel ? `<span class="been-badge ${sentClass}">${sentLabel}</span>` : ""}
             ${stars    ? `<span class="been-stars">${stars}</span>` : ""}
           </div>
-        </div>`;
+        </a>`;
     }).join("");
 }
 
 function renderPostsGrid(reviews) {
     const grid = document.getElementById("posts-grid");
     if (!grid) return;
-    grid.innerHTML = reviews.map(r => {
+    grid.innerHTML = reviews.map((r, i) => {
         const photo = r.photos?.[0];
         const initial = r.restaurant_name?.[0]?.toUpperCase() || "?";
         const stars = r.stars ? "★".repeat(r.stars) : "";
@@ -323,7 +323,7 @@ function renderPostsGrid(reviews) {
             ? `style="background-image:url('${photo}')"`
             : `class="post-cell-placeholder"`;
         return `
-        <div class="post-cell" ${bg}>
+        <div class="post-cell" ${bg} data-review-index="${i}">
           ${!photo ? `<span class="post-initial">${initial}</span>` : ""}
           <div class="post-overlay">
             <span class="post-name">${escHtml(r.restaurant_name)}</span>
@@ -331,6 +331,70 @@ function renderPostsGrid(reviews) {
           </div>
         </div>`;
     }).join("");
+
+    // Wire up click → modal
+    grid.querySelectorAll(".post-cell").forEach(cell => {
+        cell.addEventListener("click", () => {
+            const idx = parseInt(cell.dataset.reviewIndex, 10);
+            openReviewModal(reviews[idx]);
+        });
+    });
+}
+
+function openReviewModal(r) {
+    // Photo strip
+    const strip = document.getElementById("modal-photo-strip");
+    strip.innerHTML = r.photos?.length
+        ? r.photos.map(p => `<img src="${p}" alt="" class="modal-photo" />`).join("")
+        : "";
+    strip.style.display = r.photos?.length ? "flex" : "none";
+
+    // Restaurant name + link
+    document.getElementById("modal-restaurant").textContent = r.restaurant_name;
+    const link = document.getElementById("modal-link");
+    link.href = `restaurant.html?id=${r.restaurant_id}`;
+
+    // Sentiment
+    const sentEl = document.getElementById("modal-sentiment");
+    sentEl.textContent = SENT_LABEL[r.sentiment] || "";
+    sentEl.className = "modal-sentiment " + (SENT_CLASS[r.sentiment] || "");
+
+    // Stars
+    document.getElementById("modal-stars").textContent =
+        r.stars ? "★".repeat(r.stars) + "☆".repeat(5 - r.stars) : "";
+
+    // Date
+    const dateEl = document.getElementById("modal-date");
+    const raw = r.visit_date || r.created_at;
+    dateEl.textContent = raw
+        ? new Date(raw).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+        : "";
+
+    // Notes
+    const notesEl = document.getElementById("modal-notes");
+    notesEl.textContent = r.notes || "";
+    notesEl.style.display = r.notes ? "" : "none";
+
+    // Dishes
+    const dishesEl = document.getElementById("modal-dishes");
+    dishesEl.textContent = r.favorite_dishes ? `Favorites: ${r.favorite_dishes}` : "";
+    dishesEl.style.display = r.favorite_dishes ? "" : "none";
+
+    document.getElementById("review-modal-backdrop").classList.add("modal-open");
+    document.body.style.overflow = "hidden";
+}
+
+// Close modal
+document.addEventListener("DOMContentLoaded", () => {
+    const backdrop = document.getElementById("review-modal-backdrop");
+    document.getElementById("modal-close")?.addEventListener("click", closeModal);
+    backdrop?.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+});
+
+function closeModal() {
+    document.getElementById("review-modal-backdrop")?.classList.remove("modal-open");
+    document.body.style.overflow = "";
 }
 
 function escHtml(str) {

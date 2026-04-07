@@ -752,6 +752,119 @@ h1 {
   letter-spacing: .5px;
 }
 
+/* ── Review modal ── */
+.review-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.review-modal-backdrop.modal-open {
+  display: flex;
+}
+.review-modal {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  position: relative;
+  animation: fadeUp .22s ease both;
+}
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 1;
+}
+.modal-close:hover { color: var(--text-primary); }
+.modal-photo-strip {
+  display: flex;
+  gap: 3px;
+  overflow-x: auto;
+  max-height: 220px;
+}
+.modal-photo {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+.modal-photo-strip:has(.modal-photo + .modal-photo) .modal-photo {
+  width: 50%;
+  border-radius: 0;
+}
+.modal-body {
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.modal-restaurant {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  margin: 0;
+  padding-right: 24px;
+}
+.modal-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.modal-sentiment {
+  font-size: .75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.modal-stars {
+  font-size: .88rem;
+  color: var(--accent);
+  letter-spacing: .5px;
+}
+.modal-date {
+  font-size: .78rem;
+  color: var(--text-secondary);
+}
+.modal-notes {
+  font-size: .9rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.modal-dishes {
+  font-size: .82rem;
+  color: var(--text-secondary);
+}
+.modal-link {
+  font-size: .84rem;
+  font-weight: 600;
+  color: var(--teal);
+  margin-top: 4px;
+}
+.modal-link:hover { text-decoration: underline; }
+
+/* Been item as link */
+.been-item {
+  text-decoration: none;
+  transition: background .12s;
+}
+.been-item:hover { background: #f0ebe3; }
+
 @media (max-width: 700px) {
   .row-top    { grid-template-columns: 1fr; }
   .row-bottom { grid-template-columns: 1fr; }

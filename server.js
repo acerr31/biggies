@@ -331,7 +331,8 @@ app.post("/api/restaurants", authenticateToken, uploadRestaurant.array("photos",
       thursdayHours,
       fridayHours,
       saturdayHours,
-      sundayHours
+      sundayHours,
+      email
     } = payload;
 
     if (!restaurantName || !phone || !address || !about || !tags) {
@@ -358,9 +359,10 @@ app.post("/api/restaurants", authenticateToken, uploadRestaurant.array("photos",
         thursdayHours,
         fridayHours,
         saturdayHours,
-        sundayHours
+        sundayHours,
+        email
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
@@ -379,7 +381,8 @@ app.post("/api/restaurants", authenticateToken, uploadRestaurant.array("photos",
       thursdayHours,
       fridayHours,
       saturdayHours,
-      sundayHours
+      sundayHours,
+      email
     ];
 
     const [result] = await connection.execute(sql, values);
@@ -495,6 +498,92 @@ app.get("/api/restaurants", async (req, res) => {
   }
 });
 
+///route get photos:
+app.get("/api/restaurants", async (req, res) => {
+  try {
+    const connection = await createConnection();
+
+    // Fetch all restaurants with their computed average star rating
+    const [restaurants] = await connection.execute(`
+  SELECT
+    r.restaurant_ID,
+    r.restaurantName,
+    r.phone,
+    r.address,
+    r.website,
+    r.tags,
+    r.about,
+    r.amenities,
+    r.timeToVisit,
+    r.notes,
+    r.mondayHours,
+    r.tuesdayHours,
+    r.wednesdayHours,
+    r.thursdayHours,
+    r.fridayHours,
+    r.saturdayHours,
+    r.sundayHours,
+    AVG(rv.stars) AS avg_rating,
+    COUNT(rv.id)  AS review_count
+  FROM restaurants r
+  LEFT JOIN reviews rv ON rv.restaurant_id = r.restaurant_ID
+  GROUP BY
+    r.restaurant_ID,
+    r.restaurantName,
+    r.phone,
+    r.address,
+    r.website,
+    r.tags,
+    r.about,
+    r.amenities,
+    r.timeToVisit,
+    r.notes,
+    r.mondayHours,
+    r.tuesdayHours,
+    r.wednesdayHours,
+    r.thursdayHours,
+    r.fridayHours,
+    r.saturdayHours,
+    r.sundayHours
+  ORDER BY r.restaurantName ASC
+`);
+
+    if (restaurants.length === 0) {
+      await connection.end();
+      return res.status(200).json({ restaurants: [] });
+    }
+
+    // Fetch the first photo for each restaurant in one query
+    const ids = restaurants.map(r => r.restaurant_ID);
+    const placeholders = ids.map(() => "?").join(",");
+
+    const [photoRows] = await connection.execute(
+      `SELECT restaurant_id, MIN(id) AS first_photo_id, file_path
+       FROM restaurant_photos
+       WHERE restaurant_id IN (${placeholders})
+       GROUP BY restaurant_id`,
+      ids
+    );
+
+    // Build a quick lookup map: restaurantId -> first photo URL
+    const photoMap = {};
+    photoRows.forEach(p => { photoMap[p.restaurant_id] = p.file_path; });
+
+    // Attach the first photo URL to each restaurant
+    const enriched = restaurants.map(r => ({
+      ...r,
+      photos: photoMap[r.restaurant_ID] ? [photoMap[r.restaurant_ID]] : []
+    }));
+
+    await connection.end();
+    res.status(200).json({ restaurants: enriched });
+
+  } catch (error) {
+    console.error("Error fetching restaurants:", error);
+    res.status(500).json({ message: "Server error while fetching restaurants" });
+  }
+});
+
 //route: get restaurant information
 app.get("/api/restaurants/:id", async (req, res) => {
   try {
@@ -503,26 +592,30 @@ app.get("/api/restaurants/:id", async (req, res) => {
 
     const [restaurantRows] = await connection.execute(
       `
-      SELECT
-        restaurant_ID,
-        restaurantName,
-        phone,
-        address,
-        website,
-        tags,
-        about,
-        amenities,
-        timeToVisit,
-        notes,
-        mondayHours,
-        tuesdayHours,
-        wednesdayHours,
-        thursdayHours,
-        fridayHours,
-        saturdayHours,
-        sundayHours
-      FROM restaurants
-      WHERE restaurant_ID = ?
+        SELECT
+            r.restaurant_ID,
+            r.restaurantName,
+            r.phone,
+            r.address,
+            r.website,
+            r.tags,
+            r.about,
+            r.amenities,
+            r.timeToVisit,
+            r.notes,
+            r.mondayHours,
+            r.tuesdayHours,
+            r.wednesdayHours,
+            r.thursdayHours,
+            r.fridayHours,
+            r.saturdayHours,
+            r.sundayHours,
+            r.email,
+            u.first_name,
+            u.last_name
+        FROM restaurants r
+        LEFT JOIN users u ON r.email = u.email
+        WHERE r.restaurant_ID = ?
       `,
       [id]
     );

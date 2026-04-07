@@ -4,6 +4,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   loadRestaurants();
+  loadWeeklyTopRestaurants();
   setupOpenNowFilter();
 });
 
@@ -40,6 +41,103 @@ async function loadRestaurants() {
   }
 }
 
+
+async function loadWeeklyTopRestaurants() {
+  const container = document.getElementById("weeklyTopRestaurants");
+  if (!container) return;
+
+  container.innerHTML = `<div class="weekly-top-empty">Loading weekly rankings...</div>`;
+
+  try {
+    const restaurantRes = await fetch("/api/restaurants");
+    if (!restaurantRes.ok) throw new Error("Failed to load restaurants");
+
+    const restaurantData = await restaurantRes.json();
+    const restaurants = restaurantData.restaurants || [];
+
+    if (!restaurants.length) {
+      container.innerHTML = `<div class="weekly-top-empty">No restaurants found.</div>`;
+      return;
+    }
+
+    const restaurantStats = await Promise.all(
+      restaurants.map(async (restaurant) => {
+        try {
+          const reviewRes = await fetch(`/api/reviews/${restaurant.restaurant_ID}`);
+          if (!reviewRes.ok) throw new Error("Failed reviews fetch");
+
+          const reviewData = await reviewRes.json();
+          const reviews = reviewData.reviews || [];
+
+          const weeklyReviews = reviews.filter(review => {
+            const reviewDate = getReviewDate(review);
+            return isInCurrentWeek(reviewDate);
+          });
+
+          const ratingsThisWeek = weeklyReviews
+            .map(review => Number(review.stars))
+            .filter(stars => !Number.isNaN(stars) && stars > 0);
+
+          const avgRatingThisWeek = ratingsThisWeek.length
+            ? ratingsThisWeek.reduce((sum, stars) => sum + stars, 0) / ratingsThisWeek.length
+            : 0;
+
+          return {
+            restaurant_ID: restaurant.restaurant_ID,
+            restaurantName: restaurant.restaurantName,
+            totalReviews: reviews.length,
+            reviewsThisWeek: weeklyReviews.length,
+            avgRatingThisWeek
+          };
+        } catch (err) {
+          console.error(`Weekly stats failed for restaurant ${restaurant.restaurant_ID}`, err);
+          return {
+            restaurant_ID: restaurant.restaurant_ID,
+            restaurantName: restaurant.restaurantName,
+            totalReviews: 0,
+            reviewsThisWeek: 0,
+            avgRatingThisWeek: 0
+          };
+        }
+      })
+    );
+
+    // Current behavior: rank by THIS WEEK'S review count
+    const topRestaurants = restaurantStats
+      .filter(r => r.reviewsThisWeek > 0)
+      .sort((a, b) => {
+        if (b.reviewsThisWeek !== a.reviewsThisWeek) {
+          return b.reviewsThisWeek - a.reviewsThisWeek;
+        }
+        return b.avgRatingThisWeek - a.avgRatingThisWeek;
+      })
+      .slice(0, 5);
+
+    if (!topRestaurants.length) {
+      container.innerHTML = `<div class="weekly-top-empty">No reviews were added for restaurants this week.</div>`;
+      return;
+    }
+
+    container.innerHTML = topRestaurants.map((restaurant, index) => `
+      <div class="weekly-top-item">
+        <div class="weekly-top-rank">#${index + 1}</div>
+        <div class="weekly-top-content">
+          <div class="weekly-top-name">${escHtml(restaurant.restaurantName)}</div>
+          <div class="weekly-top-meta">
+            <span>${restaurant.reviewsThisWeek} review${restaurant.reviewsThisWeek === 1 ? "" : "s"} this week</span>
+            <span>•</span>
+            <span>${renderStars(restaurant.avgRatingThisWeek)} (${restaurant.avgRatingThisWeek.toFixed(1)})</span>
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<div class="weekly-top-empty">Could not load weekly top restaurants.</div>`;
+  }
+}
+
 /* ── 2. Build a single restaurant card element ── */
 function buildCard(r) {
   const card = document.createElement("div");
@@ -49,7 +147,7 @@ function buildCard(r) {
   // Use the first photo if available, otherwise a placeholder
   const imgUrl = r.photos && r.photos.length > 0
     ? r.photos[0]
-    : `https://picsum.photos/seed/${r.restaurant_ID}/400/300`;
+    : "/images/PlatedLogo.png";
 
   // Parse tags for category display (tags stored as comma-separated string)
   const categoryText = r.tags
@@ -92,20 +190,45 @@ async function openDetailPanel(id) {
 
   try {
     // Fetch restaurant detail and reviews in parallel
-    const [rRes, revRes] = await Promise.all([
+    const [rRes, revRes, photoRes] = await Promise.all([
       fetch(`/api/restaurants/${id}`),
-      fetch(`/api/reviews/${id}`)
+      fetch(`/api/reviews/${id}`),
+      fetch(`/api/restaurants/${id}/photos`)
     ]);
 
-    const rData   = rRes.ok   ? await rRes.json()   : null;
-    const revData = revRes.ok ? await revRes.json()  : { reviews: [] };
+    const rData    = rRes.ok    ? await rRes.json()   : null;
+    const revData  = revRes.ok  ? await revRes.json() : { reviews: [] };
+    const photoData = photoRes.ok ? await photoRes.json() : { photos: [] };
 
     if (!rData) {
       body.innerHTML = `<p class="no-results">Could not load restaurant details.</p>`;
       return;
     }
 
-    body.innerHTML = buildDetailHTML(rData.restaurant, revData.reviews || []);
+    const uploadedPhotosFromDetail = Array.isArray(rData.restaurant?.photos)
+  ? rData.restaurant.photos
+  : [];
+
+    const uploadedPhotosFromPhotoRoute = Array.isArray(photoData.photos)
+      ? photoData.photos
+      : [];
+
+    const reviewPhotos = (revData.reviews || []).flatMap(review =>
+      Array.isArray(review.photos) ? review.photos : []
+    );
+
+    const mergedRestaurant = {
+      ...rData.restaurant,
+      photos: [
+        ...new Set([
+          ...uploadedPhotosFromDetail,
+          ...uploadedPhotosFromPhotoRoute,
+          ...reviewPhotos
+        ])
+      ]
+    };
+
+    body.innerHTML = buildDetailHTML(mergedRestaurant, revData.reviews || []);
 
     // Wire up photo carousel navigation if there are multiple photos
     initCarousel();
@@ -410,6 +533,24 @@ function getOpenStatus(restaurant) {
   console.log("Open Now check:", restaurant.restaurantName, todayHours);
   // console.log(allRestaurants[0].mondayHours);
   return isOpenNow(todayHours);
+}
+
+function getReviewDate(review) {
+  return review.created_at || review.review_date || review.visit_date || null;
+}
+
+function isInCurrentWeek(dateStr) {
+  if (!dateStr) return false;
+
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return false;
+
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setHours(0, 0, 0, 0);
+  startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday start
+
+  return date >= startOfWeek && date <= now;
 }
 
 

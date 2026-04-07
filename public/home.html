@@ -13,7 +13,7 @@
     <!-- Plated Topbar -->
     <header class="topbar">
         <div class="logo">
-            <a href="dashboard.html">
+            <a href="home.html">
                 <img src="images/PlatedLogo.png" alt="Plated" />
             </a>
         </div>
@@ -57,7 +57,7 @@
                     <p class="feed-sub">Reviews from the Plated community</p>
                     <div class="feed-actions">
                         <a href="restaurantform.html" class="feed-action-btn">+ Add a Restaurant</a>
-                        <a href="review.html" class="feed-action-btn feed-action-btn--secondary">+ Add a Review</a>
+                        <a href="explore.html" class="feed-action-btn feed-action-btn--secondary">+ Add a Review</a>
                     </div>
                 </div>
 
@@ -235,6 +235,21 @@
                 </div>`;
         }
 
+        // ── format date/time ───────────────────────────────────────────────────
+        function formatDate(dateStr) {
+            if (!dateStr) return "";
+            const d = new Date(dateStr);
+
+            // prevent crash if invalid date
+            if (isNaN(d)) return "";
+
+            return d.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+            });
+        }
+
         // ── render ───────────────────────────────────────────────────
         function renderReviews(reviews) {
             const list = document.getElementById("feedList");
@@ -256,8 +271,8 @@
                     : "";
 
                 const visitHtml = r.visit_date
-                    ? `<span style="color:#8a8278; font-size:.82rem;"> · Visited ${r.visit_date}</span>`
-                    : "";
+                ? `<span style="color:#8a8278; font-size:.82rem;"> · Visited ${formatDate(r.visit_date)}</span>`
+                : "";
 
                 return `
                 <article class="card">
@@ -270,7 +285,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <p class="card-restaurant">${r.restaurant_name || "Unknown Restaurant"}</p>
+                        <a class="card-restaurant" href="restaurant.html?id=${r.restaurant_id}">${r.restaurant_name || "Unknown Restaurant"}</a>
                         ${r.stars ? `<p class="card-stars">${starsHtml(r.stars)} (${r.stars}/5)</p>` : ""}
                         ${sentimentHtml(r.sentiment)}
                         ${r.notes ? `<p class="card-notes">${r.notes}</p>` : ""}

@@ -288,6 +288,52 @@
       submitBtn.disabled = false;
       submitBtn.textContent = "Post Review";
     }
+
+    
+
+    
   });
 
 })();
+
+
+
+// fixing the broken name and back button on the review page when coming from the restaurant page
+document.addEventListener("DOMContentLoaded", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const restaurantId = params.get("id");
+
+  if (!restaurantId) return;
+
+  try {
+    const res = await fetch(`/api/restaurants/${restaurantId}`);
+    const data = await res.json();
+
+    if (!res.ok || !data.restaurant) return;
+
+    // Set restaurant name
+    const nameEl = document.getElementById("restaurantName");
+    if (nameEl) {
+      nameEl.textContent = data.restaurant.restaurantName || "Restaurant";
+    }
+
+    // Fix cancel button
+    const cancelBtn = document.getElementById("cancelBtn");
+    if (cancelBtn) {
+      cancelBtn.onclick = function () {
+        window.location.href = `restaurant.html?id=${restaurantId}`;
+      };
+    }
+
+    // Fix back button
+        const backBtn = document.getElementById("backBtn");
+    if (backBtn) {
+      backBtn.onclick = function () {
+        window.location.href = `restaurant.html?id=${restaurantId}`;
+      };
+    }
+
+  } catch (err) {
+    console.error("Context load failed:", err);
+  }
+});

@@ -173,6 +173,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             setAvatarPhoto(data.profile_photo);
         }
 
+        // ── Fetch + render reviews (Been, streak, posts) ──────
+        try {
+            const revRes = await fetch("/api/my-reviews", {
+                headers: { "Authorization": token }
+            });
+            if (revRes.ok) {
+                const { reviews } = await revRes.json();
+                updateReviewFeatures(reviews);
+            }
+        } catch (e) {
+            console.error("Could not load reviews:", e);
+        }
+
         if (shareBtn) {
             shareBtn.addEventListener("click", async () => {
             const username = (document.getElementById("profile-username")?.textContent || "").trim();
@@ -206,4 +219,124 @@ if (logoutBtn) {
     localStorage.removeItem("jwtToken");
     window.location.href = "/";
   });
+}
+
+// ── Been toggle ───────────────────────────────────────────────
+document.getElementById("been-toggle")?.addEventListener("click", () => {
+    const dropdown = document.getElementById("been-dropdown");
+    const chevron  = document.querySelector(".been-chevron");
+    if (!dropdown) return;
+    const open = dropdown.classList.toggle("been-open");
+    if (chevron) chevron.textContent = open ? "˅" : "›";
+});
+
+// ── Review feature helpers ────────────────────────────────────
+
+function updateReviewFeatures(reviews) {
+    const count = reviews.length;
+
+    // Visited count + been count
+    const visitedEl = document.getElementById("visited-count");
+    const beenCount = document.getElementById("been-list-count");
+    if (visitedEl) visitedEl.textContent = count;
+    if (beenCount) beenCount.innerHTML = `${count} <span class="been-chevron">›</span>`;
+
+    // Streak
+    const streak = calcStreak(reviews);
+    const streakEl = document.getElementById("streak-count");
+    if (streakEl) streakEl.textContent = `${streak} wk${streak !== 1 ? "s" : ""}`;
+
+    // Been dropdown
+    renderBeenDropdown(reviews);
+
+    // Posts grid
+    if (count > 0) {
+        const postsLabel = document.getElementById("posts-count-label");
+        if (postsLabel) postsLabel.textContent = `${count} post${count !== 1 ? "s" : ""}`;
+        renderPostsGrid(reviews);
+        document.getElementById("posts-section").style.display = "";
+    }
+}
+
+function calcStreak(reviews) {
+    if (!reviews.length) return 0;
+    const MS_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+    // Get Monday-based week start timestamp for a date
+    const weekStart = (d) => {
+        const date = new Date(d);
+        date.setHours(0, 0, 0, 0);
+        const day = date.getDay();
+        date.setDate(date.getDate() - (day === 0 ? 6 : day - 1));
+        return date.getTime();
+    };
+
+    const weeks = new Set(reviews.map(r => weekStart(r.created_at)));
+    const thisWeek = weekStart(new Date());
+    const lastWeek = thisWeek - MS_WEEK;
+
+    // Start from this week if it has a review, else last week
+    let current = weeks.has(thisWeek) ? thisWeek : (weeks.has(lastWeek) ? lastWeek : null);
+    if (!current) return 0;
+
+    let streak = 0;
+    while (weeks.has(current)) {
+        streak++;
+        current -= MS_WEEK;
+    }
+    return streak;
+}
+
+const SENT_LABEL = { liked: "Liked it", fine: "It was fine", didnt: "Didn't like it" };
+const SENT_CLASS = { liked: "sent-liked", fine: "sent-fine", didnt: "sent-didnt" };
+
+function renderBeenDropdown(reviews) {
+    const dropdown = document.getElementById("been-dropdown");
+    if (!dropdown) return;
+    if (!reviews.length) {
+        dropdown.innerHTML = `<p class="been-empty">No reviews yet.</p>`;
+        return;
+    }
+    dropdown.innerHTML = reviews.map(r => {
+        const sentClass = SENT_CLASS[r.sentiment] || "";
+        const sentLabel = SENT_LABEL[r.sentiment] || "";
+        const stars = r.stars ? "★".repeat(r.stars) + "☆".repeat(5 - r.stars) : "";
+        return `
+        <div class="been-item">
+          <span class="been-restaurant">${escHtml(r.restaurant_name)}</span>
+          <div class="been-item-right">
+            ${sentLabel ? `<span class="been-badge ${sentClass}">${sentLabel}</span>` : ""}
+            ${stars    ? `<span class="been-stars">${stars}</span>` : ""}
+          </div>
+        </div>`;
+    }).join("");
+}
+
+function renderPostsGrid(reviews) {
+    const grid = document.getElementById("posts-grid");
+    if (!grid) return;
+    grid.innerHTML = reviews.map(r => {
+        const photo = r.photos?.[0];
+        const initial = r.restaurant_name?.[0]?.toUpperCase() || "?";
+        const stars = r.stars ? "★".repeat(r.stars) : "";
+        const bg = photo
+            ? `style="background-image:url('${photo}')"`
+            : `class="post-cell-placeholder"`;
+        return `
+        <div class="post-cell" ${bg}>
+          ${!photo ? `<span class="post-initial">${initial}</span>` : ""}
+          <div class="post-overlay">
+            <span class="post-name">${escHtml(r.restaurant_name)}</span>
+            ${stars ? `<span class="post-stars">${stars}</span>` : ""}
+          </div>
+        </div>`;
+    }).join("");
+}
+
+function escHtml(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
 }

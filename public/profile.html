@@ -74,7 +74,7 @@
         <p class="activity-big-num" id="visited-count">0</p>
         <div class="activity-sub-row">
           <div class="activity-sub">
-            <span class="activity-sub-num">0 wks</span>
+            <span class="activity-sub-num" id="streak-count">0 wks</span>
             <span class="activity-sub-lab">Streak</span>
           </div>
         </div>
@@ -98,13 +98,16 @@
       <div class="card lists-card">
         <p class="card-eyebrow">My lists</p>
         <div class="list-rows">
-          <a href="#been-section" class="list-row" id="been-list-row">
+          <div class="list-row been-toggle" id="been-toggle">
             <div class="list-left">
               <div class="list-icon">✓</div>
               <span class="list-name">Been</span>
             </div>
-            <span class="list-meta" id="been-list-count">0 ›</span>
-          </a>
+            <span class="list-meta" id="been-list-count">0 <span class="been-chevron">›</span></span>
+          </div>
+          <div class="been-dropdown" id="been-dropdown">
+            <!-- restaurant rows injected by JS -->
+          </div>
           <a href="#" class="list-row">
             <div class="list-left">
               <div class="list-icon">♥</div>
@@ -140,15 +143,15 @@
 
     </div>
 
-    <!-- ROW 3: Been — review history -->
-    <div class="grid-row row-been" id="been-section" style="display:none;">
-      <div class="card been-card">
-        <div class="been-header">
-          <p class="card-eyebrow" style="margin-bottom:0;">Been — My Reviews</p>
-          <span class="been-count-label" id="been-header-count"></span>
+    <!-- ROW 3: Posts grid (Instagram-style) -->
+    <div class="grid-row row-posts" id="posts-section" style="display:none;">
+      <div class="card posts-card">
+        <div class="posts-header">
+          <p class="card-eyebrow" style="margin-bottom:0;">My Posts</p>
+          <span class="posts-count-label" id="posts-count-label"></span>
         </div>
-        <div class="been-grid" id="been-grid">
-          <!-- review cards injected by JS -->
+        <div class="posts-grid" id="posts-grid">
+          <!-- post cells injected by JS -->
         </div>
       </div>
     </div>

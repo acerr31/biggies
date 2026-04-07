@@ -930,6 +930,56 @@ app.get('/api/reviews', async (req, res) => {
 //END ROUTES TO POST,GET,DELETE Reviews
 /////////////////////////////////////////////////
 
+// Route: GET /api/my-reviews — all reviews for the authenticated user
+app.get('/api/my-reviews', authenticateToken, async (req, res) => {
+    try {
+        const connection = await createConnection();
+
+        const [reviews] = await connection.execute(
+            `SELECT
+                r.id,
+                r.restaurant_id,
+                r.sentiment,
+                r.stars,
+                r.notes,
+                r.favorite_dishes,
+                r.visit_date,
+                r.created_at,
+                res.restaurantName AS restaurant_name
+             FROM reviews r
+             JOIN restaurants res ON r.restaurant_id = res.restaurant_ID
+             WHERE r.user_email = ?
+             ORDER BY r.created_at DESC`,
+            [req.user.email]
+        );
+
+        const reviewIds = reviews.map(r => r.id);
+        let photoMap = {};
+
+        if (reviewIds.length > 0) {
+            const placeholders = reviewIds.map(() => '?').join(',');
+            const [photos] = await connection.execute(
+                `SELECT review_id, file_path FROM review_photos WHERE review_id IN (${placeholders})`,
+                reviewIds
+            );
+            photos.forEach(p => {
+                if (!photoMap[p.review_id]) photoMap[p.review_id] = [];
+                photoMap[p.review_id].push(p.file_path);
+            });
+        }
+
+        await connection.end();
+
+        res.status(200).json({
+            reviews: reviews.map(r => ({ ...r, photos: photoMap[r.id] || [] }))
+        });
+
+    } catch (error) {
+        console.error('Error fetching user reviews:', error);
+        res.status(500).json({ message: 'Error fetching reviews.' });
+    }
+});
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

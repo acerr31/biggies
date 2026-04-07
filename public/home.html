@@ -285,7 +285,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <p class="card-restaurant">${r.restaurant_name || "Unknown Restaurant"}</p>
+                        <a class="card-restaurant" href="restaurant.html?id=${r.restaurant_id}">${r.restaurant_name || "Unknown Restaurant"}</a>
                         ${r.stars ? `<p class="card-stars">${starsHtml(r.stars)} (${r.stars}/5)</p>` : ""}
                         ${sentimentHtml(r.sentiment)}
                         ${r.notes ? `<p class="card-notes">${r.notes}</p>` : ""}

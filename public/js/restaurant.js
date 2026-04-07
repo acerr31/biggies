@@ -192,8 +192,91 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
+
+    /// Side bar buttons:
+    const copyBtn = document.querySelectorAll(".sideTop__row .miniLink")[0];
+    const callBtn = document.querySelectorAll(".sideTop__row .miniLink")[1];
+    const openBtn = document.querySelectorAll(".sideTop__row .miniLink")[2];
+
+    if (copyBtn) {
+      copyBtn.onclick = async function (e) {
+        e.preventDefault();
+        try {
+          await navigator.clipboard.writeText(restaurant.address || "");
+          copyBtn.textContent = "Copied!";
+        } catch {
+          copyBtn.textContent = "Failed";
+        }
+      };
+    }
+
+    if (callBtn) {
+      callBtn.onclick = function (e) {
+        e.preventDefault();
+        if (restaurant.phone) {
+          window.location.href = `tel:${restaurant.phone}`;
+        }
+      };
+    }
+
+    if (openBtn) {
+      openBtn.onclick = function (e) {
+        e.preventDefault();
+        if (restaurant.website) {
+          window.open(restaurant.website, "_blank");
+        }
+      };
+    }
+
+
+    // Maps insert
+
+    const directionsBtn = document.querySelector(".sideButtons .btn--primary");
+
+    if (directionsBtn) {
+      directionsBtn.onclick = function (e) {
+        e.preventDefault();
+        if (restaurant.address) {
+          const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`;
+          window.open(mapsUrl, "_blank");
+        }
+      };
+    }
+
+    const heroDirectionsBtn = document.querySelector(".hero__quickActions .btn--primary");
+
+    if (heroDirectionsBtn) {
+      heroDirectionsBtn.onclick = function (e) {
+        e.preventDefault();
+        if (restaurant.address) {
+          const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`;
+          window.open(mapsUrl, "_blank");
+        }
+      };
+    }
+
+    const mapBox = document.querySelector(".mapBox");
+
+    if (mapBox && restaurant.address) {
+      mapBox.innerHTML = `
+        <iframe
+          width="100%"
+          height="220"
+          style="border:0; border-radius:12px;"
+          loading="lazy"
+          allowfullscreen
+          referrerpolicy="no-referrer-when-downgrade"
+          src="https://www.google.com/maps?q=${encodeURIComponent(restaurant.address)}&output=embed">
+        </iframe>
+      `;
+    }
+
+    
+
   } catch (error) {
     console.error("Error loading restaurant page:", error);
   }
+
+  
 });
 

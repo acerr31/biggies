@@ -199,3 +199,11 @@ if (editBtn) {
     window.location.href = "/edit-profile";
   });
 }
+
+const logoutBtn = document.getElementById("logout-btn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("jwtToken");
+    window.location.href = "/";
+  });
+}

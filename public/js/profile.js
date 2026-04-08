@@ -423,30 +423,38 @@ function renderBeenDropdown(reviews) {
 function renderPostsGrid(reviews) {
     const grid = document.getElementById("posts-grid");
     if (!grid) return;
-    grid.innerHTML = reviews.map((r, i) => {
-        const photo = r.photos?.[0];
-        const initial = r.restaurant_name?.[0]?.toUpperCase() || "?";
-        const stars = r.stars ? "★".repeat(r.stars) : "";
-        const bg = photo
-            ? `style="background-image:url('${photo}')"`
-            : `class="post-cell-placeholder"`;
-        return `
-        <div class="post-cell" ${bg} data-review-index="${i}">
-          ${!photo ? `<span class="post-initial">${initial}</span>` : ""}
-          <div class="post-overlay">
-            <span class="post-name">${escHtml(r.restaurant_name)}</span>
-            ${stars ? `<span class="post-stars">${stars}</span>` : ""}
-          </div>
-        </div>`;
-    }).join("");
 
-    // Wire up click → modal
-    grid.querySelectorAll(".post-cell").forEach(cell => {
-        cell.addEventListener("click", () => {
-            const idx = parseInt(cell.dataset.reviewIndex, 10);
-            openReviewModal(reviews[idx]);
-        });
-    });
+    grid.innerHTML = reviews.map(r => {
+        const stars = r.stars ? "★".repeat(r.stars) + "☆".repeat(5 - r.stars) : "";
+        const sentLabel = SENT_LABEL[r.sentiment] || "";
+        const sentClass = SENT_CLASS[r.sentiment] || "";
+        const date = r.visit_date || r.created_at
+            ? new Date(r.visit_date || r.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+            : "";
+
+        const photosHtml = r.photos?.length
+            ? `<div class="pf-photos">
+                ${r.photos.map(p => `<img src="${p}" alt="" class="pf-photo" />`).join("")}
+               </div>`
+            : "";
+
+        return `
+        <article class="pf-post">
+          <div class="pf-header">
+            <a href="restaurant.html?id=${r.restaurant_id}" class="pf-title">
+              You ranked <strong>${escHtml(r.restaurant_name)}</strong>
+            </a>
+            <div class="pf-meta">
+              ${sentLabel ? `<span class="pf-sentiment ${sentClass}">${sentLabel}</span>` : ""}
+              ${stars ? `<span class="pf-stars">${stars}</span>` : ""}
+              ${date ? `<span class="pf-date">${date}</span>` : ""}
+            </div>
+          </div>
+          ${photosHtml}
+          ${r.notes ? `<p class="pf-notes">${escHtml(r.notes)}</p>` : ""}
+          ${r.favorite_dishes ? `<p class="pf-dishes">Favorites: ${escHtml(r.favorite_dishes)}</p>` : ""}
+        </article>`;
+    }).join("");
 }
 
 function openReviewModal(r) {

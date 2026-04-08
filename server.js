@@ -980,6 +980,61 @@ app.get('/api/my-reviews', authenticateToken, async (req, res) => {
     }
 });
 
+// Route: GET /api/leaderboard — users ranked by review count
+app.get('/api/leaderboard', authenticateToken, async (req, res) => {
+    try {
+        const connection = await createConnection();
+        const [rows] = await connection.execute(
+            `SELECT u.email, u.username, u.first_name, u.last_name, u.profile_photo,
+                    COUNT(r.id) AS review_count
+             FROM users u
+             LEFT JOIN reviews r ON r.user_email = u.email
+             GROUP BY u.email
+             ORDER BY review_count DESC, u.username ASC`
+        );
+        await connection.end();
+
+        const leaderboard = rows.map((row, i) => ({
+            rank: i + 1,
+            username: row.username,
+            first_name: row.first_name,
+            last_name: row.last_name,
+            profile_photo: row.profile_photo,
+            review_count: row.review_count,
+            isMe: row.email === req.user.email
+        }));
+
+        res.status(200).json({ leaderboard });
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        res.status(500).json({ message: 'Error fetching leaderboard.' });
+    }
+});
+
+// Route: GET /api/recommendations — 3 random restaurants user hasn't reviewed
+app.get('/api/recommendations', authenticateToken, async (req, res) => {
+    try {
+        const connection = await createConnection();
+        const [rows] = await connection.execute(
+            `SELECT res.restaurant_ID AS id, res.restaurantName, res.tags,
+                    (SELECT file_path FROM restaurant_photos rp
+                     WHERE rp.restaurant_id = res.restaurant_ID LIMIT 1) AS photo
+             FROM restaurants res
+             WHERE res.restaurant_ID NOT IN (
+                 SELECT restaurant_id FROM reviews WHERE user_email = ?
+             )
+             ORDER BY RAND()
+             LIMIT 3`,
+            [req.user.email]
+        );
+        await connection.end();
+        res.status(200).json({ recommendations: rows });
+    } catch (error) {
+        console.error('Error fetching recommendations:', error);
+        res.status(500).json({ message: 'Error fetching recommendations.' });
+    }
+});
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

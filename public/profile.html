@@ -68,7 +68,7 @@
         </div>
       </div>
 
-      <!-- Activity stats card (challenge removed) -->
+      <!-- Activity stats card -->
       <div class="card activity-card">
         <p class="card-eyebrow">Restaurants visited</p>
         <p class="activity-big-num" id="visited-count">0</p>
@@ -78,15 +78,26 @@
             <span class="activity-sub-lab">Streak</span>
           </div>
         </div>
+        <div class="activity-divider"></div>
+        <p class="activity-tip" id="activity-tip">Try somewhere new and leave a review to grow your streak!</p>
+        <a href="explore.html" class="activity-cta">Browse restaurants ›</a>
       </div>
 
       <!-- Rank card -->
       <div class="card rank-card">
         <p class="card-eyebrow">Rank on Plated</p>
-        <p class="rank-num">#—</p>
+        <div class="rank-toggle" id="rank-toggle">
+          <p class="rank-num" id="rank-num">#—</p>
+          <span class="rank-chevron">›</span>
+        </div>
+        <div class="leaderboard-dropdown" id="leaderboard-dropdown">
+          <!-- injected by JS -->
+        </div>
         <div class="rank-divider"></div>
         <p class="card-eyebrow" style="margin-top:0;">Recs for you</p>
-        <a href="#" class="recs-link">View recommendations ›</a>
+        <div class="recs-list" id="recs-list">
+          <p class="recs-loading">Loading...</p>
+        </div>
       </div>
 
     </div>
@@ -108,13 +119,6 @@
           <div class="been-dropdown" id="been-dropdown">
             <!-- restaurant rows injected by JS -->
           </div>
-          <a href="#" class="list-row">
-            <div class="list-left">
-              <div class="list-icon">♥</div>
-              <span class="list-name">Recs for You</span>
-            </div>
-            <span class="list-meta">›</span>
-          </a>
         </div>
       </div>
 

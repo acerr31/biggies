@@ -25,15 +25,7 @@ async function copyProfileInvite(username) {
         if (navigator.clipboard && window.isSecureContext) {
             await navigator.clipboard.writeText(inviteText);
         } else {
-            const tempInput = document.createElement("textarea");
-            tempInput.value = inviteText;
-            tempInput.setAttribute("readonly", "");
-            tempInput.style.position = "absolute";
-            tempInput.style.left = "-9999px";
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempInput);
+            await navigator.clipboard.writeText(inviteText);
         }
 
         showShareToast(`Copied: ${inviteText}`);
@@ -173,6 +165,43 @@ document.addEventListener("DOMContentLoaded", async () => {
             setAvatarPhoto(data.profile_photo);
         }
 
+        // ── Fetch leaderboard (to show rank number immediately) ─
+        try {
+            const lbRes = await fetch("/api/leaderboard", {
+                headers: { "Authorization": token }
+            });
+            if (lbRes.ok) {
+                const { leaderboard } = await lbRes.json();
+                const me = leaderboard.find(u => u.isMe);
+                if (me) {
+                    const rankEl = document.getElementById("rank-num");
+                    if (rankEl) rankEl.textContent = `#${me.rank}`;
+                    const summaryRank = document.getElementById("summary-rank");
+                    if (summaryRank) summaryRank.textContent = `#${me.rank}`;
+                }
+                // Cache it so the dropdown doesn't re-fetch
+                const dropdown = document.getElementById("leaderboard-dropdown");
+                if (dropdown) {
+                    dropdown.dataset.cache = JSON.stringify(leaderboard);
+                }
+            }
+        } catch (e) {
+            console.error("Could not load leaderboard:", e);
+        }
+
+        // ── Fetch recommendations ─────────────────────────────
+        try {
+            const recRes = await fetch("/api/recommendations", {
+                headers: { "Authorization": token }
+            });
+            if (recRes.ok) {
+                const { recommendations } = await recRes.json();
+                renderRecommendations(recommendations);
+            }
+        } catch (e) {
+            console.error("Could not load recommendations:", e);
+        }
+
         // ── Fetch + render reviews (Been, streak, posts) ──────
         try {
             const revRes = await fetch("/api/my-reviews", {
@@ -221,6 +250,61 @@ if (logoutBtn) {
   });
 }
 
+// ── Rank toggle + leaderboard ─────────────────────────────────
+document.getElementById("rank-toggle")?.addEventListener("click", async () => {
+    const dropdown = document.getElementById("leaderboard-dropdown");
+    const chevron  = document.querySelector(".rank-chevron");
+    if (!dropdown) return;
+
+    const open = dropdown.classList.toggle("leaderboard-open");
+    if (chevron) chevron.textContent = open ? "˅" : "›";
+
+    if (open && !dropdown.dataset.rendered) {
+        dropdown.dataset.rendered = "1";
+        if (dropdown.dataset.cache) {
+            renderLeaderboard(JSON.parse(dropdown.dataset.cache));
+        } else {
+            dropdown.innerHTML = `<p class="lb-loading">Loading...</p>`;
+            const token = localStorage.getItem("jwtToken");
+            try {
+                const res  = await fetch("/api/leaderboard", { headers: { "Authorization": token } });
+                const data = await res.json();
+                renderLeaderboard(data.leaderboard);
+            } catch {
+                dropdown.innerHTML = `<p class="lb-loading">Could not load leaderboard.</p>`;
+            }
+        }
+    }
+});
+
+function renderLeaderboard(leaderboard) {
+    const dropdown = document.getElementById("leaderboard-dropdown");
+    if (!dropdown) return;
+
+    const medals = ["🥇", "🥈", "🥉"];
+    dropdown.innerHTML = leaderboard.map(u => {
+        const medal  = medals[u.rank - 1] || "";
+        const name   = (u.first_name && u.last_name) ? `${u.first_name} ${u.last_name}` : u.username;
+        const avatar = u.profile_photo
+            ? `<img src="${u.profile_photo}" class="lb-avatar-img" />`
+            : `<span class="lb-avatar-initials">${((u.first_name?.[0] || "") + (u.last_name?.[0] || "")).toUpperCase() || "?"}</span>`;
+        return `
+        <div class="lb-row${u.isMe ? " lb-me" : ""}">
+          <span class="lb-rank">${medal || "#" + u.rank}</span>
+          <div class="lb-avatar">${avatar}</div>
+          <span class="lb-name">${escHtml(name)}</span>
+          <span class="lb-count">${u.review_count} review${u.review_count !== 1 ? "s" : ""}</span>
+        </div>`;
+    }).join("");
+
+    // Update rank number in card
+    const me = leaderboard.find(u => u.isMe);
+    if (me) {
+        const rankEl = document.getElementById("rank-num");
+        if (rankEl) rankEl.textContent = `#${me.rank}`;
+    }
+}
+
 // ── Been toggle ───────────────────────────────────────────────
 document.getElementById("been-toggle")?.addEventListener("click", () => {
     const dropdown = document.getElementById("been-dropdown");
@@ -245,6 +329,21 @@ function updateReviewFeatures(reviews) {
     const streak = calcStreak(reviews);
     const streakEl = document.getElementById("streak-count");
     if (streakEl) streakEl.textContent = `${streak} wk${streak !== 1 ? "s" : ""}`;
+
+    // Summary stats in lists card
+    const summaryVisited = document.getElementById("summary-visited");
+    const summaryStreak  = document.getElementById("summary-streak");
+    if (summaryVisited) summaryVisited.textContent = count;
+    if (summaryStreak)  summaryStreak.textContent  = `${streak} wk${streak !== 1 ? "s" : ""}`;
+
+    // Activity tip
+    const tipEl = document.getElementById("activity-tip");
+    if (tipEl) {
+        if (count === 0) tipEl.textContent = "You haven't reviewed anywhere yet. Go explore!";
+        else if (streak === 0) tipEl.textContent = "Post a review this week to start your streak!";
+        else if (streak < 3) tipEl.textContent = `${streak} week streak — keep it going!`;
+        else tipEl.textContent = `${streak} week streak! You're on a roll 🔥`;
+    }
 
     // Been dropdown
     renderBeenDropdown(reviews);
@@ -395,6 +494,28 @@ document.addEventListener("DOMContentLoaded", () => {
 function closeModal() {
     document.getElementById("review-modal-backdrop")?.classList.remove("modal-open");
     document.body.style.overflow = "";
+}
+
+function renderRecommendations(recs) {
+    const list = document.getElementById("recs-list");
+    if (!list) return;
+    if (!recs.length) {
+        list.innerHTML = `<p class="recs-empty">You've reviewed everything! Check back later.</p>`;
+        return;
+    }
+    list.innerHTML = recs.map(r => {
+        const photo = r.photo
+            ? `<div class="rec-photo" style="background-image:url('${r.photo}')"></div>`
+            : `<div class="rec-photo rec-photo-placeholder"></div>`;
+        return `
+        <a href="restaurant.html?id=${r.id}" class="rec-item">
+          ${photo}
+          <div class="rec-info">
+            <span class="rec-name">${escHtml(r.restaurantName)}</span>
+            ${r.tags ? `<span class="rec-tags">${escHtml(r.tags)}</span>` : ""}
+          </div>
+        </a>`;
+    }).join("");
 }
 
 function escHtml(str) {

@@ -32,7 +32,7 @@
   <!-- Page body -->
   <main class="page">
 
-    <!-- ROW 1: identity | activity stats | rank card -->
+    <!-- ROW 1: identity | right panel (stats + rank + recs) -->
     <div class="grid-row row-top">
 
       <!-- Identity card -->
@@ -68,36 +68,38 @@
         </div>
       </div>
 
-      <!-- Activity stats card -->
-      <div class="card activity-card">
-        <p class="card-eyebrow">Restaurants visited</p>
-        <p class="activity-big-num" id="visited-count">0</p>
-        <div class="activity-sub-row">
-          <div class="activity-sub">
-            <span class="activity-sub-num" id="streak-count">0 wks</span>
-            <span class="activity-sub-lab">Streak</span>
+      <!-- Overview card: stats + rank + recs combined -->
+      <div class="card overview-card">
+
+        <!-- Top stat strip -->
+        <div class="overview-stats">
+          <div class="overview-stat">
+            <span class="overview-stat-num" id="visited-count">0</span>
+            <span class="overview-stat-lab">Visited</span>
+          </div>
+          <div class="overview-stat-divider"></div>
+          <div class="overview-stat">
+            <span class="overview-stat-num" id="streak-count">0 wks</span>
+            <span class="overview-stat-lab">Streak</span>
+          </div>
+          <div class="overview-stat-divider"></div>
+          <div class="overview-stat rank-toggle" id="rank-toggle">
+            <span class="overview-stat-num" id="rank-num">#—</span>
+            <span class="overview-stat-lab">Rank <span class="rank-chevron">›</span></span>
           </div>
         </div>
-        <div class="activity-divider"></div>
-        <p class="activity-tip" id="activity-tip">Try somewhere new and leave a review to grow your streak!</p>
-        <a href="explore.html" class="activity-cta">Browse restaurants ›</a>
-      </div>
 
-      <!-- Rank card -->
-      <div class="card rank-card">
-        <p class="card-eyebrow">Rank on Plated</p>
-        <div class="rank-toggle" id="rank-toggle">
-          <p class="rank-num" id="rank-num">#—</p>
-          <span class="rank-chevron">›</span>
-        </div>
-        <div class="leaderboard-dropdown" id="leaderboard-dropdown">
-          <!-- injected by JS -->
-        </div>
-        <div class="rank-divider"></div>
-        <p class="card-eyebrow" style="margin-top:0;">Recs for you</p>
+        <!-- Leaderboard dropdown -->
+        <div class="leaderboard-dropdown" id="leaderboard-dropdown"></div>
+
+        <div class="overview-divider"></div>
+
+        <!-- Recs -->
+        <p class="card-eyebrow">Recs for you</p>
         <div class="recs-list" id="recs-list">
           <p class="recs-loading">Loading...</p>
         </div>
+
       </div>
 
     </div>

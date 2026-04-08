@@ -92,8 +92,53 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   gap: 20px;
   animation: fadeUp .38s ease both;
 }
-.row-top  { grid-template-columns: 280px 1fr 220px; }
+.row-top  { grid-template-columns: 300px 1fr; }
 .row-bottom { grid-template-columns: 1fr 1fr; animation-delay: .08s; }
+
+/* Overview card */
+.overview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.overview-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 16px;
+}
+.overview-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 0;
+}
+.overview-stat-num {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  line-height: 1;
+}
+.overview-stat-lab {
+  font-size: .7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-secondary);
+}
+.overview-stat-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.overview-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0;
+}
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(14px); }
@@ -251,12 +296,9 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
 .challenge-link { color: var(--teal); font-weight: 600; }
 .challenge-link:hover { text-decoration: underline; }
 
-/*  Rank card */
+/*  Rank card (kept for leaderboard dropdown styling hooks) */
 .rank-card { display: flex; flex-direction: column; gap: 8px; }
 .rank-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   cursor: pointer;
   user-select: none;
 }
@@ -990,7 +1032,7 @@ h1 {
 }
 .been-item:hover { background: #f0ebe3; }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .row-top    { grid-template-columns: 1fr; }
   .row-bottom { grid-template-columns: 1fr; }
   .posts-grid { grid-template-columns: repeat(3, 1fr); }

@@ -920,15 +920,17 @@ h1 {
   overflow-x: auto;
 }
 .pf-photo {
-  width: 260px;
-  height: 200px;
-  object-fit: cover;
+  width: 180px;
+  height: 140px;
+  object-fit: contain;
+  background: #f4f4f4;
   border-radius: var(--radius-md);
   flex-shrink: 0;
 }
 .pf-photos:has(.pf-photo:only-child) .pf-photo {
-  width: 100%;
-  height: 260px;
+  width: 320px;
+  height: 220px;
+  object-fit: contain;
 }
 
 .pf-notes {

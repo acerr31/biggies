@@ -127,7 +127,9 @@ async function loadWeeklyTopRestaurants() {
       <div class="weekly-top-item">
         <div class="weekly-top-rank">#${index + 1}</div>
         <div class="weekly-top-content">
-          <div class="weekly-top-name">${escHtml(restaurant.restaurantName)}</div>
+          <a href="restaurant.html?id=${restaurant.restaurant_ID}" class="weekly-top-name">
+              ${escHtml(restaurant.restaurantName)}
+            </a>
           <div class="weekly-top-meta">
             <span>${restaurant.reviewsThisWeek} review${restaurant.reviewsThisWeek === 1 ? "" : "s"} this week</span>
             <span>•</span>

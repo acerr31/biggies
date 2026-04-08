@@ -303,7 +303,10 @@ function buildDetailHTML(r, reviews) {
     ? reviews.map(rv => `
         <div class="dp-review">
           <div class="dp-review-header">
-            <span class="dp-avatar">${escHtml(rv.initials || "?")}</span>
+            ${rv.profile_photo
+              ? `<img src="${rv.profile_photo}" class="dp-avatar dp-avatar-photo" alt="" />`
+              : `<span class="dp-avatar">${escHtml(rv.initials || "?")}</span>`
+            }
             <div>
               <strong>${escHtml(rv.username || "Anonymous")}</strong>
               <span class="dp-review-date">${rv.visit_date ? formatDate(rv.visit_date) : ""}</span>

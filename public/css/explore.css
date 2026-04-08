@@ -607,6 +607,10 @@ body.panel-open { overflow: hidden; }
   color: var(--accent-text);
   flex-shrink: 0;
 }
+.dp-avatar-photo {
+  object-fit: cover;
+  background: none;
+}
 .dp-review-header strong { font-size: .9rem; }
 .dp-review-date {
   display: block;

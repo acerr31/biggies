@@ -45,6 +45,15 @@ function setAvatarPhoto(url) {
     Array.from(circle.childNodes)
         .filter(n => n.nodeType === Node.TEXT_NODE)
         .forEach(n => n.textContent = "");
+
+    // Update topbar avatar
+    const topbar = document.getElementById("topbar-initials");
+    if (topbar) {
+        topbar.style.backgroundImage = `url('${url}')`;
+        topbar.style.backgroundSize = "cover";
+        topbar.style.backgroundPosition = "center";
+        topbar.textContent = "";
+    }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

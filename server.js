@@ -783,7 +783,8 @@ app.get('/api/reviews/:restaurantId', async (req, res) => {
                 r.created_at,
                 u.username,
                 u.first_name,
-                u.last_name
+                u.last_name,
+                u.profile_photo
              FROM reviews r
              JOIN users u ON r.user_email = u.email
              WHERE r.restaurant_id = ?
@@ -811,7 +812,8 @@ app.get('/api/reviews/:restaurantId', async (req, res) => {
         const enriched = reviews.map(r => ({
             ...r,
             photos: photoMap[r.id] || [],
-            initials: ((r.first_name?.[0] || '') + (r.last_name?.[0] || '')).toUpperCase() || r.username?.slice(0, 2).toUpperCase() || '?'
+            initials: ((r.first_name?.[0] || '') + (r.last_name?.[0] || '')).toUpperCase() || r.username?.slice(0, 2).toUpperCase() || '?',
+            profile_photo: r.profile_photo || null
         }));
 
         res.status(200).json({ reviews: enriched });
@@ -887,6 +889,7 @@ app.get('/api/reviews', async (req, res) => {
                 u.username,
                 u.first_name,
                 u.last_name,
+                u.profile_photo,
                 res.restaurantName AS restaurant_name
              FROM reviews r
              JOIN users u ON r.user_email = u.email
@@ -915,7 +918,8 @@ app.get('/api/reviews', async (req, res) => {
         const enriched = reviews.map(r => ({
             ...r,
             photos: photoMap[r.id] || [],
-            initials: ((r.first_name?.[0] || '') + (r.last_name?.[0] || '')).toUpperCase() || r.username?.slice(0, 2).toUpperCase() || '?'
+            initials: ((r.first_name?.[0] || '') + (r.last_name?.[0] || '')).toUpperCase() || r.username?.slice(0, 2).toUpperCase() || '?',
+            profile_photo: r.profile_photo || null
         }));
 
         res.status(200).json({ reviews: enriched });
@@ -989,6 +993,8 @@ app.get('/api/leaderboard', authenticateToken, async (req, res) => {
                     COUNT(r.id) AS review_count
              FROM users u
              LEFT JOIN reviews r ON r.user_email = u.email
+             LEFT JOIN restaurants res ON r.restaurant_id = res.restaurant_ID
+             WHERE r.id IS NULL OR res.restaurant_ID IS NOT NULL
              GROUP BY u.email
              ORDER BY review_count DESC, u.username ASC`
         );

@@ -866,3 +866,206 @@ img { display: block; max-width: 100%; }
 
   transition: all 0.2s ease;
 }
+
+/* ============================================================
+   home.css — ADDITIONS: Likes & Comments
+   ============================================================ */
+
+/* ── Engagement bar (like + comment toggle) ─────────────────── */
+.card-engagement {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px 4px;
+  border-top: 1px solid var(--border-light);
+}
+
+/* Shared button base */
+.like-btn,
+.comment-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: var(--transition);
+}
+
+.like-btn:hover,
+.comment-toggle-btn:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-color: var(--accent-border);
+}
+
+/* Liked (active) state */
+.like-btn.liked {
+  color: var(--red);
+}
+
+.like-btn.liked .like-icon {
+  /* Swap the hollow heart for a filled one */
+  content: "♥";
+}
+
+.like-btn.liked .like-icon::before {
+  content: "♥";
+}
+
+.like-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* When the button has the .liked class, swap heart glyph */
+.like-btn.liked .like-icon {
+  /* Override the hollow ♡ rendered in JS with a solid ♥ */
+  font-size: 1rem;
+  /* We achieve the swap via CSS by hiding the ♡ and using ::before */
+  /* Simpler: just rely on the JS class + color change above */
+  color: var(--red);
+}
+
+.like-count,
+.comment-count {
+  font-variant-numeric: tabular-nums;
+  min-width: 1ch;
+}
+
+/* ── Comment section (hidden by default, shown when .open) ──── */
+.comment-section {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 20px 16px;
+  animation: fadeUp .15s ease;
+}
+
+.comment-section.open {
+  display: flex;
+}
+
+/* ── Individual comments ────────────────────────────────────── */
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.comment-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.comment-avatar {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px;
+  font-size: .72rem !important;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.comment-content {
+  flex: 1;
+  background: var(--surface-tinted);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+}
+
+.comment-author {
+  font-weight: 600;
+  font-size: .82rem;
+  color: var(--text-primary);
+  margin-right: 6px;
+}
+
+.comment-time {
+  font-size: .75rem;
+  color: var(--text-muted);
+}
+
+.comment-body {
+  margin-top: 4px;
+  font-size: .88rem;
+  color: var(--text-primary);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Placeholder states */
+.comments-loading,
+.no-comments {
+  font-size: .85rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 8px 0;
+}
+
+/* ── Comment form ───────────────────────────────────────────── */
+.comment-form {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.comment-input {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: .88rem;
+  color: var(--text-primary);
+  background: var(--surface-tinted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  resize: vertical;
+  min-height: 44px;
+  max-height: 120px;
+  line-height: 1.4;
+  transition: var(--transition);
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(201, 123, 42, .12);
+}
+
+.comment-input::placeholder {
+  color: var(--text-muted);
+}
+
+.comment-submit-btn {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  height: 44px;
+  align-self: flex-end;
+}
+
+.comment-submit-btn:hover {
+  background: var(--accent-hover);
+}
+
+.comment-submit-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}

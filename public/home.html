@@ -280,7 +280,42 @@
                 const visitHtml = r.visit_date
                 ? `<span style="color:#8a8278; font-size:.82rem;"> · Visited ${formatDate(r.visit_date)}</span>`
                 : "";
-
+// ── NEW: like + comment bar ──────────────────────────
+                const engagementBar = `
+                <div class="card-engagement">
+                    <button
+                        class="like-btn"
+                        data-review-id="${r.id}"
+                        aria-pressed="false"
+                        title="Like this review"
+                    >
+                        <span class="like-icon">♡</span>
+                        <span class="like-count">0</span>
+                    </button>
+                    <button
+                        class="comment-toggle-btn"
+                        data-review-id="${r.id}"
+                        aria-expanded="false"
+                        title="Show comments"
+                    >
+                        <span class="comment-icon">💬</span>
+                        <span class="comment-count">0</span>
+                    </button>
+                </div>
+ 
+                <div class="comment-section">
+                    <div class="comment-list"></div>
+                    <div class="comment-form">
+                        <textarea
+                            class="comment-input"
+                            placeholder="Write a comment… (Ctrl+Enter to submit)"
+                            rows="2"
+                            maxlength="500"
+                        ></textarea>
+                        <button class="comment-submit-btn" data-review-id="${r.id}">Post</button>
+                    </div>
+                </div>`;
+                // ── END new engagement bar ───────────────────────────
                 return `
                 <article class="card">
                     ${carouselHtml}
@@ -301,8 +336,27 @@
                         ${r.notes ? `<p class="card-notes">${r.notes}</p>` : ""}
                         ${dishesHtml}
                     </div>
+                    ${engagementBar}                    
                 </article>`;
             }).join("");
+            // ── Initialise like counts after the DOM is built ────────
+            // Fire-and-forget: fetch like data for every rendered review
+            if (token) {
+                reviews.forEach(r => {
+                    fetch(`/api/reviews/${r.id}/likes`, {
+                        headers: { "Authorization": token }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        const card    = list.querySelector(`[data-review-id="${r.id}"].like-btn`);
+                        if (!card) return;
+                        card.querySelector(".like-count").textContent = data.total;
+                        card.classList.toggle("liked", data.liked);
+                        card.setAttribute("aria-pressed", String(data.liked));
+                    })
+                    .catch(() => {});
+                });
+            }
         }
 
         // ── fetch ────────────────────────────────────────────────────

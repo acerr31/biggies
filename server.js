@@ -1041,6 +1041,162 @@ app.get('/api/recommendations', authenticateToken, async (req, res) => {
     }
 });
 
+// ============================================================
+// LIKES & COMMENTS
+// ============================================================
+
+// ── Likes ────────────────────────────────────────────────────
+
+// POST /api/reviews/:id/like  — toggle like on/off (auth required)
+app.post('/api/reviews/:id/like', authenticateToken, async (req, res) => {
+    const { id: reviewId } = req.params;
+    const userEmail = req.user.email;
+
+    try {
+        const connection = await createConnection();
+
+        // Check whether the user has already liked this review
+        const [existing] = await connection.execute(
+            'SELECT id FROM review_likes WHERE review_id = ? AND user_email = ?',
+            [reviewId, userEmail]
+        );
+
+        let liked;
+        if (existing.length > 0) {
+            // Already liked → remove (unlike)
+            await connection.execute(
+                'DELETE FROM review_likes WHERE review_id = ? AND user_email = ?',
+                [reviewId, userEmail]
+            );
+            liked = false;
+        } else {
+            // Not yet liked → insert
+            await connection.execute(
+                'INSERT INTO review_likes (review_id, user_email) VALUES (?, ?)',
+                [reviewId, userEmail]
+            );
+            liked = true;
+        }
+
+        // Return updated total count
+        const [[{ total }]] = await connection.execute(
+            'SELECT COUNT(*) AS total FROM review_likes WHERE review_id = ?',
+            [reviewId]
+        );
+
+        await connection.end();
+        res.status(200).json({ liked, total });
+
+    } catch (error) {
+        console.error('Error toggling like:', error);
+        res.status(500).json({ message: 'Error toggling like.' });
+    }
+});
+
+// GET /api/reviews/:id/likes  — get like count + caller's like status
+app.get('/api/reviews/:id/likes', authenticateToken, async (req, res) => {
+    const { id: reviewId } = req.params;
+    const userEmail = req.user.email;
+
+    try {
+        const connection = await createConnection();
+
+        const [[{ total }]] = await connection.execute(
+            'SELECT COUNT(*) AS total FROM review_likes WHERE review_id = ?',
+            [reviewId]
+        );
+
+        const [myLike] = await connection.execute(
+            'SELECT id FROM review_likes WHERE review_id = ? AND user_email = ?',
+            [reviewId, userEmail]
+        );
+
+        await connection.end();
+        res.status(200).json({ total, liked: myLike.length > 0 });
+
+    } catch (error) {
+        console.error('Error fetching likes:', error);
+        res.status(500).json({ message: 'Error fetching likes.' });
+    }
+});
+
+// ── Comments ─────────────────────────────────────────────────
+
+// POST /api/reviews/:id/comments  — add a comment (auth required)
+app.post('/api/reviews/:id/comments', authenticateToken, async (req, res) => {
+    const { id: reviewId } = req.params;
+    const { body } = req.body;
+
+    if (!body || !body.trim()) {
+        return res.status(400).json({ message: 'Comment cannot be empty.' });
+    }
+
+    try {
+        const connection = await createConnection();
+
+        const [result] = await connection.execute(
+            'INSERT INTO review_comments (review_id, user_email, body) VALUES (?, ?, ?)',
+            [reviewId, req.user.email, body.trim()]
+        );
+
+        // Return the new comment with author info so the front-end can display it immediately
+        const [[comment]] = await connection.execute(
+            `SELECT rc.id, rc.body, rc.created_at,
+                    u.username, u.first_name, u.last_name, u.profile_photo
+             FROM review_comments rc
+             JOIN users u ON rc.user_email = u.email
+             WHERE rc.id = ?`,
+            [result.insertId]
+        );
+
+        await connection.end();
+
+        comment.initials = ((comment.first_name?.[0] || '') + (comment.last_name?.[0] || '')).toUpperCase()
+                         || comment.username?.slice(0, 2).toUpperCase() || '?';
+
+        res.status(201).json({ comment });
+
+    } catch (error) {
+        console.error('Error posting comment:', error);
+        res.status(500).json({ message: 'Error posting comment.' });
+    }
+});
+
+// GET /api/reviews/:id/comments  — fetch all comments for a review
+app.get('/api/reviews/:id/comments', async (req, res) => {
+    const { id: reviewId } = req.params;
+
+    try {
+        const connection = await createConnection();
+
+        const [comments] = await connection.execute(
+            `SELECT rc.id, rc.body, rc.created_at,
+                    u.username, u.first_name, u.last_name, u.profile_photo
+             FROM review_comments rc
+             JOIN users u ON rc.user_email = u.email
+             WHERE rc.review_id = ?
+             ORDER BY rc.created_at ASC`,
+            [reviewId]
+        );
+
+        await connection.end();
+
+        const enriched = comments.map(c => ({
+            ...c,
+            initials: ((c.first_name?.[0] || '') + (c.last_name?.[0] || '')).toUpperCase()
+                    || c.username?.slice(0, 2).toUpperCase() || '?'
+        }));
+
+        res.status(200).json({ comments: enriched });
+
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        res.status(500).json({ message: 'Error fetching comments.' });
+    }
+});
+
+// ── END LIKES & COMMENTS ──────────────────────────────────────
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

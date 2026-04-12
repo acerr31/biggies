@@ -445,10 +445,26 @@ body { font-family: var(--font-body); color: var(--text-primary); min-height: 10
   to { transform: rotate(360deg); }
 }
 
-.no-results {
+/* .no-results {
   text-align: center;
   padding: 40px;
   color: var(--text-secondary);
+} */
+
+.no-results--with-rec {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 12px 0 6px;
+}
+
+.no-results-sub {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.recommended-card-wrap {
+  display: contents;
 }
 
 /* responsiveness */

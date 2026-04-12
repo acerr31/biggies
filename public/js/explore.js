@@ -8,12 +8,14 @@ document.addEventListener("DOMContentLoaded", () => {
   setupOpenNowFilter();
   setupReviewsFilter();
   setupReviewRatingFilter();
+  setupLiveSearch();
 });
 
 let allRestaurants = [];
 let openNowOnly = false;
 let reviewsOnly = false;
 let ratingOnly = false;
+let searchQuery = "";
 
 
 /* ── 1. Fetch all restaurants and render cards ── */
@@ -38,12 +40,40 @@ async function loadRestaurants() {
     }); */
 
     allRestaurants = data.restaurants || [];
-    renderRestaurants(allRestaurants);
+    //renderRestaurants(allRestaurants);
+    applyFilters();
 
   } catch (err) {
     console.error(err);
     grid.innerHTML = `<div class="no-results">Could not load restaurants. Please try again later.</div>`;
   }
+}
+
+function setupLiveSearch() {
+  const searchInput = document.getElementById("searchInput");
+  if (!searchInput) return;
+
+  searchInput.addEventListener("input", () => {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    applyFilters()
+  });
+}
+
+function applyFilters() {
+  let filtered = [...allRestaurants];
+
+  if (searchQuery) {
+    filtered = filtered.filter(restaurant => {
+      const name = (restaurant.restaurantName || "").toLowerCase();
+      return name.includes(searchQuery);
+    });
+  }
+
+  if (openNowOnly) {
+    filtered = filtered.filter(getOpenStatus);
+  }
+
+  renderRestaurants(filtered);
 }
 
 
@@ -448,12 +478,38 @@ function renderRestaurants(restaurants) {
   //   count.textContent = `${restaurants.length} restaurant${restaurants.length === 1 ? "" : "s"}`;
   // }
 
+  // if (!restaurants || restaurants.length === 0) {
+  //   grid.innerHTML = `<div class="no-results">No Restaurants Found.🥺 
+  //     <a href="restaurantform.html"> 
+  //     Be the first to submit one!
+  //     </a>
+  //   </div>`;
+  //   return;
+  // }
+
   if (!restaurants || restaurants.length === 0) {
-    grid.innerHTML = `<div class="no-results">No Restaurants Found. \r🥺 
+    grid.innerHTML = `<div class="no-results no-results--with-rec">
+      <div>No Restaurants Found.🥺</div>
       <a href="restaurantform.html"> 
       Be the first to submit one!
       </a>
-    </div>`;
+      <div class="no-reuslts-sub">...but we think you'll like this:</div>
+    </div>
+    `;
+    
+    // pick a random restaurant from allRestaurants
+    if (allRestaurants.length > 0) {
+      const random = 
+        allRestaurants[Math.floor(Math.random() * allRestaurants.length)];
+
+      const recCard = buildCard(random);
+      const wrapper = document.createElement("div");
+      wrapper.className = "recommended-card-wrap";
+      wrapper.appendChild(recCard);
+
+      grid.appendChild(wrapper);
+    }
+    
     return;
   }
 
@@ -471,13 +527,14 @@ function setupOpenNowFilter() {
   btn.addEventListener("click", () => {
     openNowOnly = !openNowOnly;
     btn.classList.toggle("active", openNowOnly);
+    applyFilters();
 
-    if (openNowOnly) {
-      const filtered = allRestaurants.filter(getOpenStatus);
-      renderRestaurants(filtered);
-    } else {
-      renderRestaurants(allRestaurants);
-    }
+    // if (openNowOnly) {
+    //   const filtered = allRestaurants.filter(getOpenStatus);
+    //   renderRestaurants(filtered);
+    // } else {
+    //   renderRestaurants(allRestaurants);
+    // }
   });
 }
 

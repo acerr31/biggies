@@ -513,10 +513,28 @@ app.get("/api/restaurants", async (req, res) => {
 
     const photoMap = {};
     photoRows.forEach(p => { photoMap[p.restaurant_id] = p.file_path; });
+    
+    // Storage for review photos
+    const [reviewPhotosRows] = await connection.execute(
+        `SELECT rv.restaurant_id, rp.file_path, rp.id
+    FROM reviews rv
+    JOIN review_photos rp ON rp.review_id = rv.id
+    WHERE rv.restaurant_id IN (${placeholders})
+    ORDER BY rp.id ASC`,
+    ids
+    );
+
+    const reviewPhotoMap = {};
+    reviewPhotosRows.forEach(row => {
+        if(!reviewPhotoMap[row.restaurant_id]) {
+            reviewPhotoMap[row.restaurant_id] = row.file_path;
+        }
+    });
 
     const enriched = restaurants.map(r => ({
       ...r,
-      photos: photoMap[r.restaurant_ID] ? [photoMap[r.restaurant_ID]] : []
+      photos: photoMap[r.restaurant_ID] ? [photoMap[r.restaurant_ID]] : [],
+      reviewPhotos: reviewPhotoMap[r.restaurant_ID] ? [reviewPhotoMap[r.restaurant_ID]] : []
     }));
 
     await connection.end();

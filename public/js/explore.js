@@ -184,7 +184,9 @@ function buildCard(r) {
   // Use the first photo if available, otherwise a placeholder
   const imgUrl = r.photos && r.photos.length > 0
     ? r.photos[0]
-    : "/images/PlatedLogo.png";
+    : r.reviewPhotos && r.reviewPhotos.length > 0
+      ? r.reviewPhotos[0]
+      : "/images/PlatedLogo.png";
 
   // Parse tags for category display (tags stored as comma-separated string)
   const categoryText = r.tags

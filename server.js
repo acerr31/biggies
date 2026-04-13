@@ -447,12 +447,10 @@ app.post("/api/restaurants", authenticateToken, uploadRestaurant.array("photos",
 });
 
 // Route: GET /api/restaurants — fetch all restaurants with average rating and first photo
-// ADD THIS BLOCK just before the existing: app.get("/api/restaurants/:id", ...)
 app.get("/api/restaurants", async (req, res) => {
   try {
     const connection = await createConnection();
 
-    // Fetch all restaurants with their computed average star rating
     const [restaurants] = await connection.execute(`
   SELECT
     r.restaurant_ID,
@@ -502,7 +500,6 @@ app.get("/api/restaurants", async (req, res) => {
       return res.status(200).json({ restaurants: [] });
     }
 
-    // Fetch the first photo for each restaurant in one query
     const ids = restaurants.map(r => r.restaurant_ID);
     const placeholders = ids.map(() => "?").join(",");
 
@@ -514,11 +511,9 @@ app.get("/api/restaurants", async (req, res) => {
       ids
     );
 
-    // Build a quick lookup map: restaurantId -> first photo URL
     const photoMap = {};
     photoRows.forEach(p => { photoMap[p.restaurant_id] = p.file_path; });
 
-    // Attach the first photo URL to each restaurant
     const enriched = restaurants.map(r => ({
       ...r,
       photos: photoMap[r.restaurant_ID] ? [photoMap[r.restaurant_ID]] : []
@@ -533,93 +528,7 @@ app.get("/api/restaurants", async (req, res) => {
   }
 });
 
-///route get photos:
-app.get("/api/restaurants", async (req, res) => {
-  try {
-    const connection = await createConnection();
-
-    // Fetch all restaurants with their computed average star rating
-    const [restaurants] = await connection.execute(`
-  SELECT
-    r.restaurant_ID,
-    r.restaurantName,
-    r.phone,
-    r.address,
-    r.website,
-    r.tags,
-    r.about,
-    r.amenities,
-    r.timeToVisit,
-    r.notes,
-    r.mondayHours,
-    r.tuesdayHours,
-    r.wednesdayHours,
-    r.thursdayHours,
-    r.fridayHours,
-    r.saturdayHours,
-    r.sundayHours,
-    AVG(rv.stars) AS avg_rating,
-    COUNT(rv.id)  AS review_count
-  FROM restaurants r
-  LEFT JOIN reviews rv ON rv.restaurant_id = r.restaurant_ID
-  GROUP BY
-    r.restaurant_ID,
-    r.restaurantName,
-    r.phone,
-    r.address,
-    r.website,
-    r.tags,
-    r.about,
-    r.amenities,
-    r.timeToVisit,
-    r.notes,
-    r.mondayHours,
-    r.tuesdayHours,
-    r.wednesdayHours,
-    r.thursdayHours,
-    r.fridayHours,
-    r.saturdayHours,
-    r.sundayHours
-  ORDER BY r.restaurantName ASC
-`);
-
-    if (restaurants.length === 0) {
-      await connection.end();
-      return res.status(200).json({ restaurants: [] });
-    }
-
-    // Fetch the first photo for each restaurant in one query
-    const ids = restaurants.map(r => r.restaurant_ID);
-    const placeholders = ids.map(() => "?").join(",");
-
-    const [photoRows] = await connection.execute(
-      `SELECT restaurant_id, MIN(id) AS first_photo_id, file_path
-       FROM restaurant_photos
-       WHERE restaurant_id IN (${placeholders})
-       GROUP BY restaurant_id`,
-      ids
-    );
-
-    // Build a quick lookup map: restaurantId -> first photo URL
-    const photoMap = {};
-    photoRows.forEach(p => { photoMap[p.restaurant_id] = p.file_path; });
-
-    // Attach the first photo URL to each restaurant
-    const enriched = restaurants.map(r => ({
-      ...r,
-      photos: photoMap[r.restaurant_ID] ? [photoMap[r.restaurant_ID]] : []
-    }));
-
-    await connection.end();
-    res.status(200).json({ restaurants: enriched });
-
-  } catch (error) {
-    console.error("Error fetching restaurants:", error);
-    res.status(500).json({ message: "Server error while fetching restaurants" });
-  }
-});
-
-//route: get restaurant information
+// Route: GET /api/restaurants/:id — get single restaurant info
 app.get("/api/restaurants/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -661,11 +570,7 @@ app.get("/api/restaurants/:id", async (req, res) => {
     }
 
     const [photoRows] = await connection.execute(
-      `
-      SELECT file_path
-      FROM restaurant_photos
-      WHERE restaurant_id = ?
-      `,
+      `SELECT file_path FROM restaurant_photos WHERE restaurant_id = ?`,
       [id]
     );
 
@@ -679,9 +584,7 @@ app.get("/api/restaurants/:id", async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: "Server error while loading restaurant"
-    });
+    res.status(500).json({ message: "Server error while loading restaurant" });
   }
 });
 
@@ -741,7 +644,6 @@ app.post('/api/reviews', authenticateToken, uploadReview.array('photos', 6), asy
 
         const reviewId = result.insertId;
 
-        // Insert Cloudinary URLs into review_photos
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
                 await connection.execute(
@@ -763,7 +665,6 @@ app.post('/api/reviews', authenticateToken, uploadReview.array('photos', 6), asy
         res.status(500).json({ message: 'Error submitting review.' });
     }
 });
-
 
 // Route: GET /api/reviews/:restaurantId — get all reviews for a restaurant
 app.get('/api/reviews/:restaurantId', async (req, res) => {
@@ -824,7 +725,6 @@ app.get('/api/reviews/:restaurantId', async (req, res) => {
     }
 });
 
-
 // Route: DELETE /api/reviews/:reviewId — delete own review + Cloudinary photos
 app.delete('/api/reviews/:reviewId', authenticateToken, async (req, res) => {
     try {
@@ -851,11 +751,9 @@ app.delete('/api/reviews/:reviewId', authenticateToken, async (req, res) => {
             [reviewId]
         );
 
-        // Delete review from DB (cascade removes review_photos rows too)
         await connection.execute('DELETE FROM reviews WHERE id = ?', [reviewId]);
         await connection.end();
 
-        // Delete photos from Cloudinary
         for (const p of photos) {
             const publicId = p.file_path.split('/').slice(-2).join('/').replace(/\.[^/.]+$/, '');
             await cloudinary.uploader.destroy(publicId).catch(err =>
@@ -869,7 +767,7 @@ app.delete('/api/reviews/:reviewId', authenticateToken, async (req, res) => {
         console.error('Error deleting review:', error);
         res.status(500).json({ message: 'Error deleting review.' });
     }
-});  // ← ADD THIS to close the delete route
+});
 
 // Route: GET /api/reviews — get ALL recent reviews for the home feed
 app.get('/api/reviews', async (req, res) => {
@@ -927,7 +825,7 @@ app.get('/api/reviews', async (req, res) => {
     } catch (error) {
         console.error('Error fetching feed:', error);
         res.status(500).json({ message: 'Error fetching feed.' });
-    }    
+    }
 });
 
 //////////////////////////////////////////////////
@@ -1045,8 +943,6 @@ app.get('/api/recommendations', authenticateToken, async (req, res) => {
 // LIKES & COMMENTS
 // ============================================================
 
-// ── Likes ────────────────────────────────────────────────────
-
 // POST /api/reviews/:id/like  — toggle like on/off (auth required)
 app.post('/api/reviews/:id/like', authenticateToken, async (req, res) => {
     const { id: reviewId } = req.params;
@@ -1055,7 +951,6 @@ app.post('/api/reviews/:id/like', authenticateToken, async (req, res) => {
     try {
         const connection = await createConnection();
 
-        // Check whether the user has already liked this review
         const [existing] = await connection.execute(
             'SELECT id FROM review_likes WHERE review_id = ? AND user_email = ?',
             [reviewId, userEmail]
@@ -1063,14 +958,12 @@ app.post('/api/reviews/:id/like', authenticateToken, async (req, res) => {
 
         let liked;
         if (existing.length > 0) {
-            // Already liked → remove (unlike)
             await connection.execute(
                 'DELETE FROM review_likes WHERE review_id = ? AND user_email = ?',
                 [reviewId, userEmail]
             );
             liked = false;
         } else {
-            // Not yet liked → insert
             await connection.execute(
                 'INSERT INTO review_likes (review_id, user_email) VALUES (?, ?)',
                 [reviewId, userEmail]
@@ -1078,7 +971,6 @@ app.post('/api/reviews/:id/like', authenticateToken, async (req, res) => {
             liked = true;
         }
 
-        // Return updated total count
         const [[{ total }]] = await connection.execute(
             'SELECT COUNT(*) AS total FROM review_likes WHERE review_id = ?',
             [reviewId]
@@ -1120,8 +1012,6 @@ app.get('/api/reviews/:id/likes', authenticateToken, async (req, res) => {
     }
 });
 
-// ── Comments ─────────────────────────────────────────────────
-
 // POST /api/reviews/:id/comments  — add a comment (auth required)
 app.post('/api/reviews/:id/comments', authenticateToken, async (req, res) => {
     const { id: reviewId } = req.params;
@@ -1139,7 +1029,6 @@ app.post('/api/reviews/:id/comments', authenticateToken, async (req, res) => {
             [reviewId, req.user.email, body.trim()]
         );
 
-        // Return the new comment with author info so the front-end can display it immediately
         const [[comment]] = await connection.execute(
             `SELECT rc.id, rc.body, rc.created_at,
                     u.username, u.first_name, u.last_name, u.profile_photo
@@ -1196,6 +1085,67 @@ app.get('/api/reviews/:id/comments', async (req, res) => {
 });
 
 // ── END LIKES & COMMENTS ──────────────────────────────────────
+
+// Route: GET /api/users/:username/profile — public user profile + their reviews
+app.get('/api/users/:username/profile', async (req, res) => {
+    try {
+        const { username } = req.params;
+        const connection = await createConnection();
+
+        const [users] = await connection.execute(
+            `SELECT username, first_name, last_name, profile_photo
+             FROM users WHERE username = ? LIMIT 1`,
+            [username]
+        );
+
+        if (users.length === 0) {
+            await connection.end();
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        const user = users[0];
+
+        const [reviews] = await connection.execute(
+            `SELECT
+                r.id,
+                r.sentiment,
+                r.stars,
+                r.notes,
+                r.favorite_dishes,
+                r.visit_date,
+                r.created_at,
+                res.restaurantName,
+                res.restaurant_ID AS restaurant_id
+             FROM reviews r
+             JOIN users u ON r.user_email = u.email
+             JOIN restaurants res ON r.restaurant_id = res.restaurant_ID
+             WHERE u.username = ?
+             ORDER BY r.created_at DESC`,
+            [username]
+        );
+
+        const reviewIds = reviews.map(r => r.id);
+        let photoMap = {};
+        if (reviewIds.length > 0) {
+            const placeholders = reviewIds.map(() => '?').join(',');
+            const [photos] = await connection.execute(
+                `SELECT review_id, file_path FROM review_photos WHERE review_id IN (${placeholders})`,
+                reviewIds
+            );
+            photos.forEach(p => {
+                if (!photoMap[p.review_id]) photoMap[p.review_id] = [];
+                photoMap[p.review_id].push(p.file_path);
+            });
+        }
+
+        await connection.end();
+
+        res.status(200).json({ user, reviews: reviews.map(r => ({ ...r, photos: photoMap[r.id] || [] })) });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ message: 'Error fetching user profile.' });
+    }
+});
 
 // Start the server
 app.listen(port, () => {

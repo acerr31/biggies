@@ -397,6 +397,11 @@
     }
     .review-delete:hover { background: #fecaca; }
     .active-sort { background: #ffbf69 !important; color: #1f2937 !important; border-color: transparent !important; }
+    .review__name--link {
+      color: #d4872a; text-decoration: none; font-weight: 600;
+      transition: color .15s;
+    }
+    .review__name--link:hover { color: #7a4510; text-decoration: underline; }
   </style>
 
   <script>
@@ -484,7 +489,7 @@
             <div class="review__top">
               <div class="avatar">${r.initials}</div>
               <div class="review__who">
-                <div class="review__name">${r.username}</div>
+                <div class="review__name"><a class="review__name--link" href="userProfile.html?username=${encodeURIComponent(r.username)}">${r.username}</a></div>
                 <div class="review__meta">
                   ${r.stars ? `<span class="rating__stars">${starsHtml(r.stars)}</span>` : ''}
                   <span class="muted">${timeAgo(r.created_at)}</span>

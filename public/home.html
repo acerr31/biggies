@@ -325,7 +325,7 @@
                             : `<div class="avatar" style="background:#d4872a;">${r.initials || "?"}</div>`
                         }
                         <div>
-                            <p class="card-author">${r.username || "Anonymous"}</p>
+                            <p class="card-author"><a class="card-author-link" href="userProfile.html?username=${encodeURIComponent(r.username || '')}">${r.username || "Anonymous"}</a></p>
                             <p class="card-time">${timeAgo(r.created_at)}${visitHtml}</p>
                         </div>
                     </div>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Profile – Plated</title>
+  <link rel="stylesheet" href="css/userProfile.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Nav -->
+  <header class="topbar">
+    <div class="logo">
+      <a href="home.html">
+        <img src="images/PlatedLogo.png" alt="Plated" />
+      </a>
+    </div>
+    <nav class="topbar-links">
+      <a href="home.html" class="nav-link">Feed</a>
+      <a href="explore.html" class="nav-link">Explore</a>
+      <a href="restaurantform.html" class="nav-link">Submit a Restaurant</a>
+      <a href="profile.html" class="nav-link">Profile</a>
+    </nav>
+    <div class="topbar-right">
+      <div class="topbar-avatar" id="topbar-initials">?</div>
+      <span class="topbar-username" id="topbar-username-label">—</span>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- Profile Hero -->
+    <section class="profile-hero card">
+      <div class="avatar-wrap">
+        <div class="avatar-circle" id="user-avatar">?</div>
+      </div>
+      <div class="profile-info">
+        <h1 class="display-name" id="user-display-name">Loading…</h1>
+        <p class="username-handle" id="user-username">@—</p>
+        <div class="stats-row">
+          <div class="stat">
+            <span class="stat-value" id="review-count">—</span>
+            <span class="stat-label">Reviews</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="reviews-section">
+      <h2 class="section-title">Reviews by <span id="section-username">this user</span></h2>
+      <div class="reviews-list" id="reviews-list">
+        <p class="loading-msg">Loading reviews…</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="js/userProfile.js"></script>
+</body>
+</html>

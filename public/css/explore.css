@@ -779,6 +779,12 @@ body.panel-open { overflow: hidden; }
   background: none;
 }
 .dp-review-header strong { font-size: .9rem; }
+.dp-reviewer-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color .15s;
+}
+.dp-reviewer-link:hover { color: var(--accent, #d4872a); text-decoration: underline; }
 .dp-review-date {
   display: block;
   font-size: .78rem;

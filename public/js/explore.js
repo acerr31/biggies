@@ -340,7 +340,7 @@ function buildDetailHTML(r, reviews) {
               : `<span class="dp-avatar">${escHtml(rv.initials || "?")}</span>`
             }
             <div>
-              <strong>${escHtml(rv.username || "Anonymous")}</strong>
+              <strong><a class="dp-reviewer-link" href="userProfile.html?username=${encodeURIComponent(rv.username || '')}">${escHtml(rv.username || "Anonymous")}</a></strong>
               <span class="dp-review-date">${rv.visit_date ? formatDate(rv.visit_date) : ""}</span>
             </div>
             ${rv.stars ? `<span class="dp-stars">${renderStars(rv.stars)}</span>` : ""}

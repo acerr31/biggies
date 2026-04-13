@@ -1,0 +1,261 @@
+/* =============================================
+              userProfile.css
+   ============================================= */
+
+:root {
+  --bg:            #f5f2ee;
+  --surface:       #ffffff;
+  --border:        #e8e3db;
+  --text-primary:  #1a1612;
+  --text-secondary:#8a8278;
+  --accent:        #d4872a;
+  --accent-light:  #fdf3e7;
+  --accent-text:   #7a4510;
+  --teal:          #1a9e8f;
+  --teal-light:    #e6f7f5;
+  --font-display:  'DM Serif Display', Georgia, serif;
+  --font-body:     'DM Sans', 'Segoe UI', sans-serif;
+  --radius-card:   18px;
+  --radius-md:     10px;
+  --topbar-h:      62px;
+  --shadow:        0 2px 12px rgba(60,40,10,.07);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; background: var(--bg); }
+body { font-family: var(--font-body); color: var(--text-primary); min-height: 100vh; }
+a { text-decoration: none; color: inherit; }
+button { font-family: var(--font-body); cursor: pointer; border: none; background: none; }
+
+/* ── Topbar ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 36px;
+  box-shadow: var(--shadow);
+}
+.logo img { height: 36px; width: auto; }
+.topbar-links { display: flex; gap: 28px; }
+.nav-link {
+  font-size: .88rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color .15s;
+}
+.nav-link:hover, .nav-link.active { color: var(--accent); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.topbar-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+}
+.topbar-username { font-size: .85rem; font-weight: 500; color: var(--text-secondary); }
+
+/* ── Page layout ── */
+.page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 36px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 28px 32px;
+}
+
+/* ── Profile Hero ── */
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.avatar-circle {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  font-family: var(--font-display);
+}
+
+.profile-info { flex: 1; }
+
+.display-name {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.username-handle {
+  font-size: .9rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.stats-row { display: flex; gap: 24px; }
+.stat { display: flex; flex-direction: column; align-items: center; }
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--accent);
+}
+.stat-label { font-size: .78rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+
+/* ── Reviews Section ── */
+.section-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading-msg, .empty-msg {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 32px 0;
+  font-size: .95rem;
+}
+
+/* ── Review Card ── */
+.review-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: box-shadow .15s;
+}
+.review-item:hover { box-shadow: 0 4px 20px rgba(60,40,10,.12); }
+
+.review-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.review-restaurant {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.review-restaurant:hover { text-decoration: underline; }
+
+.review-date {
+  font-size: .8rem;
+  color: var(--text-secondary);
+}
+
+.review-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stars {
+  color: #f5a623;
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+.sentiment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: .8rem;
+  font-weight: 600;
+}
+.sentiment-badge.positive { background: var(--teal-light); color: var(--teal); }
+.sentiment-badge.neutral  { background: var(--accent-light); color: var(--accent-text); }
+.sentiment-badge.negative { background: #fdecea; color: #c0392b; }
+
+.review-notes {
+  font-size: .95rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+.review-dishes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dish-chip {
+  background: var(--accent-light);
+  color: var(--accent-text);
+  font-size: .78rem;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.review-photos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.review-photos img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .topbar { padding: 0 16px; }
+  .topbar-links { gap: 14px; }
+  .page { padding: 20px 12px 48px; }
+  .profile-hero { flex-direction: column; text-align: center; }
+  .stats-row { justify-content: center; }
+  .card { padding: 18px 16px; }
+}

@@ -74,46 +74,23 @@
             </section>
 
             <!-- Right sidebar -->
-            <aside class="sidebar sidebar-right">
-                <div class="sidebar-section">
-                    <p class="sidebar-label">Trending today</p>
-                    <div class="trending-item">
-                        <span class="trend-num">1</span>
-                        <div><p class="trend-title">Smash Burgers</p><p class="trend-count">842 posts</p></div>
-                    </div>
-                    <div class="trending-item">
-                        <span class="trend-num">2</span>
-                        <div><p class="trend-title">Sourdough Bread</p><p class="trend-count">611 posts</p></div>
-                    </div>
-                    <div class="trending-item">
-                        <span class="trend-num">3</span>
-                        <div><p class="trend-title">Mango Sorbet</p><p class="trend-count">389 posts</p></div>
-                    </div>
-                    <div class="trending-item">
-                        <span class="trend-num">4</span>
-                        <div><p class="trend-title">Ramen from Scratch</p><p class="trend-count">274 posts</p></div>
-                    </div>
-                </div>
-                <div class="sidebar-section">
-                    <p class="sidebar-label">Suggested follows</p>
-                    <div class="suggest-item">
-                        <div class="avatar" style="background:#c9b1d9;">SK</div>
-                        <div class="suggest-info">
-                            <p>Samin Kiani</p>
-                            <p class="suggest-sub">Salt, Fat, Acid, Heat</p>
-                        </div>
-                        <button class="follow-btn">Follow</button>
-                    </div>
-                    <div class="suggest-item">
-                        <div class="avatar" style="background:#b7e4c7;">OB</div>
-                        <div class="suggest-info">
-                            <p>Omar Basha</p>
-                            <p class="suggest-sub">Street food specialist</p>
-                        </div>
-                        <button class="follow-btn">Follow</button>
-                    </div>
-                </div>
-            </aside>
+            <!-- Right sidebar -->
+<aside class="sidebar sidebar-right">
+    <div class="sidebar-section weekly-top-card">
+        <p class="sidebar-label">Weekly Top Restaurants</p>
+        <p class="sidebar-copy">Most active restaurants this week</p>
+        <div id="homeWeeklyTopRestaurants" class="weekly-top-list">
+            <div class="weekly-top-empty">Loading weekly rankings...</div>
+        </div>
+    </div>
+
+    <div class="sidebar-section">
+        <p class="sidebar-label">Suggested follows</p>
+        <div id="suggestedFollowsList">
+            <div class="weekly-top-empty">Loading suggestions...</div>
+        </div>
+    </div>
+</aside>
 
         </div>
     </main>

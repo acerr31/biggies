@@ -193,3 +193,238 @@ document.addEventListener("keydown", async (e) => {
         await postComment(reviewId, textarea, listEl, countEl);
     }
 });
+
+// ── Feed sidebar widgets ───────────────────────────────────
+
+function escHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function renderStars(n) {
+    const full = Math.round(Number(n) || 0);
+    let out = "";
+    for (let i = 1; i <= 5; i++) {
+        out += i <= full ? "★" : "☆";
+    }
+    return out;
+}
+
+function getReviewDate(review) {
+    return review.created_at || review.review_date || review.visit_date || null;
+}
+
+function isInCurrentWeek(dateStr) {
+    if (!dateStr) return false;
+
+    const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return false;
+
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setHours(0, 0, 0, 0);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+
+    return date >= startOfWeek && date <= now;
+}
+
+function shuffleArray(items) {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
+
+function initialsFromUser(user) {
+    const first = (user.first_name || "").trim()[0] || "";
+    const last = (user.last_name || "").trim()[0] || "";
+    const username = (user.username || "").trim();
+    return (first + last || username.slice(0, 2) || "?").toUpperCase();
+}
+
+async function loadHomeWeeklyTopRestaurants() {
+    const container = document.getElementById("homeWeeklyTopRestaurants");
+    if (!container) return;
+
+    container.innerHTML = `<div class="weekly-top-empty">Loading weekly rankings...</div>`;
+
+    try {
+        const restaurantRes = await fetch("/api/restaurants");
+        if (!restaurantRes.ok) throw new Error("Failed to load restaurants");
+
+        const restaurantData = await restaurantRes.json();
+        const restaurants = restaurantData.restaurants || [];
+
+        if (!restaurants.length) {
+            container.innerHTML = `<div class="weekly-top-empty">No restaurants found.</div>`;
+            return;
+        }
+
+        const restaurantStats = await Promise.all(
+            restaurants.map(async (restaurant) => {
+                try {
+                    const reviewRes = await fetch(`/api/reviews/${restaurant.restaurant_ID}`);
+                    if (!reviewRes.ok) throw new Error("Failed reviews fetch");
+
+                    const reviewData = await reviewRes.json();
+                    const reviews = reviewData.reviews || [];
+
+                    const weeklyReviews = reviews.filter((review) => {
+                        const reviewDate = getReviewDate(review);
+                        return isInCurrentWeek(reviewDate);
+                    });
+
+                    const ratingsThisWeek = weeklyReviews
+                        .map((review) => Number(review.stars))
+                        .filter((stars) => !Number.isNaN(stars) && stars > 0);
+
+                    const avgRatingThisWeek = ratingsThisWeek.length
+                        ? ratingsThisWeek.reduce((sum, stars) => sum + stars, 0) / ratingsThisWeek.length
+                        : 0;
+
+                    return {
+                        restaurant_ID: restaurant.restaurant_ID,
+                        restaurantName: restaurant.restaurantName,
+                        reviewsThisWeek: weeklyReviews.length,
+                        avgRatingThisWeek
+                    };
+                } catch (err) {
+                    console.error(`Weekly stats failed for restaurant ${restaurant.restaurant_ID}`, err);
+                    return {
+                        restaurant_ID: restaurant.restaurant_ID,
+                        restaurantName: restaurant.restaurantName,
+                        reviewsThisWeek: 0,
+                        avgRatingThisWeek: 0
+                    };
+                }
+            })
+        );
+
+        const topRestaurants = restaurantStats
+            .filter((restaurant) => restaurant.reviewsThisWeek > 0)
+            .sort((a, b) => {
+                if (b.reviewsThisWeek !== a.reviewsThisWeek) {
+                    return b.reviewsThisWeek - a.reviewsThisWeek;
+                }
+                return b.avgRatingThisWeek - a.avgRatingThisWeek;
+            })
+            .slice(0, 5);
+
+        if (!topRestaurants.length) {
+            container.innerHTML = `<div class="weekly-top-empty">No reviews were added for restaurants this week.</div>`;
+            return;
+        }
+
+        container.innerHTML = topRestaurants.map((restaurant, index) => `
+            <div class="weekly-top-item">
+                <div class="weekly-top-rank">#${index + 1}</div>
+                <div class="weekly-top-content">
+                    <a href="restaurant.html?id=${restaurant.restaurant_ID}" class="weekly-top-name">
+                        ${escHtml(restaurant.restaurantName)}
+                    </a>
+                    <div class="weekly-top-meta">
+                        <span>${restaurant.reviewsThisWeek} review${restaurant.reviewsThisWeek === 1 ? "" : "s"} this week</span>
+                        <span>•</span>
+                        <span>${renderStars(restaurant.avgRatingThisWeek)} (${restaurant.avgRatingThisWeek.toFixed(1)})</span>
+                    </div>
+                </div>
+            </div>
+        `).join("");
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = `<div class="weekly-top-empty">Could not load weekly top restaurants.</div>`;
+    }
+}
+
+function emailToHandle(email) {
+    const local = String(email || "").split("@")[0].trim();
+    return local || "member";
+}
+
+function handleToInitials(handle) {
+    const cleaned = String(handle || "").replace(/[^a-zA-Z0-9]/g, "");
+    return (cleaned.slice(0, 2) || "?").toUpperCase();
+}
+
+async function loadSuggestedFollows() {
+    const container = document.getElementById("suggestedFollowsList");
+    if (!container) return;
+
+    const token = localStorage.getItem("jwtToken");
+    const headers = token
+        ? { "Authorization": token, "Content-Type": "application/json" }
+        : {};
+
+    container.innerHTML = `<div class="weekly-top-empty">Loading suggestions...</div>`;
+
+    try {
+        const [profileRes, usersRes] = await Promise.all([
+            fetch("/api/profile", {
+                method: "GET",
+                headers
+            }),
+            fetch("/api/users", {
+                method: "GET",
+                headers
+            })
+        ]);
+
+        if (!usersRes.ok) throw new Error("Failed to load users");
+
+        const profileData = profileRes.ok ? await profileRes.json() : {};
+        const usersData = await usersRes.json();
+
+        const currentEmail = String(profileData.email || "").toLowerCase().trim();
+
+        const emails = Array.isArray(usersData.emails) ? usersData.emails : [];
+
+        const suggestions = shuffleArray(
+            emails.filter((email) => {
+                const normalizedEmail = String(email || "").toLowerCase().trim();
+
+                if (!normalizedEmail) return false;
+                if (normalizedEmail === "poop@email.com") return false;
+                if (normalizedEmail === currentEmail) return false;
+
+                return true;
+            })
+        ).slice(0, 3);
+
+        if (!suggestions.length) {
+            container.innerHTML = `<div class="weekly-top-empty">No suggested follows right now.</div>`;
+            return;
+        }
+
+        container.innerHTML = suggestions.map((email) => {
+            const handle = emailToHandle(email);
+            const initials = handleToInitials(handle);
+
+            return `
+                <div class="suggest-item">
+                    <div class="avatar" style="background:#d4872a;">${escHtml(initials)}</div>
+                    <div class="suggest-info">
+                        <p>${escHtml(handle)}</p>
+                        <p class="suggest-sub">Plated member</p>
+                    </div>
+                    <button class="follow-btn" type="button">Follow</button>
+                </div>
+            `;
+        }).join("");
+
+    } catch (err) {
+        console.error("Suggested follows error:", err);
+        container.innerHTML = `<div class="weekly-top-empty">Could not load suggestions.</div>`;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadHomeWeeklyTopRestaurants();
+    loadSuggestedFollows();
+});

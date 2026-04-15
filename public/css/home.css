@@ -1078,3 +1078,77 @@ img { display: block; max-width: 100%; }
   opacity: .6;
   cursor: not-allowed;
 }
+
+/* ── Home sidebar weekly leaderboard ─────────────────────── */
+.sidebar-copy {
+  font-size: .78rem;
+  color: var(--text-secondary);
+  margin: -4px 0 12px;
+}
+
+.weekly-top-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.weekly-top-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.weekly-top-rank {
+  min-width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  background: var(--accent-light);
+  color: var(--accent-text);
+}
+
+.weekly-top-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.weekly-top-name {
+  display: inline-block;
+  font-weight: 700;
+  margin-bottom: 4px;
+  font-size: 14px;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+.weekly-top-name:hover,
+.suggest-link:hover {
+  color: var(--accent);
+}
+
+.weekly-top-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.weekly-top-empty {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.suggest-link {
+  color: inherit;
+  text-decoration: none;
+}

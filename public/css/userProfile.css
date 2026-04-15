@@ -254,6 +254,34 @@ button { font-family: var(--font-body); cursor: pointer; border: none; backgroun
   border: 1px solid var(--border);
 }
 
+.follow-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.btn-follow {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 2px solid #3d342b;
+  background: #3d342b;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-follow.following {
+  background: transparent;
+  color: #3d342b;
+}
+
+.follower-count {
+  color: var(--text-secondary, #8a8278);
+  font-size: 0.9rem;
+}
+
 /* ── Responsive ── */
 @media (max-width: 600px) {
   .topbar { padding: 0 16px; }

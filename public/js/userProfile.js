@@ -87,6 +87,46 @@
       }
 
 
+    /* ── Follow button ── */
+    const followRow = document.getElementById('follow-row');
+    const followBtn = document.getElementById('follow-btn');
+    const followerCountEl = document.getElementById('follower-count');
+
+    if (token) {
+      followRow.style.display = 'flex';
+
+      try {
+        const statusRes = await fetch(`/api/users/${encodeURIComponent(username)}/follow-status`, {
+          headers: { Authorization: token }
+        });
+        if (statusRes.ok) {
+          const { following, followerCount } = await statusRes.json();
+          followBtn.textContent = following ? 'Unfollow' : 'Follow';
+          followBtn.classList.toggle('following', following);
+          followerCountEl.textContent = `${followerCount} follower${followerCount !== 1 ? 's' : ''}`;
+        }
+      } catch (e) {
+        console.error('Could not load follow status:', e);
+      }
+
+      followBtn.addEventListener('click', async () => {
+        try {
+          const res = await fetch(`/api/users/${encodeURIComponent(username)}/follow`, {
+            method: 'POST',
+            headers: { Authorization: token }
+          });
+          if (res.ok) {
+            const { following, followerCount } = await res.json();
+            followBtn.textContent = following ? 'Unfollow' : 'Follow';
+            followBtn.classList.toggle('following', following);
+            followerCountEl.textContent = `${followerCount} follower${followerCount !== 1 ? 's' : ''}`;
+          }
+        } catch (e) {
+          console.error('Could not toggle follow:', e);
+        }
+      });
+    }
+
     /* ── Render profile hero ── */
     document.title = `${user.username} – Plated`;
 
@@ -221,5 +261,3 @@
 
 
 })();
-
-

@@ -1175,6 +1175,115 @@ app.get('/api/users/:username/profile', async (req, res) => {
     }
 });
 
+// ============================================================
+// FOLLOW / UNFOLLOW
+// ============================================================
+
+// POST /api/users/:username/follow — toggle follow on/off (auth required)
+app.post('/api/users/:username/follow', authenticateToken, async (req, res) => {
+  const { username } = req.params;
+  const followerEmail = req.user.email;
+
+  try {
+    const connection = await createConnection();
+
+    const [target] = await connection.execute(
+      'SELECT email FROM users WHERE username = ? LIMIT 1',
+      [username]
+    );
+    if (target.length === 0) {
+      await connection.end();
+      return res.status(404).json({ message: 'User not found.' });
+    }
+    const followingEmail = target[0].email;
+
+    if (followerEmail === followingEmail) {
+      await connection.end();
+      return res.status(400).json({ message: "You can't follow yourself." });
+    }
+
+    const [existing] = await connection.execute(
+      'SELECT id FROM follows WHERE follower_email = ? AND following_email = ?',
+      [followerEmail, followingEmail]
+    );
+
+    let following;
+    if (existing.length > 0) {
+      await connection.execute(
+        'DELETE FROM follows WHERE follower_email = ? AND following_email = ?',
+        [followerEmail, followingEmail]
+      );
+      following = false;
+    } else {
+      await connection.execute(
+        'INSERT INTO follows (follower_email, following_email) VALUES (?, ?)',
+        [followerEmail, followingEmail]
+      );
+      following = true;
+    }
+
+    const [[{ count }]] = await connection.execute(
+      'SELECT COUNT(*) AS count FROM follows WHERE following_email = ?',
+      [followingEmail]
+    );
+
+    await connection.end();
+    res.status(200).json({ following, followerCount: count });
+  } catch (error) {
+    console.error('Error toggling follow:', error);
+    res.status(500).json({ message: 'Error toggling follow.' });
+  }
+});
+
+// GET /api/users/:username/follow-status — check if logged-in user follows this profile
+app.get('/api/users/:username/follow-status', authenticateToken, async (req, res) => {
+  const { username } = req.params;
+  try {
+    const connection = await createConnection();
+    const [target] = await connection.execute(
+      'SELECT email FROM users WHERE username = ? LIMIT 1', [username]
+    );
+    if (target.length === 0) {
+      await connection.end();
+      return res.status(404).json({ message: 'User not found.' });
+    }
+    const followingEmail = target[0].email;
+    const [row] = await connection.execute(
+      'SELECT id FROM follows WHERE follower_email = ? AND following_email = ?',
+      [req.user.email, followingEmail]
+    );
+    const [[{ count }]] = await connection.execute(
+      'SELECT COUNT(*) AS count FROM follows WHERE following_email = ?', [followingEmail]
+    );
+    await connection.end();
+    res.status(200).json({ following: row.length > 0, followerCount: count });
+  } catch (error) {
+    console.error('Error fetching follow status:', error);
+    res.status(500).json({ message: 'Error fetching follow status.' });
+  }
+});
+
+// GET /api/profile/following — get list of users the logged-in user follows (for feed)
+app.get('/api/profile/following', authenticateToken, async (req, res) => {
+  try {
+    const connection = await createConnection();
+    const [rows] = await connection.execute(
+      `SELECT u.username, u.first_name, u.last_name, u.profile_photo
+       FROM follows f
+       JOIN users u ON f.following_email = u.email
+       WHERE f.follower_email = ?`,
+      [req.user.email]
+    );
+    await connection.end();
+    res.status(200).json({ following: rows });
+  } catch (error) {
+    console.error('Error fetching following list:', error);
+    res.status(500).json({ message: 'Error fetching following list.' });
+  }
+});
+
+// ── END FOLLOW / UNFOLLOW ─────────────────────────────────────
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

@@ -364,11 +364,22 @@
             const list = document.getElementById("feedList");
             list.innerHTML = `<div class="feed-state">Loading...</div>`;
 
+            // try {
+            //     const endpoint = tab === "following" ? "/api/reviews/following" : "/api/reviews";
             try {
-                const endpoint = tab === "following" ? "/api/reviews/following" : "/api/reviews";
+                let endpoint = "/api/reviews";
+
+                if (tab == "following") {
+                    endpoint = "/api/reviews/following";
+                    // FUTURE: this endpoint should return reviews from accounts the logged-in user follows.
+                    // Backend will need to look up the user's follow list from the auth token / user account.
+                    // If follow relationships are stored in a table, this route should JOIN that table here.
+                }
+
                 const res  = await fetch(endpoint, {
                     headers: token ? { "Authorization": token } : {}
                 });
+
                 const data = await res.json();
                 renderReviews(data.reviews || data);
             } catch (err) {
@@ -380,7 +391,7 @@
         // ── tab switching ────────────────────────────────────────────
         document.querySelectorAll(".feed-tab").forEach(btn => {
             btn.addEventListener("click", () => {
-                currentTab = btn.dataset.tab;
+                currentTab = btn.dataset.tab;   // should be "discovery" or "following"
                 document.querySelectorAll(".feed-tab").forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
                 loadFeed(currentTab);

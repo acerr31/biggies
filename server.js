@@ -574,7 +574,8 @@ app.get("/api/restaurants/:id", async (req, res) => {
             r.sundayHours,
             r.email,
             u.first_name,
-            u.last_name
+            u.last_name,
+            u.username
         FROM restaurants r
         LEFT JOIN users u ON r.email = u.email
         WHERE r.restaurant_ID = ?
@@ -1111,7 +1112,7 @@ app.get('/api/users/:username/profile', async (req, res) => {
         const connection = await createConnection();
 
         const [users] = await connection.execute(
-            `SELECT username, first_name, last_name, profile_photo
+            `SELECT email, username, first_name, last_name, profile_photo
              FROM users WHERE username = ? LIMIT 1`,
             [username]
         );
@@ -1122,6 +1123,15 @@ app.get('/api/users/:username/profile', async (req, res) => {
         }
 
         const user = users[0];
+
+        const [submissionRows] = await connection.execute(
+            `SELECT COUNT(*) AS submission_count
+            FROM restaurants
+            WHERE email = ?`,
+            [user.email]
+        );
+
+        user.submission_count = submissionRows[0]?.submission_count || 0;
 
         const [reviews] = await connection.execute(
             `SELECT

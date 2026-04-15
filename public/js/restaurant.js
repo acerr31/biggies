@@ -113,12 +113,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (postedByBtn) {
       if (restaurant.first_name && restaurant.last_name) {
-        postedByBtn.textContent = `Posted by ${restaurant.first_name} ${restaurant.last_name}`;
+        postedByBtn.textContent = `Submitted by ${restaurant.first_name} ${restaurant.last_name}`;
       } else if (restaurant.email) {
         // fallback
-        postedByBtn.textContent = `Posted by ${restaurant.email.split("@")[0]}`;
+        postedByBtn.textContent = `Submitted by ${restaurant.email.split("@")[0]}`;
       } else {
-        postedByBtn.textContent = "Posted by unknown";
+        postedByBtn.textContent = "SubmittedS by unknown";
       }
     }
         
@@ -267,6 +267,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (restaurant.address) {
           const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`;
           window.open(mapsUrl, "_blank");
+        }
+      };
+    }
+
+      const profileDirectionBtn = document.querySelector(".hero__quickActions .btn--secondary");
+
+    if (profileDirectionBtn) {
+      profileDirectionBtn.onclick = function (e) {
+        e.preventDefault();
+        if (restaurant.username) {
+          const userClick = `/userProfile.html?username=${encodeURIComponent(restaurant.username)}`;
+          window.open(userClick, "_blank");
         }
       };
     }

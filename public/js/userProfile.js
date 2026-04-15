@@ -52,6 +52,41 @@
 
     const { user, reviews } = data;
 
+    // submission count
+    const submissionEl = document.getElementById("submission-count");
+    if (submissionEl) {
+      submissionEl.textContent = user.submission_count ?? 0;
+    }
+
+    // streak
+    const streak = calcStreak(reviews);
+    const streakEl = document.getElementById("week-streak");
+    if (streakEl) {
+      streakEl.textContent = `${streak} wk${streak !== 1 ? "s" : ""}`;
+    }
+
+    // rank
+      try {
+        const lbRes = await fetch("/api/leaderboard", token
+          ? { headers: { Authorization: token } }
+          : {}
+        );
+
+        if (lbRes.ok) {
+          const { leaderboard } = await lbRes.json();
+
+          const rankedUser = leaderboard.find(u => u.username === user.username);
+
+          const rankEl = document.getElementById("rank");
+          if (rankEl) {
+            rankEl.textContent = rankedUser ? `#${rankedUser.rank}` : "—";
+          }
+        }
+      } catch (e) {
+        console.error("Could not load leaderboard:", e);
+      }
+
+
     /* ── Render profile hero ── */
     document.title = `${user.username} – Plated`;
 
@@ -154,4 +189,37 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
   }
+
+  function calcStreak(reviews) {
+    if (!reviews.length) return 0;
+    const MS_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+    // Get Monday-based week start timestamp for a date
+    const weekStart = (d) => {
+        const date = new Date(d);
+        date.setHours(0, 0, 0, 0);
+        const day = date.getDay();
+        date.setDate(date.getDate() - (day === 0 ? 6 : day - 1));
+        return date.getTime();
+    };
+
+    const weeks = new Set(reviews.map(r => weekStart(r.created_at)));
+    const thisWeek = weekStart(new Date());
+    const lastWeek = thisWeek - MS_WEEK;
+
+    // Start from this week if it has a review, else last week
+    let current = weeks.has(thisWeek) ? thisWeek : (weeks.has(lastWeek) ? lastWeek : null);
+    if (!current) return 0;
+
+    let streak = 0;
+    while (weeks.has(current)) {
+        streak++;
+        current -= MS_WEEK;
+    }
+    return streak;
+}
+
+
 })();
+
+

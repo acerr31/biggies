@@ -487,7 +487,7 @@
         return `
           <div class="review" data-id="${r.id}">
             <div class="review__top">
-              <div class="avatar">${r.initials}</div>
+              <a href="userProfile.html?username=${encodeURIComponent(r.username)}" style="display:contents;"><div class="avatar" style="cursor:pointer;">${r.initials}</div></a>
               <div class="review__who">
                 <div class="review__name"><a class="review__name--link" href="userProfile.html?username=${encodeURIComponent(r.username)}">${r.username}</a></div>
                 <div class="review__meta">

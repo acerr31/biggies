@@ -297,10 +297,12 @@
                 <article class="card">
                     ${carouselHtml}
                     <div class="card-meta">
-                        ${r.profile_photo
-                            ? `<img src="${r.profile_photo}" class="avatar avatar-photo" alt="" />`
-                            : `<div class="avatar" style="background:#d4872a;">${r.initials || "?"}</div>`
-                        }
+                        <a href="userProfile.html?username=${encodeURIComponent(r.username || '')}" style="display:contents;">
+                            ${r.profile_photo
+                                ? `<img src="${r.profile_photo}" class="avatar avatar-photo" alt="" style="cursor:pointer;" />`
+                                : `<div class="avatar" style="background:#d4872a;cursor:pointer;">${r.initials || "?"}</div>`
+                            }
+                        </a>
                         <div>
                             <p class="card-author"><a class="card-author-link" href="userProfile.html?username=${encodeURIComponent(r.username || '')}">${r.username || "Anonymous"}</a></p>
                             <p class="card-time">${timeAgo(r.created_at)}${visitHtml}</p>

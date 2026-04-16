@@ -438,8 +438,10 @@ function renderPostsGrid(reviews) {
                </div>`
             : "";
 
+        const visitDateVal = r.visit_date ? r.visit_date.split("T")[0] : "";
+
         return `
-        <article class="pf-post">
+        <article class="pf-post" data-review-id="${r.id}" data-photos="${encodeURIComponent(JSON.stringify(r.photos || []))}">
           <div class="pf-header">
             <a href="restaurant.html?id=${r.restaurant_id}" class="pf-title">
               You ranked <strong>${escHtml(r.restaurant_name)}</strong>
@@ -453,8 +455,186 @@ function renderPostsGrid(reviews) {
           ${photosHtml}
           ${r.notes ? `<p class="pf-notes">${escHtml(r.notes)}</p>` : ""}
           ${r.favorite_dishes ? `<p class="pf-dishes">Favorites: ${escHtml(r.favorite_dishes)}</p>` : ""}
+          <div class="pf-actions">
+            <button class="pf-edit-btn"
+              data-id="${r.id}"
+              data-sentiment="${r.sentiment || ""}"
+              data-stars="${r.stars || ""}"
+              data-notes="${escHtml(r.notes || "")}"
+              data-dishes="${escHtml(r.favorite_dishes || "")}"
+              data-visit-date="${visitDateVal}">Edit</button>
+            <button class="pf-delete-btn" data-id="${r.id}">Delete</button>
+          </div>
         </article>`;
     }).join("");
+
+    // Store photos on the button element directly (not in dataset to avoid encoding issues)
+    grid.querySelectorAll(".pf-edit-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const article = btn.closest("article");
+            const photos  = article ? JSON.parse(decodeURIComponent(article.dataset.photos || "%5B%5D")) : [];
+            openEditModal(btn.dataset, photos);
+        });
+    });
+    grid.querySelectorAll(".pf-delete-btn").forEach(btn => {
+        btn.addEventListener("click", () => deleteReview(btn.dataset.id));
+    });
+}
+
+let _editPhotosToDelete = new Set();
+
+async function deleteReview(id) {
+    if (!confirm("Delete this review? This cannot be undone.")) return;
+    const token = localStorage.getItem("jwtToken");
+    try {
+        const res = await fetch(`/api/reviews/${id}`, {
+            method: "DELETE",
+            headers: { "Authorization": token }
+        });
+        if (!res.ok) throw new Error();
+        document.querySelector(`.pf-post[data-review-id="${id}"]`)?.remove();
+    } catch {
+        alert("Could not delete review.");
+    }
+}
+
+function openEditModal(data, photos) {
+    _editPhotosToDelete = new Set();
+
+    document.getElementById("edit-review-id").value  = data.id;
+    document.getElementById("edit-sentiment").value  = data.sentiment || "";
+    document.getElementById("edit-stars").value      = data.stars || "";
+    document.getElementById("edit-notes").value      = (data.notes || "").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"');
+    document.getElementById("edit-dishes").value     = (data.dishes || "").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"');
+    document.getElementById("edit-visit-date").value = data.visitDate || "";
+    document.getElementById("edit-error").style.display = "none";
+
+    // Render current photos
+    const photoContainer = document.getElementById("edit-current-photos");
+    photoContainer.innerHTML = (photos && photos.length) ? photos.map(url => `
+        <div class="edit-photo-thumb" data-url="${url}" style="position:relative;width:72px;height:72px;">
+            <img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;" />
+            <button class="edit-photo-remove" data-url="${url}"
+                style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#c0392b;color:#fff;border:none;cursor:pointer;font-size:.75rem;line-height:20px;text-align:center;padding:0;">✕</button>
+        </div>`).join("") : "<p style='font-size:.82rem;color:#aaa;'>No photos</p>";
+
+    photoContainer.querySelectorAll(".edit-photo-remove").forEach(btn => {
+        btn.addEventListener("click", () => {
+            _editPhotosToDelete.add(btn.dataset.url);
+            btn.closest(".edit-photo-thumb").remove();
+        });
+    });
+
+    // Clear new photo input + preview
+    const newInput = document.getElementById("edit-new-photos");
+    const preview  = document.getElementById("edit-new-photos-preview");
+    if (newInput) newInput.value = "";
+    if (preview)  preview.innerHTML = "";
+
+    const backdrop = document.getElementById("edit-modal-backdrop");
+    backdrop.style.display = "flex";
+    document.body.style.overflow = "hidden";
+}
+
+function closeEditModal() {
+    document.getElementById("edit-modal-backdrop").style.display = "none";
+    document.body.style.overflow = "";
+}
+
+async function saveEditReview() {
+    const id        = document.getElementById("edit-review-id").value;
+    const sentiment = document.getElementById("edit-sentiment").value;
+    const stars     = document.getElementById("edit-stars").value;
+    const notes     = document.getElementById("edit-notes").value.trim();
+    const dishes    = document.getElementById("edit-dishes").value.trim();
+    const visitDate = document.getElementById("edit-visit-date").value;
+    const errEl     = document.getElementById("edit-error");
+    const token     = localStorage.getItem("jwtToken");
+    const newPhotos = document.getElementById("edit-new-photos")?.files || [];
+
+    const fd = new FormData();
+    fd.append("data", JSON.stringify({
+        sentiment,
+        stars: stars || null,
+        notes,
+        favoriteDishes: dishes,
+        visitDate,
+        photosToDelete: [..._editPhotosToDelete]
+    }));
+    for (const file of newPhotos) fd.append("photos", file);
+
+    try {
+        const res = await fetch(`/api/reviews/${id}`, {
+            method: "PUT",
+            headers: { "Authorization": token },
+            body: fd
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            errEl.textContent = data.message || "Could not save.";
+            errEl.style.display = "block";
+            return;
+        }
+        closeEditModal();
+        const revRes = await fetch("/api/my-reviews", { headers: { "Authorization": token } });
+        if (revRes.ok) {
+            const { reviews } = await revRes.json();
+            renderPostsGrid(reviews);
+        }
+    } catch {
+        errEl.textContent = "Network error. Please try again.";
+        errEl.style.display = "block";
+    }
+}
+
+async function loadMyRestaurants() {
+    const token = localStorage.getItem("jwtToken");
+    try {
+        const res = await fetch("/api/my-restaurants", { headers: { "Authorization": token } });
+        if (!res.ok) return;
+        const { restaurants } = await res.json();
+        if (!restaurants.length) return;
+
+        const section = document.getElementById("submissions-section");
+        const list    = document.getElementById("submissions-list");
+        const label   = document.getElementById("submissions-count-label");
+        if (!section || !list) return;
+
+        label.textContent = `${restaurants.length} submission${restaurants.length !== 1 ? "s" : ""}`;
+        list.innerHTML = restaurants.map(r => `
+          <div class="been-item" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0ebe4;" data-restaurant-id="${r.restaurant_ID}">
+            ${r.photo ? `<img src="${r.photo}" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;" alt="" />` : `<div style="width:52px;height:52px;border-radius:8px;background:#f0ebe4;flex-shrink:0;"></div>`}
+            <div style="flex:1;min-width:0;">
+              <a href="restaurant.html?id=${r.restaurant_ID}" style="font-weight:600;color:#1f2937;text-decoration:none;font-size:.92rem;">${escHtml(r.restaurantName)}</a>
+              ${r.address ? `<p style="font-size:.8rem;color:#8a8278;margin:2px 0 0;">${escHtml(r.address)}</p>` : ""}
+            </div>
+            <button class="sub-delete-btn" data-id="${r.restaurant_ID}" style="font-size:.78rem;color:#c0392b;padding:4px 10px;border-radius:999px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;flex-shrink:0;">Delete</button>
+          </div>
+        `).join("");
+
+        list.querySelectorAll(".sub-delete-btn").forEach(btn => {
+            btn.addEventListener("click", () => deleteRestaurant(btn.dataset.id));
+        });
+
+        section.style.display = "";
+    } catch (e) {
+        console.error("Could not load submissions:", e);
+    }
+}
+
+async function deleteRestaurant(id) {
+    if (!confirm("Delete this restaurant submission? This will also remove all its reviews.")) return;
+    const token = localStorage.getItem("jwtToken");
+    try {
+        const res = await fetch(`/api/restaurants/${id}`, {
+            method: "DELETE",
+            headers: { "Authorization": token }
+        });
+        if (!res.ok) throw new Error();
+        document.querySelector(`[data-restaurant-id="${id}"]`)?.remove();
+    } catch {
+        alert("Could not delete restaurant.");
+    }
 }
 
 function openReviewModal(r) {
@@ -505,7 +685,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const backdrop = document.getElementById("review-modal-backdrop");
     document.getElementById("modal-close")?.addEventListener("click", closeModal);
     backdrop?.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
-    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+    const editBackdrop = document.getElementById("edit-modal-backdrop");
+    document.getElementById("edit-modal-close")?.addEventListener("click", closeEditModal);
+    editBackdrop?.addEventListener("click", e => { if (e.target === editBackdrop) closeEditModal(); });
+    document.getElementById("edit-save-btn")?.addEventListener("click", saveEditReview);
+
+    document.getElementById("edit-new-photos")?.addEventListener("change", function () {
+        const preview = document.getElementById("edit-new-photos-preview");
+        preview.innerHTML = "";
+        for (const file of this.files) {
+            const url = URL.createObjectURL(file);
+            preview.innerHTML += `<img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;" />`;
+        }
+    });
+
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") { closeModal(); closeEditModal(); }
+    });
+
+    loadMyRestaurants();
 });
 
 function closeModal() {

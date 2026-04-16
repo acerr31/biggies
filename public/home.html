@@ -128,6 +128,8 @@
             const lastName  = data.last_name  || "";
 
             topbarUsername.textContent = username;
+            window._myUsername = username;
+            window._reRenderFeed?.();
 
             let initials = (firstName[0] || "") + (lastName[0] || "");
             if (!initials) initials = username.slice(0, 2);
@@ -293,8 +295,22 @@
                     </div>
                 </div>`;
                 // ── END new engagement bar ───────────────────────────
+                const isOwn = window._myUsername && r.username === window._myUsername;
+                const visitDateVal = r.visit_date ? r.visit_date.split("T")[0] : "";
+                const ownActions = isOwn ? `
+                    <div class="card-own-actions">
+                        <button class="feed-edit-btn"
+                            data-id="${r.id}"
+                            data-sentiment="${r.sentiment || ""}"
+                            data-stars="${r.stars || ""}"
+                            data-notes="${(r.notes || "").replace(/"/g,"&quot;")}"
+                            data-dishes="${(r.favorite_dishes || "").replace(/"/g,"&quot;")}"
+                            data-visit-date="${visitDateVal}">Edit</button>
+                        <button class="feed-delete-btn" data-id="${r.id}">Delete</button>
+                    </div>` : "";
+
                 return `
-                <article class="card">
+                <article class="card" data-review-id="${r.id}" data-photos="${encodeURIComponent(JSON.stringify(r.photos || []))}">
                     ${carouselHtml}
                     <div class="card-meta">
                         <a href="userProfile.html?username=${encodeURIComponent(r.username || '')}" style="display:contents;">
@@ -303,10 +319,11 @@
                                 : `<div class="avatar" style="background:#d4872a;cursor:pointer;">${r.initials || "?"}</div>`
                             }
                         </a>
-                        <div>
+                        <div style="flex:1;">
                             <p class="card-author"><a class="card-author-link" href="userProfile.html?username=${encodeURIComponent(r.username || '')}">${r.username || "Anonymous"}</a></p>
                             <p class="card-time">${timeAgo(r.created_at)}${visitHtml}</p>
                         </div>
+                        ${ownActions}
                     </div>
                     <div class="card-body">
                         <a class="card-restaurant" href="restaurant.html?id=${r.restaurant_id}">${r.restaurant_name || "Unknown Restaurant"}</a>
@@ -315,7 +332,7 @@
                         ${r.notes ? `<p class="card-notes">${r.notes}</p>` : ""}
                         ${dishesHtml}
                     </div>
-                    ${engagementBar}                    
+                    ${engagementBar}
                 </article>`;
             }).join("");
             // ── Initialise like counts after the DOM is built ────────
@@ -360,7 +377,8 @@
                 });
 
                 const data = await res.json();
-                renderReviews(data.reviews || data);
+                window._lastFeedReviews = data.reviews || data;
+                renderReviews(window._lastFeedReviews);
             } catch (err) {
                 console.error("Feed error:", err);
                 list.innerHTML = `<div class="feed-state">Could not load reviews. Please try again later.</div>`;
@@ -380,6 +398,168 @@
         // ── init ─────────────────────────────────────────────────────
         loadFeed("discover");
 
+        window._reRenderFeed = () => {
+            if (window._lastFeedReviews) renderReviews(window._lastFeedReviews);
+        };
+
+    })();
+    </script>
+
+    <!-- Edit review modal (home feed) -->
+    <div id="home-edit-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:16px;padding:28px 24px 24px;max-width:460px;width:90%;position:relative;max-height:90vh;overflow-y:auto;">
+        <button id="home-edit-close" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#555;">✕</button>
+        <h3 style="margin:0 0 16px;font-size:1.1rem;">Edit Review</h3>
+        <input type="hidden" id="home-edit-id" />
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Sentiment</label>
+        <select id="home-edit-sentiment" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;">
+          <option value="">— select —</option>
+          <option value="liked">Liked it</option>
+          <option value="fine">It was fine</option>
+          <option value="didnt">Didn't like it</option>
+        </select>
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Stars</label>
+        <select id="home-edit-stars" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;">
+          <option value="">— none —</option>
+          <option value="1">★ 1</option>
+          <option value="2">★★ 2</option>
+          <option value="3">★★★ 3</option>
+          <option value="4">★★★★ 4</option>
+          <option value="5">★★★★★ 5</option>
+        </select>
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Notes</label>
+        <textarea id="home-edit-notes" rows="3" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;resize:vertical;font-size:.9rem;box-sizing:border-box;margin-bottom:14px;"></textarea>
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Favorite dishes</label>
+        <input type="text" id="home-edit-dishes" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;box-sizing:border-box;" />
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Visit date</label>
+        <input type="date" id="home-edit-visit-date" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;box-sizing:border-box;" />
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Current photos</label>
+        <div id="home-edit-current-photos" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:8px;"></div>
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Add new photos</label>
+        <input type="file" id="home-edit-new-photos" accept="image/*" multiple style="margin-bottom:10px;font-size:.85rem;" />
+        <div id="home-edit-new-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
+        <button id="home-edit-save" style="width:100%;padding:10px;background:#d4872a;color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;">Save changes</button>
+        <p id="home-edit-error" style="color:#c0392b;font-size:.83rem;margin-top:8px;display:none;"></p>
+      </div>
+    </div>
+    <script>
+    (function () {
+        const token = localStorage.getItem("jwtToken");
+
+        let _homePhotosToDelete = new Set();
+
+        function openHomeEdit(dataset, photos) {
+            _homePhotosToDelete = new Set();
+            document.getElementById("home-edit-id").value         = dataset.id;
+            document.getElementById("home-edit-sentiment").value  = dataset.sentiment || "";
+            document.getElementById("home-edit-stars").value      = dataset.stars || "";
+            document.getElementById("home-edit-notes").value      = (dataset.notes || "").replace(/&quot;/g, '"');
+            document.getElementById("home-edit-dishes").value     = (dataset.dishes || "").replace(/&quot;/g, '"');
+            document.getElementById("home-edit-visit-date").value = dataset.visitDate || "";
+            document.getElementById("home-edit-error").style.display = "none";
+
+            // Render existing photos
+            const photoContainer = document.getElementById("home-edit-current-photos");
+            photoContainer.innerHTML = (photos && photos.length) ? photos.map(url => `
+                <div style="position:relative;width:72px;height:72px;" data-url="${url}">
+                    <img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;" />
+                    <button class="home-photo-remove" data-url="${url}"
+                        style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#c0392b;color:#fff;border:none;cursor:pointer;font-size:.75rem;line-height:20px;text-align:center;padding:0;">✕</button>
+                </div>`).join("") : "<p style='font-size:.82rem;color:#aaa;'>No photos</p>";
+
+            photoContainer.querySelectorAll(".home-photo-remove").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    _homePhotosToDelete.add(btn.dataset.url);
+                    btn.closest("[data-url]").remove();
+                });
+            });
+
+            const newInput = document.getElementById("home-edit-new-photos");
+            const preview  = document.getElementById("home-edit-new-preview");
+            if (newInput) newInput.value = "";
+            if (preview)  preview.innerHTML = "";
+
+            document.getElementById("home-edit-backdrop").style.display = "flex";
+            document.body.style.overflow = "hidden";
+        }
+        function closeHomeEdit() {
+            document.getElementById("home-edit-backdrop").style.display = "none";
+            document.body.style.overflow = "";
+        }
+
+        document.getElementById("home-edit-new-photos")?.addEventListener("change", function () {
+            const preview = document.getElementById("home-edit-new-preview");
+            preview.innerHTML = "";
+            for (const file of this.files) {
+                const url = URL.createObjectURL(file);
+                preview.innerHTML += `<img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;" />`;
+            }
+        });
+
+        document.getElementById("home-edit-close")?.addEventListener("click", closeHomeEdit);
+        document.getElementById("home-edit-backdrop")?.addEventListener("click", e => {
+            if (e.target === document.getElementById("home-edit-backdrop")) closeHomeEdit();
+        });
+        document.addEventListener("keydown", e => { if (e.key === "Escape") closeHomeEdit(); });
+
+        document.getElementById("home-edit-save")?.addEventListener("click", async () => {
+            const id        = document.getElementById("home-edit-id").value;
+            const sentiment = document.getElementById("home-edit-sentiment").value;
+            const stars     = document.getElementById("home-edit-stars").value;
+            const notes     = document.getElementById("home-edit-notes").value.trim();
+            const dishes    = document.getElementById("home-edit-dishes").value.trim();
+            const visitDate = document.getElementById("home-edit-visit-date").value;
+            const errEl     = document.getElementById("home-edit-error");
+            const newPhotos = document.getElementById("home-edit-new-photos")?.files || [];
+
+            const fd = new FormData();
+            fd.append("data", JSON.stringify({
+                sentiment, stars: stars || null, notes, favoriteDishes: dishes, visitDate,
+                photosToDelete: [..._homePhotosToDelete]
+            }));
+            for (const file of newPhotos) fd.append("photos", file);
+
+            try {
+                const res = await fetch(`/api/reviews/${id}`, {
+                    method: "PUT",
+                    headers: { "Authorization": token },
+                    body: fd
+                });
+                const data = await res.json();
+                if (!res.ok) { errEl.textContent = data.message || "Could not save."; errEl.style.display = "block"; return; }
+                closeHomeEdit();
+                document.querySelector(".feed-tab.active")?.click();
+            } catch {
+                errEl.textContent = "Network error. Please try again.";
+                errEl.style.display = "block";
+            }
+        });
+
+        // Event delegation for edit/delete buttons in the feed
+        document.getElementById("feedList")?.addEventListener("click", async e => {
+            const editBtn   = e.target.closest(".feed-edit-btn");
+            const deleteBtn = e.target.closest(".feed-delete-btn");
+
+            if (editBtn) {
+                const card   = editBtn.closest(".card");
+                const photos = card ? JSON.parse(decodeURIComponent(card.dataset.photos || "%5B%5D")) : [];
+                openHomeEdit(editBtn.dataset, photos);
+            }
+            if (deleteBtn) {
+                if (!confirm("Delete this review? This cannot be undone.")) return;
+                const id = deleteBtn.dataset.id;
+                try {
+                    const res = await fetch(`/api/reviews/${id}`, {
+                        method: "DELETE",
+                        headers: { "Authorization": token }
+                    });
+                    if (!res.ok) { alert("Could not delete review."); return; }
+                    document.querySelector(`.card[data-review-id="${id}"]`)?.remove();
+                } catch {
+                    alert("Could not delete review.");
+                }
+            }
+        });
     })();
     </script>
 

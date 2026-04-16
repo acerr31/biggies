@@ -1070,6 +1070,25 @@ h1 {
 }
 .been-item:hover { background: #f0ebe3; }
 
+.pf-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.pf-edit-btn, .pf-delete-btn {
+  font-size: .78rem;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background .15s;
+}
+.pf-edit-btn  { background: #fff8f0; border-color: #f4c07a; color: #b36b1a; }
+.pf-edit-btn:hover  { background: #fdecd0; }
+.pf-delete-btn { background: #fef2f2; border-color: #fecaca; color: #c0392b; }
+.pf-delete-btn:hover { background: #fecaca; }
+
 @media (max-width: 900px) {
   .row-top    { grid-template-columns: 1fr; }
   .row-bottom { grid-template-columns: 1fr; }

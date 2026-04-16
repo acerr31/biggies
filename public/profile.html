@@ -162,6 +162,19 @@
       </div>
     </div>
 
+    <!-- ROW 4: My restaurant submissions -->
+    <div class="grid-row row-posts" id="submissions-section" style="display:none;">
+      <div class="card posts-card">
+        <div class="posts-header">
+          <p class="card-eyebrow" style="margin-bottom:0;">My Restaurant Submissions</p>
+          <span class="posts-count-label" id="submissions-count-label"></span>
+        </div>
+        <div id="submissions-list" style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+          <!-- submission rows injected by JS -->
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <p id="message" class="message"></p>
@@ -181,6 +194,54 @@
         <p class="modal-notes" id="modal-notes"></p>
         <p class="modal-dishes" id="modal-dishes"></p>
         <a class="modal-link" id="modal-link" href="#">View restaurant page ›</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit review modal -->
+  <div class="review-modal-backdrop" id="edit-modal-backdrop" style="display:none;align-items:center;justify-content:center;">
+    <div class="review-modal" id="edit-modal" style="max-width:480px;width:90%;">
+      <button class="modal-close" id="edit-modal-close">✕</button>
+      <div class="modal-body" style="padding-top:8px;">
+        <h3 style="margin:0 0 16px;font-size:1.1rem;">Edit Review</h3>
+        <input type="hidden" id="edit-review-id" />
+
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Sentiment</label>
+        <select id="edit-sentiment" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;">
+          <option value="">— select —</option>
+          <option value="liked">Liked it</option>
+          <option value="fine">It was fine</option>
+          <option value="didnt">Didn't like it</option>
+        </select>
+
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Stars</label>
+        <select id="edit-stars" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;">
+          <option value="">— none —</option>
+          <option value="1">★ 1</option>
+          <option value="2">★★ 2</option>
+          <option value="3">★★★ 3</option>
+          <option value="4">★★★★ 4</option>
+          <option value="5">★★★★★ 5</option>
+        </select>
+
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Notes</label>
+        <textarea id="edit-notes" rows="3" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;resize:vertical;font-size:.9rem;box-sizing:border-box;margin-bottom:14px;"></textarea>
+
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Favorite dishes</label>
+        <input type="text" id="edit-dishes" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;box-sizing:border-box;" placeholder="e.g. tacos, guac" />
+
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Visit date</label>
+        <input type="date" id="edit-visit-date" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;box-sizing:border-box;" />
+
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Current photos</label>
+        <div id="edit-current-photos" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:8px;"></div>
+
+        <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Add new photos</label>
+        <input type="file" id="edit-new-photos" accept="image/*" multiple style="margin-bottom:10px;font-size:.85rem;" />
+        <div id="edit-new-photos-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
+
+        <button id="edit-save-btn" style="width:100%;padding:10px;background:#d4872a;color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;">Save changes</button>
+        <p id="edit-error" style="color:#c0392b;font-size:.83rem;margin-top:8px;display:none;"></p>
       </div>
     </div>
   </div>

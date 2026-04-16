@@ -1152,3 +1152,23 @@ img { display: block; max-width: 100%; }
   color: inherit;
   text-decoration: none;
 }
+
+.card-own-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.feed-edit-btn, .feed-delete-btn {
+  font-size: .75rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background .15s;
+}
+.feed-edit-btn   { background: #fff8f0; border-color: #f4c07a; color: #b36b1a; }
+.feed-edit-btn:hover   { background: #fdecd0; }
+.feed-delete-btn { background: #fef2f2; border-color: #fecaca; color: #c0392b; }
+.feed-delete-btn:hover { background: #fecaca; }

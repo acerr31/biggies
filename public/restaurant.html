@@ -390,12 +390,19 @@
       transition: transform .15s;
     }
     .review__photos img:hover { transform: scale(1.05); }
+    .review-edit {
+      margin-left: auto; font-size: .78rem; color: #b36b1a;
+      padding: 4px 10px; border-radius: 999px; border: 1px solid #f4c07a;
+      background: #fff8f0; cursor: pointer; transition: background .15s;
+    }
+    .review-edit:hover { background: #fdecd0; }
     .review-delete {
-      margin-left: auto; font-size: .78rem; color: #c0392b;
+      font-size: .78rem; color: #c0392b;
       padding: 4px 10px; border-radius: 999px; border: 1px solid #fecaca;
       background: #fef2f2; cursor: pointer; transition: background .15s;
     }
     .review-delete:hover { background: #fecaca; }
+    .review-own-actions { margin-left: auto; display: flex; gap: 6px; }
     .active-sort { background: #ffbf69 !important; color: #1f2937 !important; border-color: transparent !important; }
     .review__name--link {
       color: #d4872a; text-decoration: none; font-weight: 600;
@@ -496,7 +503,14 @@
                   ${r.visit_date ? `<span class="muted">· Visited ${r.visit_date}</span>` : ''}
                 </div>
               </div>
-              ${isOwn ? `<button class="review-delete" data-id="${r.id}">Delete</button>` : ''}
+              ${isOwn ? `
+                <button class="review-edit" data-id="${r.id}"
+                  data-sentiment="${r.sentiment || ''}"
+                  data-stars="${r.stars || ''}"
+                  data-notes="${(r.notes || '').replace(/"/g,'&quot;')}"
+                  data-dishes="${(r.favorite_dishes || '').replace(/"/g,'&quot;')}"
+                  data-visit-date="${r.visit_date ? r.visit_date.split('T')[0] : ''}">Edit</button>
+                <button class="review-delete" data-id="${r.id}">Delete</button>` : ''}
             </div>
             ${sentimentHtml(r.sentiment)}
             ${r.notes ? `<p class="review__text">${r.notes}</p>` : ''}
@@ -505,7 +519,10 @@
           </div>`;
       }).join('');
 
-      // wire up delete buttons
+      // wire up edit + delete buttons
+      list.querySelectorAll('.review-edit').forEach(btn => {
+        btn.addEventListener('click', () => openEditModal(btn.dataset));
+      });
       list.querySelectorAll('.review-delete').forEach(btn => {
         btn.addEventListener('click', () => deleteReview(btn.dataset.id));
       });
@@ -589,7 +606,6 @@
         if (!res.ok) { const d = await res.json(); alert(d.message); return; }
         allReviews = allReviews.filter(r => r.id != reviewId);
         renderReviews();
-        // update count
         document.getElementById('reviewCount').textContent =
           `${allReviews.length} review${allReviews.length !== 1 ? 's' : ''}`;
       } catch (err) {
@@ -597,6 +613,109 @@
         alert('Could not delete review.');
       }
     }
+
+    // ── edit ──────────────────────────────────────────────
+    let _restPhotosToDelete = new Set();
+
+    function openEditModal(dataset) {
+      _restPhotosToDelete = new Set();
+      document.getElementById('rest-edit-id').value           = dataset.id;
+      document.getElementById('rest-edit-sentiment').value    = dataset.sentiment || '';
+      document.getElementById('rest-edit-stars').value        = dataset.stars || '';
+      document.getElementById('rest-edit-notes').value        = (dataset.notes || '').replace(/&quot;/g, '"');
+      document.getElementById('rest-edit-dishes').value       = (dataset.dishes || '').replace(/&quot;/g, '"');
+      document.getElementById('rest-edit-visit-date').value   = dataset.visitDate || '';
+      document.getElementById('rest-edit-error').style.display = 'none';
+
+      // Populate current photos
+      const review = allReviews.find(r => r.id == dataset.id);
+      const photos = review?.photos || [];
+      const photoContainer = document.getElementById('rest-edit-current-photos');
+      photoContainer.innerHTML = photos.length ? photos.map(url => `
+        <div style="position:relative;width:72px;height:72px;" data-url="${url}">
+          <img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;" />
+          <button class="rest-photo-remove" data-url="${url}"
+            style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#c0392b;color:#fff;border:none;cursor:pointer;font-size:.75rem;line-height:20px;text-align:center;padding:0;">✕</button>
+        </div>`).join('') : "<p style='font-size:.82rem;color:#aaa;'>No photos</p>";
+
+      photoContainer.querySelectorAll('.rest-photo-remove').forEach(btn => {
+        btn.addEventListener('click', () => {
+          _restPhotosToDelete.add(btn.dataset.url);
+          btn.closest('[data-url]').remove();
+        });
+      });
+
+      // Clear file input + preview
+      const newInput = document.getElementById('rest-edit-new-photos');
+      const preview  = document.getElementById('rest-edit-new-preview');
+      if (newInput) newInput.value = '';
+      if (preview)  preview.innerHTML = '';
+
+      document.getElementById('rest-edit-backdrop').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditModal() {
+      document.getElementById('rest-edit-backdrop').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    async function saveEditReview() {
+      const id        = document.getElementById('rest-edit-id').value;
+      const sentiment = document.getElementById('rest-edit-sentiment').value;
+      const stars     = document.getElementById('rest-edit-stars').value;
+      const notes     = document.getElementById('rest-edit-notes').value.trim();
+      const dishes    = document.getElementById('rest-edit-dishes').value.trim();
+      const visitDate = document.getElementById('rest-edit-visit-date').value;
+      const errEl     = document.getElementById('rest-edit-error');
+      const newPhotos = document.getElementById('rest-edit-new-photos')?.files || [];
+
+      const fd = new FormData();
+      fd.append('data', JSON.stringify({
+        sentiment, stars: stars || null, notes, favoriteDishes: dishes, visitDate,
+        photosToDelete: [..._restPhotosToDelete]
+      }));
+      for (const file of newPhotos) fd.append('photos', file);
+
+      try {
+        const res = await fetch(`/api/reviews/${id}`, {
+          method: 'PUT',
+          headers: { 'Authorization': token },
+          body: fd
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errEl.textContent = data.message || 'Could not save.';
+          errEl.style.display = 'block';
+          return;
+        }
+        // Update in-memory review and re-render
+        const idx = allReviews.findIndex(r => r.id == id);
+        if (idx !== -1) {
+          allReviews[idx] = { ...allReviews[idx], sentiment, stars: stars || null, notes, favorite_dishes: dishes, visit_date: visitDate, photos: data.photos || allReviews[idx].photos };
+        }
+        closeEditModal();
+        renderReviews();
+      } catch {
+        errEl.textContent = 'Network error. Please try again.';
+        errEl.style.display = 'block';
+      }
+    }
+
+    document.getElementById('rest-edit-new-photos')?.addEventListener('change', function () {
+      const preview = document.getElementById('rest-edit-new-preview');
+      preview.innerHTML = '';
+      for (const file of this.files) {
+        const url = URL.createObjectURL(file);
+        preview.innerHTML += `<img src="${url}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;" />`;
+      }
+    });
+
+    document.getElementById('rest-edit-close')?.addEventListener('click', closeEditModal);
+    document.getElementById('rest-edit-backdrop')?.addEventListener('click', e => {
+      if (e.target === document.getElementById('rest-edit-backdrop')) closeEditModal();
+    });
+    document.getElementById('rest-edit-save')?.addEventListener('click', saveEditReview);
 
     // ── sort buttons ──────────────────────────────────────
     document.querySelectorAll('.review-sort').forEach(btn => {
@@ -612,8 +731,54 @@
     loadReviews();
   })();
   </script>
+<!-- Edit review modal -->
+  <div id="rest-edit-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:16px;padding:28px 24px 24px;max-width:460px;width:90%;position:relative;max-height:90vh;overflow-y:auto;">
+      <button id="rest-edit-close" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#555;">✕</button>
+      <h3 style="margin:0 0 16px;font-size:1.1rem;">Edit Review</h3>
+      <input type="hidden" id="rest-edit-id" />
+
+      <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Sentiment</label>
+      <select id="rest-edit-sentiment" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;">
+        <option value="">— select —</option>
+        <option value="liked">Liked it</option>
+        <option value="fine">It was fine</option>
+        <option value="didnt">Didn't like it</option>
+      </select>
+
+      <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Stars</label>
+      <select id="rest-edit-stars" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;">
+        <option value="">— none —</option>
+        <option value="1">★ 1</option>
+        <option value="2">★★ 2</option>
+        <option value="3">★★★ 3</option>
+        <option value="4">★★★★ 4</option>
+        <option value="5">★★★★★ 5</option>
+      </select>
+
+      <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Notes</label>
+      <textarea id="rest-edit-notes" rows="3" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;resize:vertical;font-size:.9rem;box-sizing:border-box;margin-bottom:14px;"></textarea>
+
+      <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Favorite dishes</label>
+      <input type="text" id="rest-edit-dishes" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;box-sizing:border-box;" />
+
+      <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Visit date</label>
+      <input type="date" id="rest-edit-visit-date" style="width:100%;padding:8px;border-radius:8px;border:1px solid #e8e3db;margin-bottom:14px;font-size:.9rem;box-sizing:border-box;" />
+
+      <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Current photos</label>
+      <div id="rest-edit-current-photos" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:8px;"></div>
+
+      <label style="display:block;margin-bottom:6px;font-size:.85rem;font-weight:600;">Add new photos</label>
+      <input type="file" id="rest-edit-new-photos" accept="image/*" multiple style="margin-bottom:10px;font-size:.85rem;" />
+      <div id="rest-edit-new-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
+
+      <button id="rest-edit-save" style="width:100%;padding:10px;background:#d4872a;color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;">Save changes</button>
+      <p id="rest-edit-error" style="color:#c0392b;font-size:.83rem;margin-top:8px;display:none;"></p>
+    </div>
+  </div>
+
 <!-- Make sure that this path to the JS file is not deleted or it will not work -->
   <script src="/js/restaurant.js"></script>
-  <script src="/js/restaurantPhotos.js"></script> 
+  <script src="/js/restaurantPhotos.js"></script>
 </body>
 </html>

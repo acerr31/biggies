@@ -788,6 +788,90 @@ app.delete('/api/reviews/:reviewId', authenticateToken, async (req, res) => {
     }
 });
 
+// Route: PUT /api/reviews/:reviewId — edit own review (text + photo add/delete)
+app.put('/api/reviews/:reviewId', authenticateToken, uploadReview.array('photos', 6), async (req, res) => {
+    try {
+        const { reviewId } = req.params;
+        let data;
+        try {
+            data = JSON.parse(req.body.data);
+        } catch {
+            return res.status(400).json({ message: 'Invalid review data.' });
+        }
+
+        const { sentiment, stars, notes, favoriteDishes, visitDate, photosToDelete } = data;
+
+        const validSentiments = ['liked', 'fine', 'didnt'];
+        if (sentiment && !validSentiments.includes(sentiment)) {
+            return res.status(400).json({ message: 'Invalid sentiment value.' });
+        }
+        if (stars !== null && stars !== undefined && stars !== '') {
+            const s = parseInt(stars);
+            if (isNaN(s) || s < 1 || s > 5) {
+                return res.status(400).json({ message: 'Stars must be between 1 and 5.' });
+            }
+        }
+
+        const connection = await createConnection();
+        const [rows] = await connection.execute(
+            'SELECT id, user_email FROM reviews WHERE id = ?', [reviewId]
+        );
+
+        if (rows.length === 0) {
+            await connection.end();
+            return res.status(404).json({ message: 'Review not found.' });
+        }
+        if (rows[0].user_email !== req.user.email) {
+            await connection.end();
+            return res.status(403).json({ message: 'You can only edit your own reviews.' });
+        }
+
+        await connection.execute(
+            `UPDATE reviews SET sentiment=?, stars=?, notes=?, favorite_dishes=?, visit_date=?, updated_at=NOW() WHERE id=?`,
+            [sentiment||null, stars||null, notes||null, favoriteDishes||null, visitDate||null, reviewId]
+        );
+
+        // Delete removed photos from DB + Cloudinary
+        if (Array.isArray(photosToDelete) && photosToDelete.length > 0) {
+            for (const url of photosToDelete) {
+                await connection.execute(
+                    'DELETE FROM review_photos WHERE review_id = ? AND file_path = ?',
+                    [reviewId, url]
+                );
+                const publicId = url.split('/').slice(-2).join('/').replace(/\.[^/.]+$/, '');
+                await cloudinary.uploader.destroy(publicId).catch(err =>
+                    console.warn('Cloudinary delete error:', err)
+                );
+            }
+        }
+
+        // Insert newly uploaded photos
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                await connection.execute(
+                    'INSERT INTO review_photos (review_id, file_path) VALUES (?, ?)',
+                    [reviewId, file.path]
+                );
+            }
+        }
+
+        // Return updated photo list so frontend can sync
+        const [photoRows] = await connection.execute(
+            'SELECT file_path FROM review_photos WHERE review_id = ?', [reviewId]
+        );
+        await connection.end();
+
+        res.status(200).json({
+            message: 'Review updated.',
+            photos: photoRows.map(p => p.file_path)
+        });
+
+    } catch (error) {
+        console.error('Error updating review:', error);
+        res.status(500).json({ message: 'Error updating review.' });
+    }
+});
+
 // Route: GET /api/reviews — get ALL recent reviews for the home feed
 app.get('/api/reviews', async (req, res) => {
     try {
@@ -1283,6 +1367,70 @@ app.get('/api/profile/following', authenticateToken, async (req, res) => {
 });
 
 // ── END FOLLOW / UNFOLLOW ─────────────────────────────────────
+
+// ============================================================
+// MY RESTAURANTS (edit / delete own submissions)
+// ============================================================
+
+// GET /api/my-restaurants — restaurants submitted by the authenticated user
+app.get('/api/my-restaurants', authenticateToken, async (req, res) => {
+    try {
+        const connection = await createConnection();
+        const [restaurants] = await connection.execute(
+            `SELECT r.restaurant_ID, r.restaurantName, r.address, r.tags, r.created_at,
+                    (SELECT file_path FROM restaurant_photos WHERE restaurant_id = r.restaurant_ID LIMIT 1) AS photo
+             FROM restaurants r
+             WHERE r.email = ?
+             ORDER BY r.created_at DESC`,
+            [req.user.email]
+        );
+        await connection.end();
+        res.status(200).json({ restaurants });
+    } catch (error) {
+        console.error('Error fetching user restaurants:', error);
+        res.status(500).json({ message: 'Error fetching restaurants.' });
+    }
+});
+
+// DELETE /api/restaurants/:id — delete own restaurant submission + Cloudinary photos
+app.delete('/api/restaurants/:id', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const connection = await createConnection();
+
+        const [rows] = await connection.execute(
+            'SELECT restaurant_ID, email FROM restaurants WHERE restaurant_ID = ?', [id]
+        );
+
+        if (rows.length === 0) {
+            await connection.end();
+            return res.status(404).json({ message: 'Restaurant not found.' });
+        }
+        if (rows[0].email !== req.user.email) {
+            await connection.end();
+            return res.status(403).json({ message: 'You can only delete your own restaurant submissions.' });
+        }
+
+        const [photos] = await connection.execute(
+            'SELECT file_path FROM restaurant_photos WHERE restaurant_id = ?', [id]
+        );
+
+        await connection.execute('DELETE FROM restaurants WHERE restaurant_ID = ?', [id]);
+        await connection.end();
+
+        for (const p of photos) {
+            const publicId = p.file_path.split('/').slice(-2).join('/').replace(/\.[^/.]+$/, '');
+            await cloudinary.uploader.destroy(publicId).catch(err =>
+                console.warn('Could not delete from Cloudinary:', err)
+            );
+        }
+
+        res.status(200).json({ message: 'Restaurant deleted.' });
+    } catch (error) {
+        console.error('Error deleting restaurant:', error);
+        res.status(500).json({ message: 'Error deleting restaurant.' });
+    }
+});
 
 // Start the server
 app.listen(port, () => {

@@ -807,7 +807,8 @@ app.get('/api/reviews', async (req, res) => {
                 u.first_name,
                 u.last_name,
                 u.profile_photo,
-                res.restaurantName AS restaurant_name
+                res.restaurantName AS restaurant_name,
+                (SELECT COUNT(*) FROM review_comments rc WHERE rc.review_id = r.id) AS comment_count
              FROM reviews r
              JOIN users u ON r.user_email = u.email
              JOIN restaurants res ON r.restaurant_id = res.restaurant_ID
